@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { Check, X, Phone, MapPin } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-
+import LeadActions from '@/components/LeadActions'
 export const dynamic = 'force-dynamic'
 
 export default async function LeadsPage() {
@@ -39,7 +39,7 @@ export default async function LeadsPage() {
                 </td>
               </tr>
             ) : (
-              leads.map((lead) => (
+              leads.map((lead: any) => (
                 <tr key={lead.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '16px', fontWeight: 500 }}>{lead.name}</td>
                   <td style={{ padding: '16px' }}>
@@ -64,14 +64,7 @@ export default async function LeadsPage() {
                     {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
                   </td>
                   <td style={{ padding: '16px', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                      <button className="btn-secondary" style={{ padding: '8px', color: 'var(--status-accepted)', borderColor: 'rgba(16, 185, 129, 0.2)' }} title="Convert to Customer">
-                        <Check size={18} />
-                      </button>
-                      <button className="btn-secondary" style={{ padding: '8px', color: 'var(--status-rejected)', borderColor: 'rgba(239, 68, 68, 0.2)' }} title="Reject Lead">
-                        <X size={18} />
-                      </button>
-                    </div>
+                    <LeadActions leadId={lead.id} />
                   </td>
                 </tr>
               ))
