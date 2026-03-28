@@ -22,45 +22,84 @@ export async function POST(req: Request) {
   try {
     const body = await req.json()
 
-    // 1. Check if this is a raw Meta Lead Gen Graph API webhook (requires another fetch)
-    // 2. Or if this is a pre-parsed payload (e.g., from Zapier / Make.com / custom integration)
-    // We will support a direct JSON ingest for the fields required:
-    
-    // Default values if direct ingest format is used (e.g., Zapier mapping)
-    let leadName = body.name || body.customer_name || body.CustomerName || 'Meta Lead'
-    let leadPhone = body.phone || body.phone_number || body.PhoneNumber || ''
-    let leadGold = parseFloat(body.gold_weight) || 0
-    let leadAmount = parseFloat(body.loan_amount) || 0
-    let location = body.location || body.city || ''
+    // Ensure it's a Page event
+    if (body.object === 'page') {
+      let leadCount = 0
 
-    // If this is a direct Facebook Graph Event, the body structure looks like:
-    // { "object": "page", "entry": [ { "changes": [ { "value": { "form_id": "...", "leadgen_id": "..." } } ] } ] }
-    if (body.object === 'page' && body.entry) {
-      // Normally, you would extract `leadgen_id` and query the Graph API to get the fields using an App Token.
-      // For this CRM architecture, we assume a pre-parsed webhook forwarder is preferred unless a Graph Token is provided.
-      // E.g. Using Zapier to catch the Meta Lead and format it correctly to hit this Webhook.
-      console.log('Received raw Meta Graph event - expecting direct field mappings.')
-    }
+      // Iterate through Facebook's deeply nested Webhook arrays
+      for (const entry of body.entry) {
+        for (const change of entry.changes) {
+          if (change.field === 'leadgen') {
+            const leadgenId = change.value.leadgen_id
 
-    if (!leadPhone) {
-      return NextResponse.json({ error: 'Phone number is required to register lead' }, { status: 400 })
-    }
+            if (!leadgenId) continue
 
-    // Insert the lead into the PostgreSQL Database automatically
-    const customer = await prisma.customer.create({
-      data: {
-        name: leadName,
-        phone: leadPhone,
-        goldWeight: leadGold > 0 ? leadGold : null,
-        loanAmount: leadAmount > 0 ? leadAmount : null,
-        branch: location,
-        status: 'WAITING',
-        notes: `Source: Meta Ads Lead Integration`,
+            // Fetch the actual decrypted Lead Information from Facebook Graph API
+            const accessToken = process.env.META_ACCESS_TOKEN
+
+            if (!accessToken) {
+              console.error('CRITICAL ERROR: META_ACCESS_TOKEN is missing in the environment variables, cannot decrypt leadgen_id:', leadgenId)
+              return NextResponse.json({ error: 'System Access Token missing' }, { status: 500 })
+            }
+
+            const graphResponse = await fetch(`https://graph.facebook.com/v20.0/${leadgenId}?access_token=${accessToken}`)
+            if (!graphResponse.ok) {
+              const errData = await graphResponse.json()
+              console.error('Meta Graph API Error:', errData)
+              continue
+            }
+
+            const graphData = await graphResponse.json()
+            
+            // Map the mysterious field_data array back into a usable JS object
+            const fields: Record<string, string> = {}
+            if (graphData.field_data) {
+              for (const field of graphData.field_data) {
+                // Combine array values into a single string just in case
+                fields[field.name.toLowerCase()] = field.values.join(', ')
+              }
+            }
+
+            // Attempt to smartly guess the standard and custom Facebook Ad Form fields
+            const leadName = fields['full_name'] || fields['first_name'] || fields['name'] || 'Meta Lead'
+            const leadPhone = fields['phone_number'] || fields['phone'] || ''
+            
+            // Check for custom gold/loan questions in your Meta Form
+            // E.g. "gold_weight", "grams", "loan_amount", "amount_needed"
+            const rawGold = fields['gold_weight'] || fields['gold_grams'] || fields['weight'] || '0'
+            const rawAmount = fields['loan_amount'] || fields['amount'] || fields['desired_loan'] || '0'
+            const location = fields['location'] || fields['city'] || fields['branch'] || ''
+
+            const parsedGold = parseFloat(rawGold.replace(/[^0-9.]/g, '')) || 0
+            const parsedAmount = parseFloat(rawAmount.replace(/[^0-9.]/g, '')) || 0
+
+            if (!leadPhone) {
+              console.warn('Facebook Lead missing phone number:', graphData)
+              continue
+            }
+
+            // Safely push into PostgreSQL
+            await prisma.customer.create({
+              data: {
+                name: leadName,
+                phone: leadPhone,
+                goldWeight: parsedGold > 0 ? parsedGold : null,
+                loanAmount: parsedAmount > 0 ? parsedAmount : null,
+                branch: location,
+                status: 'WAITING',
+                notes: `Source: Native Facebook Graph (${leadgenId})`,
+              }
+            })
+
+            leadCount++;
+          }
+        }
       }
-    })
 
-    return NextResponse.json({ success: true, customerId: customer.id }, { status: 200 })
+      return NextResponse.json({ success: true, processed: leadCount }, { status: 200 })
+    }
 
+    return NextResponse.json({ error: 'Ignoring non-page event' }, { status: 400 })
   } catch (error) {
     console.error('Meta Webhook Error:', error)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
