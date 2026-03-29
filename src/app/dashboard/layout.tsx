@@ -59,8 +59,11 @@ export default async function DashboardLayout({
           <Link href="/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', background: 'var(--surface-hover)', fontWeight: 500 }}>
             <LayoutDashboard size={20} color="var(--primary-color)" /> Dashboard
           </Link>
-          <Link href="/dashboard/customers" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
-            <Users size={20} /> Customers
+          <Link href="/dashboard/customers?tab=new" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
+            <Users size={20} /> New Customers
+          </Link>
+          <Link href="/dashboard/customers?tab=ongoing" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
+            <UserPlus size={20} /> Ongoing Customers
           </Link>
           {session?.role === 'MANAGER' && (
             <>

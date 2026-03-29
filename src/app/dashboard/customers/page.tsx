@@ -36,21 +36,9 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
     <div className="fade-in">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <h1 style={{ fontSize: '28px', margin: 0 }}>Customer Directory</h1>
-          <div style={{ display: 'flex', gap: '8px', background: 'var(--surface-color)', padding: '4px', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-            <Link 
-              href="/dashboard/customers?tab=new" 
-              style={{ padding: '8px 16px', borderRadius: '6px', textDecoration: 'none', color: currentTab === 'new' ? 'var(--bg-color)' : 'var(--text-secondary)', background: currentTab === 'new' ? 'var(--primary-color)' : 'transparent', fontWeight: 600, fontSize: '13px' }}
-            >
-              New Customers
-            </Link>
-            <Link 
-              href="/dashboard/customers?tab=ongoing" 
-              style={{ padding: '8px 16px', borderRadius: '6px', textDecoration: 'none', color: currentTab === 'ongoing' ? 'var(--bg-color)' : 'var(--text-secondary)', background: currentTab === 'ongoing' ? 'var(--primary-color)' : 'transparent', fontWeight: 600, fontSize: '13px' }}
-            >
-              Ongoing Customers
-            </Link>
-          </div>
+          <h1 style={{ fontSize: '28px', margin: 0 }}>
+            {currentTab === 'ongoing' ? 'Ongoing Customers' : 'New Customers'}
+          </h1>
         </div>
         
         <div style={{ display: 'flex', gap: '12px' }}>
