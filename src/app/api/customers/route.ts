@@ -13,7 +13,7 @@ export async function POST(req: Request) {
     if (!session) return NextResponse.json({ error: 'Invalid Session' }, { status: 401 })
 
     const body = await req.json()
-    const { name, phone, goldWeight, loanAmount, branch, notes, status } = body
+    const { name, phone, goldWeight, loanAmount, branch, notes, status, photoUrl } = body
 
     if (!name || !phone) {
       return NextResponse.json({ error: 'Name and Phone are required' }, { status: 400 })
@@ -26,6 +26,7 @@ export async function POST(req: Request) {
         goldWeight: goldWeight || null,
         loanAmount: loanAmount || null,
         branch: branch || null,
+        photoUrl: photoUrl || null,
         notes: notes || null,
         status: status || 'PROCESSING',
         createdById: String(session.id),

@@ -8,6 +8,7 @@ import DeleteDocumentButton from '@/components/DeleteDocumentButton'
 import CloseLoanButton from '@/components/CloseLoanButton'
 import DueDateSelector from '@/components/DueDateSelector'
 import FinishUploadButton from '@/components/FinishUploadButton'
+import ProfilePhotoUploader from '@/components/ProfilePhotoUploader'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 
@@ -34,16 +35,26 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
 
   return (
     <div className="fade-in max-w-4xl">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <Link href="/dashboard/customers" style={{ color: 'var(--text-secondary)' }}>
-            <ArrowLeft size={24} />
-          </Link>
-          <h1 style={{ fontSize: '28px', margin: 0 }}>{customer.name}</h1>
-          <div className={`badge badge-${customer.status.toLowerCase()}`}>{customer.status}</div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+          <ProfilePhotoUploader customerId={customer.id} initialPhotoUrl={customer.photoUrl} />
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <Link href="/dashboard/customers" style={{ color: 'var(--text-secondary)', paddingRight: '8px', borderRight: '1px solid var(--border-color)' }} className="hover-opacity">
+                <ArrowLeft size={24} />
+              </Link>
+              <h1 style={{ fontSize: '32px', margin: 0, fontWeight: 700, letterSpacing: '-0.5px' }}>{customer.name}</h1>
+              <div className={`badge badge-${customer.status.toLowerCase()}`}>{customer.status}</div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: 'var(--text-secondary)', fontSize: '13px' }}>
+               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><Phone size={14} /> {customer.phone}</span>
+               <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><MapPin size={14} /> {customer.branch || 'Headquarters'}</span>
+            </div>
+          </div>
         </div>
         
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
           <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px' }}>
             <Edit size={18} /> Edit Profile
           </button>

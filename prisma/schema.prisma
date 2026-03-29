@@ -44,6 +44,7 @@ model Customer {
   goldWeight Float?
   loanAmount Float?
   branch     String?
+  photoUrl   String?
   status     Status   @default(WAITING)
   dueDate    DateTime?
   notes      String?  @db.Text
