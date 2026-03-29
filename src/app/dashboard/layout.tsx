@@ -42,7 +42,7 @@ export default async function DashboardLayout({
     id: n.id,
     name: n.name,
     loanAmount: n.loanAmount,
-    dueDate: n.dueDate!.toISOString()
+    dueDate: new Date(n.dueDate!).toISOString()
   }))
 
   return (
