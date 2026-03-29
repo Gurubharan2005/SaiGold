@@ -2,12 +2,25 @@ import { prisma } from '@/lib/prisma'
 import { FileText, Download, User as UserIcon, Calendar } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import Link from 'next/link'
+import SearchInput from '@/components/SearchInput'
 
 export const dynamic = 'force-dynamic'
 
-export default async function DocumentsOverviewPage() {
-  // Fetch all documents across the entire CRM, along with who uploaded them and which customer they belong to
+export default async function DocumentsOverviewPage({ 
+  searchParams 
+}: { 
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }> 
+}) {
+  const resolvedParams = await searchParams
+  const query = typeof resolvedParams.q === 'string' ? resolvedParams.q : undefined
+
+  // Match explicitly any Customer Name string against the DB using standard SQL ILIKE syntax equivalent bindings natively.
   const documents = await prisma.customerDocument.findMany({
+    where: query ? {
+      customer: {
+        name: { contains: query, mode: 'insensitive' }
+      }
+    } : undefined,
     orderBy: { uploadedAt: 'desc' },
     include: {
       customer: true,
@@ -19,8 +32,11 @@ export default async function DocumentsOverviewPage() {
     <div className="fade-in max-w-5xl">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <h1 style={{ fontSize: '28px', margin: 0 }}>Global Documents Vault</h1>
-        <div className="badge badge-accepted">
-          {documents.length} Files Stored
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', width: '350px' }}>
+           <SearchInput placeholder="Search documents by customer name..." />
+           <div className="badge badge-accepted" style={{ whiteSpace: 'nowrap' }}>
+             {documents.length} Files
+           </div>
         </div>
       </div>
 
