@@ -1,15 +1,29 @@
 import { prisma } from '@/lib/prisma'
 import { Check, X, Phone, MapPin } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import LeadActions from '@/components/LeadActions'
+import { cookies } from 'next/headers'
+import { decrypt } from '@/lib/auth'
+import ClientBulkLeadsTable from '@/components/ClientBulkLeadsTable'
 export const dynamic = 'force-dynamic'
 
 export default async function LeadsPage() {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('auth-token')?.value
+  const session = token ? await decrypt(token) : null
+
   // Fetch all leads that came from Meta Webhook (Waiting Status)
   const leads = await prisma.customer.findMany({
     where: { status: 'WAITING' },
     orderBy: { createdAt: 'desc' }
   })
+
+  // Fetch active staff list for bulk assignment
+  const activeStaffList = session?.role === 'MANAGER' 
+    ? await prisma.user.findMany({
+        where: { role: 'STAFF', isActive: true },
+        select: { id: true, name: true }
+      })
+    : []
 
   return (
     <div className="fade-in">
@@ -20,60 +34,11 @@ export default async function LeadsPage() {
         </div>
       </div>
 
-      <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-          <thead>
-            <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Customer Name</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Contact Info</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Loan Details</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Received</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {leads.length === 0 ? (
-              <tr>
-                <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  No new leads from Meta Ads currently.
-                </td>
-              </tr>
-            ) : (
-              leads.map((lead: any) => (
-                <tr key={lead.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                  <td style={{ padding: '16px', fontWeight: 500 }}>{lead.name}</td>
-                  <td style={{ padding: '16px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                      <Phone size={14} color="var(--text-secondary)" /> {lead.phone}
-                    </div>
-                    {lead.branch && (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                        <MapPin size={14} /> {lead.branch}
-                      </div>
-                    )}
-                  </td>
-                  <td style={{ padding: '16px' }}>
-                    {lead.goldWeight ? (
-                      <span style={{ color: 'var(--primary-color)', fontWeight: 600 }}>{lead.goldWeight}g</span>
-                    ) : (
-                      <span style={{ color: 'var(--text-secondary)' }}>N/A</span>
-                    )}
-                    {lead.loanAmount && ` / ₹${lead.loanAmount}`}
-                  </td>
-                  <td style={{ padding: '16px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-                    {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
-                  </td>
-                  <td style={{ padding: '16px', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                      <LeadActions leadId={lead.id} />
-                    </div>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
+      <ClientBulkLeadsTable 
+        leads={leads} 
+        activeStaffList={activeStaffList} 
+        userRole={session?.role || 'STAFF'} 
+      />
     </div>
   )
 }
