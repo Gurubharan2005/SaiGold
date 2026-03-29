@@ -2,8 +2,9 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { Phone, MapPin, Loader2, Target, Check, X } from 'lucide-react'
+import { Phone, MapPin, Loader2, Target, Check, X, Clock } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
+import { useEffect } from 'react'
 
 export default function ClientBulkLeadsTable({ 
   leads, 
@@ -34,6 +35,18 @@ export default function ClientBulkLeadsTable({
       setSelectedIds([...selectedIds, id])
     }
   }
+
+  // Implementation of Continuous Sync logic
+  useEffect(() => {
+    // Polling interval: 30 seconds
+    const interval = setInterval(() => {
+      if (!loading && selectedIds.length === 0) {
+        router.refresh()
+      }
+    }, 30000)
+    
+    return () => clearInterval(interval)
+  }, [router, loading, selectedIds.length])
 
   const handleBulkAssign = async () => {
     if (!bulkAssignTo || selectedIds.length === 0) return
@@ -95,6 +108,19 @@ export default function ClientBulkLeadsTable({
           </div>
         </div>
       )}
+
+      {/* Manual Refresh & Status Bar */}
+      <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'flex-end', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-color)' }}>
+        <button 
+          onClick={() => router.refresh()}
+          style={{ 
+            background: 'none', border: '1px solid var(--border-color)', color: 'var(--text-secondary)', 
+            padding: '6px 12px', borderRadius: '4px', fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' 
+          }}
+        >
+          <Clock size={14} /> Auto-Syncing (30s)
+        </button>
+      </div>
 
       <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
         <thead>
