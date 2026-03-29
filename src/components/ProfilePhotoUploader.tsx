@@ -37,9 +37,9 @@ export default function ProfilePhotoUploader({ customerId, initialPhotoUrl }: { 
       })
 
       router.refresh()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Failed to upload photo:', error)
-      alert("Failed to upload Profile Photo")
+      alert(`Avatar System offline: ${error.message || String(error)}. Try hard refreshing your cache.`)
       setPreview(initialPhotoUrl) // revert
     } finally {
       setIsUploading(false)
@@ -76,6 +76,35 @@ export default function ProfilePhotoUploader({ customerId, initialPhotoUrl }: { 
       <label style={{
         position: 'absolute',
         bottom: '0',
+        right: '48px', // Positioned left of the camera
+        background: 'var(--surface-color)',
+        color: 'var(--text-secondary)',
+        width: '36px',
+        height: '36px',
+        borderRadius: '50%',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        border: '1px solid var(--border-color)',
+        boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        transition: 'transform 0.2s',
+        opacity: isUploading ? 0.5 : 1,
+        pointerEvents: isUploading ? 'none' : 'auto'
+      }} className="hover-scale" title="Upload from Gallery">
+        <Upload size={16} />
+        <input 
+          type="file" 
+          accept="image/*" 
+          style={{ display: 'none' }} 
+          onChange={handleUpload}
+          disabled={isUploading}
+        />
+      </label>
+
+      <label style={{
+        position: 'absolute',
+        bottom: '0',
         right: '0',
         background: 'var(--primary-color)',
         color: '#1a1f2c',
@@ -90,11 +119,12 @@ export default function ProfilePhotoUploader({ customerId, initialPhotoUrl }: { 
         transition: 'transform 0.2s',
         opacity: isUploading ? 0.5 : 1,
         pointerEvents: isUploading ? 'none' : 'auto'
-      }} className="hover-scale">
+      }} className="hover-scale" title="Take Photo">
         <Camera size={18} />
         <input 
           type="file" 
           accept="image/*" 
+          capture="environment"
           style={{ display: 'none' }} 
           onChange={handleUpload}
           disabled={isUploading}
