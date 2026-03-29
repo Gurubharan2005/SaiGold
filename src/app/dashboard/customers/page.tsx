@@ -2,14 +2,27 @@ import { prisma } from '@/lib/prisma'
 import { Plus, Search, FileSpreadsheet, Phone, MapPin } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { cookies } from 'next/headers'
+import { decrypt } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
 export default async function CustomersPage() {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('auth-token')?.value
+  const session = token ? await decrypt(token) : null
+
+  // Contextual Security: Managers see everything. Staff see ONLY the customers they manually registered or are assigned to.
+  const baseWhere: any = { status: { not: 'WAITING' } }
+  if (session?.role !== 'MANAGER') {
+    baseWhere.OR = [
+      { createdById: String(session?.id) },
+      { assignedToId: String(session?.id) }
+    ]
+  }
+
   const customers = await prisma.customer.findMany({
-    where: { 
-      status: { not: 'WAITING' } // don't show pending leads here
-    },
+    where: baseWhere,
     orderBy: { createdAt: 'desc' }
   })
 

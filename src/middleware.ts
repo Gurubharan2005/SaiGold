@@ -17,8 +17,11 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/', request.url))
     }
 
-    // Role-based protection: Only MANAGERs can access /dashboard/staff
-    if (request.nextUrl.pathname.startsWith('/dashboard/staff') && payload.role !== 'MANAGER') {
+    // Role-based protection: Only MANAGERs can access Administration, Leads, and Vaults
+    const restrictedPaths = ['/dashboard/staff', '/dashboard/leads', '/dashboard/documents']
+    const isRestricted = restrictedPaths.some(path => request.nextUrl.pathname.startsWith(path))
+    
+    if (isRestricted && payload.role !== 'MANAGER') {
       return NextResponse.redirect(new URL('/dashboard', request.url)) // Bounce back
     }
     

@@ -29,18 +29,18 @@ export default async function DashboardLayout({
           <Link href="/dashboard/customers" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
             <Users size={20} /> Customers
           </Link>
-          <Link href="/dashboard/leads" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
-            <UserPlus size={20} /> Meta Leads
-          </Link>
-          <Link href="/dashboard/documents" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
-            <FileText size={20} /> Documents
-          </Link>
-
-          {/* Manager Only Tools */}
           {session?.role === 'MANAGER' && (
-            <Link href="/dashboard/staff" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500, marginTop: '16px', borderTop: '1px solid var(--border-color)' }}>
-              <ShieldCheck size={20} /> Staff Management
-            </Link>
+            <>
+              <Link href="/dashboard/leads" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                <UserPlus size={20} /> Meta Leads
+              </Link>
+              <Link href="/dashboard/documents" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                <FileText size={20} /> Documents
+              </Link>
+              <Link href="/dashboard/staff" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500, marginTop: '16px', borderTop: '1px solid var(--border-color)' }}>
+                <ShieldCheck size={20} /> Staff Management
+              </Link>
+            </>
           )}
         </nav>
 

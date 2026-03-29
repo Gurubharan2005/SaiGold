@@ -1,8 +1,17 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { cookies } from 'next/headers'
+import { decrypt } from '@/lib/auth'
 
 export async function POST(req: Request) {
   try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('auth-token')?.value
+    if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    
+    const session = await decrypt(token)
+    if (!session) return NextResponse.json({ error: 'Invalid Session' }, { status: 401 })
+
     const body = await req.json()
     const { name, phone, goldWeight, loanAmount, branch, notes, status } = body
 
@@ -19,6 +28,7 @@ export async function POST(req: Request) {
         branch: branch || null,
         notes: notes || null,
         status: status || 'PROCESSING',
+        createdById: String(session.id),
       }
     })
 
