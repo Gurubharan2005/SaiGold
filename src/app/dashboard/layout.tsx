@@ -1,11 +1,17 @@
-import { LayoutDashboard, Users, UserPlus, FileText, Settings, LogOut } from 'lucide-react'
+import { LayoutDashboard, Users, UserPlus, FileText, Settings, LogOut, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
+import { decrypt } from '@/lib/auth'
 
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const cookieStore = await cookies()
+  const token = cookieStore.get('auth-token')?.value
+  const session = token ? await decrypt(token) : null
+
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-color)' }}>
       {/* Sidebar Navigation */}
@@ -29,6 +35,13 @@ export default function DashboardLayout({
           <Link href="/dashboard/documents" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
             <FileText size={20} /> Documents
           </Link>
+
+          {/* Manager Only Tools */}
+          {session?.role === 'MANAGER' && (
+            <Link href="/dashboard/staff" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500, marginTop: '16px', borderTop: '1px solid var(--border-color)' }}>
+              <ShieldCheck size={20} /> Staff Management
+            </Link>
+          )}
         </nav>
 
         <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)' }}>
@@ -44,8 +57,10 @@ export default function DashboardLayout({
       {/* Main Content */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <header style={{ height: '70px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-color)/50', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', padding: '0 32px', justifyContent: 'space-between' }}>
-          <h3 style={{ margin: 0, fontWeight: 500, color: 'var(--text-secondary)' }}>Welcome back, Admin</h3>
-          <div className="badge badge-accepted">MANAGER</div>
+          <h3 style={{ margin: 0, fontWeight: 500, color: 'var(--text-secondary)' }}>Welcome back, {session?.name || 'User'}</h3>
+          <div className={`badge badge-${session?.role === 'MANAGER' ? 'accepted' : 'processing'}`}>
+            {session?.role || 'STAFF'}
+          </div>
         </header>
         <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
           {children}

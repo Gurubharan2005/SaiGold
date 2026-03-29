@@ -16,6 +16,11 @@ export async function middleware(request: NextRequest) {
     if (!payload) {
       return NextResponse.redirect(new URL('/', request.url))
     }
+
+    // Role-based protection: Only MANAGERs can access /dashboard/staff
+    if (request.nextUrl.pathname.startsWith('/dashboard/staff') && payload.role !== 'MANAGER') {
+      return NextResponse.redirect(new URL('/dashboard', request.url)) // Bounce back
+    }
     
     // Auth success - forward request
     return NextResponse.next()
