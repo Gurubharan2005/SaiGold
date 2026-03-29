@@ -6,6 +6,10 @@ import CustomerStatusSelect from '@/components/CustomerStatusSelect'
 import DocumentUploader from '@/components/DocumentUploader'
 import DeleteDocumentButton from '@/components/DeleteDocumentButton'
 import CloseLoanButton from '@/components/CloseLoanButton'
+import DueDateSelector from '@/components/DueDateSelector'
+import FinishUploadButton from '@/components/FinishUploadButton'
+import { cookies } from 'next/headers'
+import { decrypt } from '@/lib/auth'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,6 +26,11 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
   if (!customer) {
     return <div className="p-8 text-center text-zinc-500">Customer not found</div>
   }
+
+  const cookieStore = await cookies()
+  const token = cookieStore.get('auth-token')?.value
+  const session = token ? await decrypt(token) : null
+  const isManager = session?.role === 'MANAGER'
 
   return (
     <div className="fade-in max-w-4xl">
@@ -73,6 +82,7 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
                 </div>
                 <div style={{ color: 'var(--text-color)', fontWeight: 500, fontSize: '12px' }}>{customer.id}</div>
               </div>
+              <DueDateSelector customerId={customer.id} initialDate={customer.dueDate?.toISOString() || null} />
             </div>
           </div>
 
@@ -119,42 +129,58 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
               )}
             </h3>
 
-            {customer.status !== 'ACCEPTED' ? (
+            {/* Document Rendering Matrix */}
+            
+            {/* Case 1: Staff looking at a Locked Customer with Documents */}
+            {!isManager && customer.status !== 'ACCEPTED' && customer.documents.length > 0 && (
+              <div style={{ padding: '24px 16px', background: 'var(--status-waiting)', borderRadius: '8px', textAlign: 'center', opacity: 0.9 }}>
+                <Lock size={24} color="#1a1f2c" style={{ margin: '0 auto 8px auto' }} />
+                <p style={{ fontSize: '13px', color: '#1a1f2c', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
+                  Files Secured. You no longer have clearance to view or alter these Compliance Documents.
+                </p>
+              </div>
+            )}
+
+            {/* Case 2: Staff looking at a Locked Customer with NO Documents (or Manager seeing locked) */}
+            {(isManager || (!isManager && customer.documents.length === 0)) && customer.status !== 'ACCEPTED' && (
               <div style={{ padding: '24px 16px', background: 'var(--surface-hover)', borderRadius: '8px', textAlign: 'center', border: '1px dashed var(--border-color)' }}>
                 <Lock size={24} color="var(--text-secondary)" style={{ margin: '0 auto 8px auto' }} />
                 <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                  Documents can only be uploaded to explicitly <strong>ACCEPTED</strong> customers. Please change their status above to unlock virtual KYC files.
+                  New documents can strictly only be uploaded to <strong>ACCEPTED</strong> profiles. Change the status to unlock the uploader.
                 </p>
               </div>
-            ) : (
+            )}
+
+            {/* Rendering the actual visible documents (Always for Manager, Only on ACCEPTED for Staff) */}
+            {(isManager || (!isManager && customer.status === 'ACCEPTED')) && customer.documents.length > 0 && (
+              <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {customer.documents.map((doc: any) => (
+                  <li key={doc.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '10px', background: 'var(--surface-hover)', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                       <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{doc.documentType}</span>
+                       <div style={{ display: 'flex', gap: '12px' }}>
+                          <a href={doc.documentUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)' }} title="Download">
+                            <Download size={14} />
+                          </a>
+                          <DeleteDocumentButton documentId={doc.id} />
+                       </div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', marginTop: '4px' }}>
+                      <FileText size={16} color="var(--primary-color)" />
+                      <span style={{ fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }} title={doc.documentName}>
+                        {doc.documentName}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {/* The Document Uploader Tool (only when ACCEPTED) */}
+            {customer.status === 'ACCEPTED' && (
               <>
-                {customer.documents.length === 0 ? (
-                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px', textAlign: 'center', padding: '16px 0' }}>No documents uploaded to this folder yet.</p>
-                ) : (
-                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                    {customer.documents.map((doc: any) => (
-                      <li key={doc.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '10px', background: 'var(--surface-hover)', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                           <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{doc.documentType}</span>
-                           <div style={{ display: 'flex', gap: '12px' }}>
-                              <a href={doc.documentUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)' }} title="Download">
-                                <Download size={14} />
-                              </a>
-                              <DeleteDocumentButton documentId={doc.id} />
-                           </div>
-                        </div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', marginTop: '4px' }}>
-                          <FileText size={16} color="var(--primary-color)" />
-                          <span style={{ fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }} title={doc.documentName}>
-                            {doc.documentName}
-                          </span>
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                
                 <DocumentUploader customerId={customer.id} />
+                {!isManager && <FinishUploadButton customerId={customer.id} />}
               </>
             )}
             

@@ -2,6 +2,8 @@ import { LayoutDashboard, Users, UserPlus, FileText, Settings, LogOut, ShieldChe
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
+import NotificationBell from '@/components/NotificationBell'
+import { prisma } from '@/lib/prisma'
 
 export default async function DashboardLayout({
   children,
@@ -11,6 +13,37 @@ export default async function DashboardLayout({
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
+
+  const sevenDaysFromNow = new Date()
+  sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7)
+
+  // Contextually fetch incoming constraints
+  const rawNotifications = await prisma.customer.findMany({
+    where: {
+      status: { not: 'CLOSED' },
+      dueDate: {
+        lte: sevenDaysFromNow,
+        not: null
+      },
+      ...(session?.role !== 'MANAGER' ? {
+         OR: [
+           { createdById: String(session?.id) },
+           { assignedToId: String(session?.id) }
+         ]
+      } : {})
+    },
+    select: { id: true, name: true, dueDate: true, loanAmount: true },
+    orderBy: { dueDate: 'asc' },
+    take: 15
+  })
+
+  // Format natively for Client Component hydration
+  const notifications = rawNotifications.map((n: any) => ({
+    id: n.id,
+    name: n.name,
+    loanAmount: n.loanAmount,
+    dueDate: n.dueDate!.toISOString()
+  }))
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-color)' }}>
@@ -58,8 +91,12 @@ export default async function DashboardLayout({
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <header style={{ height: '70px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-color)/50', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', padding: '0 32px', justifyContent: 'space-between' }}>
           <h3 style={{ margin: 0, fontWeight: 500, color: 'var(--text-secondary)' }}>Welcome back, {session?.name || 'User'}</h3>
-          <div className={`badge badge-${session?.role === 'MANAGER' ? 'accepted' : 'processing'}`}>
-            {session?.role || 'STAFF'}
+          
+          <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+            <NotificationBell notifications={notifications} />
+            <div className={`badge badge-${session?.role === 'MANAGER' ? 'accepted' : 'processing'}`}>
+              {session?.role || 'STAFF'}
+            </div>
           </div>
         </header>
         <div style={{ padding: '32px', flex: 1, overflowY: 'auto' }}>
