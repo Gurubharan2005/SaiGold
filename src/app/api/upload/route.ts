@@ -55,9 +55,9 @@ export async function POST(request: Request): Promise<NextResponse> {
     })
 
     return NextResponse.json({ blob, document }, { status: 200 })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Failure saving document:', error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: `Upload Crash: ${error.message || String(error)}` }, { status: 500 })
   }
 }
 
