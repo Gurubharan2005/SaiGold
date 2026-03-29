@@ -1,9 +1,10 @@
 import { prisma } from '@/lib/prisma'
-import { ArrowLeft, Edit, Phone, MapPin, Calendar, CreditCard, Hash, FileText, Download } from 'lucide-react'
+import { ArrowLeft, Edit, Phone, MapPin, Calendar, CreditCard, Hash, FileText, Download, Lock } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import CustomerStatusSelect from '@/components/CustomerStatusSelect'
 import DocumentUploader from '@/components/DocumentUploader'
+import DeleteDocumentButton from '@/components/DeleteDocumentButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -110,28 +111,51 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
 
           <div className="card">
             <h3 style={{ fontSize: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
-              Documents
-              <span className="badge badge-waiting">{customer.documents.length} Files</span>
+              Compliance Documents
+              {customer.status === 'ACCEPTED' && (
+                <span className="badge badge-accepted">{customer.documents.length} Files</span>
+              )}
             </h3>
-            {customer.documents.length === 0 ? (
-              <p style={{ color: 'var(--text-secondary)', fontSize: '13px', textAlign: 'center', padding: '16px 0' }}>No documents uploaded yet.</p>
+
+            {customer.status !== 'ACCEPTED' ? (
+              <div style={{ padding: '24px 16px', background: 'var(--surface-hover)', borderRadius: '8px', textAlign: 'center', border: '1px dashed var(--border-color)' }}>
+                <Lock size={24} color="var(--text-secondary)" style={{ margin: '0 auto 8px auto' }} />
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
+                  Documents can only be uploaded to explicitly <strong>ACCEPTED</strong> customers. Please change their status above to unlock virtual KYC files.
+                </p>
+              </div>
             ) : (
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {customer.documents.map((doc: any) => (
-                  <li key={doc.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px', background: 'var(--surface-hover)', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden' }}>
-                      <FileText size={16} color="var(--primary-color)" />
-                      <span style={{ fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '140px' }} title={doc.fileName}>{doc.fileName}</span>
-                    </div>
-                    <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)', display: 'flex' }} title="Download">
-                      <Download size={16} />
-                    </a>
-                  </li>
-                ))}
-              </ul>
+              <>
+                {customer.documents.length === 0 ? (
+                  <p style={{ color: 'var(--text-secondary)', fontSize: '13px', textAlign: 'center', padding: '16px 0' }}>No documents uploaded to this folder yet.</p>
+                ) : (
+                  <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {customer.documents.map((doc: any) => (
+                      <li key={doc.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '10px', background: 'var(--surface-hover)', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                           <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{doc.documentType}</span>
+                           <div style={{ display: 'flex', gap: '12px' }}>
+                              <a href={doc.documentUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)' }} title="Download">
+                                <Download size={14} />
+                              </a>
+                              <DeleteDocumentButton documentId={doc.id} />
+                           </div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', marginTop: '4px' }}>
+                          <FileText size={16} color="var(--primary-color)" />
+                          <span style={{ fontSize: '13px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '200px' }} title={doc.documentName}>
+                            {doc.documentName}
+                          </span>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                
+                <DocumentUploader customerId={customer.id} />
+              </>
             )}
             
-            <DocumentUploader customerId={customer.id} />
           </div>
           
         </div>

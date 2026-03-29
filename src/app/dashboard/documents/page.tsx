@@ -7,8 +7,8 @@ export const dynamic = 'force-dynamic'
 
 export default async function DocumentsOverviewPage() {
   // Fetch all documents across the entire CRM, along with who uploaded them and which customer they belong to
-  const documents = await prisma.document.findMany({
-    orderBy: { createdAt: 'desc' },
+  const documents = await prisma.customerDocument.findMany({
+    orderBy: { uploadedAt: 'desc' },
     include: {
       customer: true,
       uploadedBy: true,
@@ -39,18 +39,21 @@ export default async function DocumentsOverviewPage() {
             {documents.length === 0 ? (
               <tr>
                 <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  No documents have been uploaded to Vercel Blob yet. Attach a file on a Leads or Customer profile!
+                  No documents have been uploaded to Vercel Blob yet. Attach a file on an ACCEPTED Customer profile!
                 </td>
               </tr>
             ) : (
               documents.map((doc: any) => (
                 <tr key={doc.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                   <td style={{ padding: '16px', fontWeight: 500 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <FileText size={16} color="var(--primary-color)" />
-                      <span style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={doc.fileName}>
-                        {doc.fileName}
-                      </span>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <span className="badge badge-waiting" style={{ alignSelf: 'flex-start', fontSize: '10px' }}>{doc.documentType}</span>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FileText size={16} color="var(--primary-color)" />
+                        <span style={{ maxWidth: '200px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }} title={doc.documentName}>
+                          {doc.documentName}
+                        </span>
+                      </div>
                     </div>
                   </td>
                   <td style={{ padding: '16px' }}>
@@ -69,11 +72,11 @@ export default async function DocumentsOverviewPage() {
                   </td>
                   <td style={{ padding: '16px', color: 'var(--text-secondary)', fontSize: '14px' }}>
                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Calendar size={14} /> {formatDistanceToNow(new Date(doc.createdAt), { addSuffix: true })}
+                        <Calendar size={14} /> {formatDistanceToNow(new Date(doc.uploadedAt), { addSuffix: true })}
                      </div>
                   </td>
                   <td style={{ padding: '16px', textAlign: 'right' }}>
-                    <a href={doc.fileUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '13px' }}>
+                    <a href={doc.documentUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '6px 12px', fontSize: '13px' }}>
                       <Download size={14} /> Download File
                     </a>
                   </td>

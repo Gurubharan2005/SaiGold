@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation'
 export default function DocumentUploader({ customerId }: { customerId: string }) {
   const router = useRouter()
   const [isUploading, setIsUploading] = useState(false)
+  const [documentType, setDocumentType] = useState('Aadhaar')
   const inputFileRef = useRef<HTMLInputElement>(null)
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -17,7 +18,7 @@ export default function DocumentUploader({ customerId }: { customerId: string })
 
     try {
       const response = await fetch(
-        `/api/upload?customerId=${customerId}&filename=${file.name}`,
+        `/api/upload?customerId=${customerId}&filename=${encodeURIComponent(file.name)}&documentType=${encodeURIComponent(documentType)}`,
         {
           method: 'POST',
           body: file,
@@ -25,26 +26,38 @@ export default function DocumentUploader({ customerId }: { customerId: string })
       )
 
       if (!response.ok) {
-        throw new Error('Upload failed')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Upload failed')
       }
-
-      const data = await response.json()
 
       // Clear input
       if (inputFileRef.current) inputFileRef.current.value = ''
-
-      // Refresh the page data natively
+      
       router.refresh()
-    } catch (error) {
+    } catch (error: any) {
       console.error('File upload error:', error)
-      alert("Failed to upload the file. Need to verify Vercel Blob settings.")
+      alert(error.message)
     } finally {
       setIsUploading(false)
     }
   }
 
   return (
-    <div style={{ marginTop: '16px' }}>
+    <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+      <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Select Document Type</label>
+      <select 
+        value={documentType} 
+        onChange={(e) => setDocumentType(e.target.value)}
+        disabled={isUploading}
+        style={{ padding: '10px', borderRadius: '4px', border: '1px solid var(--border-color)', background: 'var(--surface-color)', color: 'var(--text-color)' }}
+      >
+        <option value="Aadhaar">Aadhaar Card</option>
+        <option value="PAN">PAN Card</option>
+        <option value="Gold Photo">Gold Photo</option>
+        <option value="Agreement">Agreement</option>
+        <option value="Other">Other Document</option>
+      </select>
+
       <input
         type="file"
         ref={inputFileRef}
@@ -53,22 +66,22 @@ export default function DocumentUploader({ customerId }: { customerId: string })
         style={{ display: 'none' }}
         id={`doc-upload-${customerId}`}
       />
-      <label
+      <label 
         htmlFor={`doc-upload-${customerId}`}
-        className="btn-secondary"
-        style={{
-          width: '100%',
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '10px',
+        className="btn-secondary" 
+        style={{ 
+          width: '100%', 
+          display: 'flex', 
+          justifyContent: 'center', 
+          alignItems: 'center', 
+          gap: '8px', 
+          padding: '10px', 
           cursor: isUploading ? 'not-allowed' : 'pointer',
           opacity: isUploading ? 0.7 : 1
         }}
       >
         {isUploading ? <Loader2 size={18} className="animate-spin text-zinc-400" /> : <UploadCloud size={18} />}
-        {isUploading ? 'Uploading...' : 'Upload Document'}
+        {isUploading ? 'Uploading to Folder...' : 'Attach File'}
       </label>
     </div>
   )
