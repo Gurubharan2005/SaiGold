@@ -1,8 +1,9 @@
 import { prisma } from '@/lib/prisma'
-import { CheckCircle, AlertCircle, Clock, FileText, UserPlus } from 'lucide-react'
+import { CheckCircle, AlertCircle, Clock, FileText, UserPlus, UserCircle, MapPin } from 'lucide-react'
 import { format } from 'date-fns'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
+import AssignLeadDropdown from '@/components/AssignLeadDropdown'
 
 // Make this route dynamic to always fetch the latest stats
 export const dynamic = 'force-dynamic';
@@ -17,11 +18,19 @@ export default async function DashboardPage() {
   const dueCustomers = await prisma.customer.count({ where: { status: 'DUE' } })
 
   const baseWhere: any = {}
+  let activeStaffList: { id: string, name: string }[] = []
+
   if (session?.role !== 'MANAGER') {
     baseWhere.OR = [
       { createdById: String(session?.id) },
       { assignedToId: String(session?.id) }
     ]
+  } else {
+    // Only fetch staff members for dispatching if the user is a Manager
+    activeStaffList = await prisma.user.findMany({
+      where: { role: 'STAFF', isActive: true },
+      select: { id: true, name: true }
+    })
   }
 
   const recentCustomers = await prisma.customer.findMany({
@@ -29,7 +38,8 @@ export default async function DashboardPage() {
     orderBy: { createdAt: 'desc' },
     select: {
       id: true, name: true, phone: true, status: true, loanAmount: true,
-      createdById: true, createdAt: true
+      createdById: true, createdAt: true,
+      assignedTo: { select: { id: true, name: true } }
     },
     take: 50
   })
@@ -84,7 +94,7 @@ export default async function DashboardPage() {
             <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Customer Data</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Workflow State</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Loan Metrics</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Handling Agent</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Acquisition Origin</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Creation Date</th>
             </tr>
@@ -107,9 +117,16 @@ export default async function DashboardPage() {
                     <span className={`badge badge-${c.status.toLowerCase()}`}>{c.status}</span>
                   </td>
                   <td style={{ padding: '16px' }}>
-                    <div style={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-                      {c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-'}
-                    </div>
+                    {c.assignedTo ? (
+                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <UserCircle size={16} color="var(--primary-color)" />
+                          <span style={{ fontSize: '13px', fontWeight: 600 }}>{c.assignedTo.name}</span>
+                       </div>
+                    ) : session?.role === 'MANAGER' ? (
+                       <AssignLeadDropdown customerId={c.id} staffList={activeStaffList} />
+                    ) : (
+                       <span style={{ fontSize: '12px', color: 'var(--text-secondary)', fontStyle: 'italic' }}>Unassigned Vault</span>
+                    )}
                   </td>
                   <td style={{ padding: '16px' }}>
                     {c.createdById ? (
