@@ -85,7 +85,10 @@ export default async function DashboardLayout({
                 <Activity size={20} /> Performance KPI
               </Link>
               <Link href="/dashboard/leads" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
-                <UserPlus size={20} /> Meta Leads
+                <Users size={20} /> Meta Leads
+              </Link>
+              <Link href="/dashboard/assign-leads" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                <Target size={20} /> Assign Leads
               </Link>
               <Link href="/dashboard/documents" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
                 <FileText size={20} /> Documents

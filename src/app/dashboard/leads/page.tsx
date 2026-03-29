@@ -3,7 +3,7 @@ import { Check, X, Phone, MapPin } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import ClientBulkLeadsTable from '@/components/ClientBulkLeadsTable'
+import ReadOnlyLeadsTable from '@/components/ReadOnlyLeadsTable'
 export const dynamic = 'force-dynamic'
 
 export default async function LeadsPage() {
@@ -34,11 +34,7 @@ export default async function LeadsPage() {
         </div>
       </div>
 
-      <ClientBulkLeadsTable 
-        leads={leads} 
-        activeStaffList={activeStaffList} 
-        userRole={session?.role || 'STAFF'} 
-      />
+      <ReadOnlyLeadsTable leads={leads} />
     </div>
   )
 }
