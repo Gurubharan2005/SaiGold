@@ -6,7 +6,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   try {
     const body = await req.json()
     const { id } = await params
-    const { status, assignedToId, notes, loanAmount, goldWeight, dueDate } = body
+    const { status, assignedToId, notes, loanAmount, goldWeight, dueDate, photoUrl } = body
 
     // We can dynamically define updates based on the exact keys sent.
     const updateData: any = {}
@@ -15,6 +15,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (notes !== undefined) updateData.notes = notes
     if (loanAmount !== undefined) updateData.loanAmount = loanAmount
     if (goldWeight !== undefined) updateData.goldWeight = goldWeight
+    if (photoUrl !== undefined) updateData.photoUrl = photoUrl
     if (dueDate) updateData.dueDate = new Date(dueDate)
 
     const updatedCustomer = await prisma.customer.update({
