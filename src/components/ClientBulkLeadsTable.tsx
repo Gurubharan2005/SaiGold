@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Phone, MapPin, Loader2, Target, Check, X } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
-import LeadActions from './LeadActions'
 
 export default function ClientBulkLeadsTable({ 
   leads, 
@@ -114,7 +113,6 @@ export default function ClientBulkLeadsTable({
             <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Contact Info</th>
             <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Loan Details</th>
             <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Received</th>
-            <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -158,11 +156,6 @@ export default function ClientBulkLeadsTable({
                 </td>
                 <td style={{ padding: '16px', color: 'var(--text-secondary)', fontSize: '14px' }}>
                   {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
-                </td>
-                <td style={{ padding: '16px', textAlign: 'right' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
-                    <LeadActions leadId={lead.id} />
-                  </div>
                 </td>
               </tr>
             ))
