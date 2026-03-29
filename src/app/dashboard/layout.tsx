@@ -52,9 +52,11 @@ export default async function DashboardLayout({
       {/* Sidebar Navigation */}
       <aside style={{ width: '260px', background: 'var(--surface-color)', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '24px', borderBottom: '1px solid var(--border-color)' }}>
-          <h2 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <span style={{ color: 'var(--primary-color)' }}>Sai Gold</span> CRM
-          </h2>
+          <Link href="/dashboard" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <h2 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', margin: 0, cursor: 'pointer' }}>
+              <span style={{ color: 'var(--primary-color)' }}>Sai Gold</span> CRM
+            </h2>
+          </Link>
         </div>
         
         <nav style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
