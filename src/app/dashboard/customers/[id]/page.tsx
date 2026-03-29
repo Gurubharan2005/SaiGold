@@ -5,6 +5,7 @@ import { format } from 'date-fns'
 import CustomerStatusSelect from '@/components/CustomerStatusSelect'
 import DocumentUploader from '@/components/DocumentUploader'
 import DeleteDocumentButton from '@/components/DeleteDocumentButton'
+import CloseLoanButton from '@/components/CloseLoanButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -37,6 +38,7 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
           <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px' }}>
             <Edit size={18} /> Edit Profile
           </button>
+          <CloseLoanButton customerId={customer.id} />
         </div>
       </div>
 

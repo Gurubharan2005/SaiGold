@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { del } from '@vercel/blob'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -25,5 +26,39 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   } catch (error) {
     console.error('Update Customer Error:', error)
     return NextResponse.json({ error: 'Failed to update customer' }, { status: 500 })
+  }
+}
+
+export async function DELETE(req: Request, { params }: { params: Promise<{ id: string }> }) {
+  try {
+    const { id } = await params
+
+    // 1. Fetch exactly all the documents mathematically attached to this loan natively
+    const customer = await prisma.customer.findUnique({
+      where: { id },
+      include: {
+        documents: true,
+      }
+    })
+
+    if (!customer) {
+       return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
+    }
+
+    // 2. Iterate heavily and purge the Vercel Blob entries via native S3 execution parameters
+    if (customer.documents && customer.documents.length > 0) {
+       const deletePromises = customer.documents.map((doc: any) => del(doc.documentUrl))
+       await Promise.allSettled(deletePromises)
+    }
+
+    // 3. Drop the customer context mapping from PostgreSQL dynamically cascading deletion to the Document tables automatically
+    await prisma.customer.delete({
+      where: { id }
+    })
+
+    return NextResponse.json({ success: true }, { status: 200 })
+  } catch (error) {
+     console.error('Delete Customer Data Scrub Error:', error)
+     return NextResponse.json({ error: 'Failed to purge database fully' }, { status: 500 })
   }
 }
