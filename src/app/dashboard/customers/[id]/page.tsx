@@ -3,6 +3,7 @@ import { ArrowLeft, Edit, Phone, MapPin, Calendar, CreditCard, Hash, FileText, D
 import Link from 'next/link'
 import { format } from 'date-fns'
 import CustomerStatusSelect from '@/components/CustomerStatusSelect'
+import CustomerSalesControl from '@/components/CustomerSalesControl'
 import DocumentUploader from '@/components/DocumentUploader'
 import DeleteDocumentButton from '@/components/DeleteDocumentButton'
 import CloseLoanButton from '@/components/CloseLoanButton'
@@ -128,9 +129,20 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
           <div className="card">
-            <h3 style={{ fontSize: '16px', marginBottom: '16px' }}>Update Status</h3>
+            <h3 style={{ fontSize: '16px', marginBottom: '16px' }}>Workflow Stage</h3>
             <CustomerStatusSelect customerId={customer.id} currentStatus={customer.status} />
           </div>
+
+          {/* New Sales Action Engine */}
+          <CustomerSalesControl
+             customerId={customer.id}
+             priority={customer.priority}
+             callStatus={customer.callStatus}
+             branch={customer.branch}
+             followUpDate={customer.followUpDate?.toISOString() || null}
+             followUpNotes={customer.followUpNotes}
+             phone={customer.phone}
+          />
 
           <div className="card">
             <h3 style={{ fontSize: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>

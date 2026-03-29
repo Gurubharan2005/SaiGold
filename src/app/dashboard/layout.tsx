@@ -1,4 +1,4 @@
-import { LayoutDashboard, Users, UserPlus, FileText, Settings, LogOut, ShieldCheck, Target } from 'lucide-react'
+import { LayoutDashboard, Users, UserPlus, FileText, Settings, LogOut, ShieldCheck, Target, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
@@ -18,23 +18,30 @@ export default async function DashboardLayout({
   const sevenDaysFromNow = new Date()
   sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7)
 
-  // Contextually fetch incoming constraints
-  const rawNotifications = await prisma.customer.findMany({
-    where: {
-      status: { not: 'CLOSED' },
-      dueDate: {
-        lte: sevenDaysFromNow,
-        not: null
-      },
-      ...(session?.role !== 'MANAGER' ? {
+  // Contextually fetch incoming constraints (Dues & Follow-Ups)
+  const baseWhere: any = {
+    status: { not: 'CLOSED' },
+    OR: [
+      { dueDate: { lte: sevenDaysFromNow, not: null } },
+      { followUpDate: { lte: sevenDaysFromNow, not: null } }
+    ]
+  }
+
+  if (session?.role !== 'MANAGER') {
+    baseWhere.AND = [
+      {
          OR: [
            { createdById: String(session?.id) },
            { assignedToId: String(session?.id) }
          ]
-      } : {})
-    },
-    select: { id: true, name: true, dueDate: true, loanAmount: true },
-    orderBy: { dueDate: 'asc' },
+      }
+    ]
+  }
+
+  const rawNotifications = await prisma.customer.findMany({
+    where: baseWhere,
+    select: { id: true, name: true, dueDate: true, followUpDate: true, loanAmount: true },
+    orderBy: { createdAt: 'desc' },
     take: 15
   })
 
@@ -43,7 +50,7 @@ export default async function DashboardLayout({
     id: n.id,
     name: n.name,
     loanAmount: n.loanAmount,
-    dueDate: new Date(n.dueDate!).toISOString()
+    dueDate: n.dueDate ? new Date(n.dueDate).toISOString() : n.followUpDate ? new Date(n.followUpDate).toISOString() : new Date().toISOString()
   }))
 
   return (
@@ -73,6 +80,9 @@ export default async function DashboardLayout({
             <>
               <Link href="/dashboard/assignments" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
                 <Target size={20} /> Assigned Leads
+              </Link>
+              <Link href="/dashboard/performance" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
+                <Activity size={20} /> Performance KPI
               </Link>
               <Link href="/dashboard/leads" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', borderRadius: 'var(--border-radius-sm)', color: 'var(--text-secondary)', fontWeight: 500 }}>
                 <UserPlus size={20} /> Meta Leads

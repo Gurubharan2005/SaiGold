@@ -1,22 +1,61 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { del } from '@vercel/blob'
+import { cookies } from 'next/headers'
+import { decrypt } from '@/lib/auth'
+import { format } from 'date-fns'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     const body = await req.json()
     const { id } = await params
-    const { status, assignedToId, notes, loanAmount, goldWeight, dueDate, photoUrl } = body
+    const { status, assignedToId, notes, loanAmount, goldWeight, dueDate, photoUrl, priority, callStatus, branch, followUpDate, followUpNotes, appendNote } = body
+
+    const cookieStore = await cookies()
+    const token = cookieStore.get('auth-token')?.value
+    const session = token ? await decrypt(token) : null
+
+    const currentCustomer = await prisma.customer.findUnique({ where: { id } })
+    if (!currentCustomer) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     // We can dynamically define updates based on the exact keys sent.
     const updateData: any = {}
     if (status) updateData.status = status
-    if (assignedToId) updateData.assignedToId = assignedToId
+    if (assignedToId) {
+       updateData.assignedToId = assignedToId
+       if (!currentCustomer.assignedAt) updateData.assignedAt = new Date()
+    }
     if (notes !== undefined) updateData.notes = notes
     if (loanAmount !== undefined) updateData.loanAmount = loanAmount
     if (goldWeight !== undefined) updateData.goldWeight = goldWeight
     if (photoUrl !== undefined) updateData.photoUrl = photoUrl
     if (dueDate) updateData.dueDate = new Date(dueDate)
+    if (priority) updateData.priority = priority
+    if (branch !== undefined) updateData.branch = branch
+    if (followUpDate) updateData.followUpDate = new Date(followUpDate)
+    if (followUpNotes !== undefined) updateData.followUpNotes = followUpNotes
+    
+    // Note Appendage Tracking
+    if (appendNote) {
+      const timestamp = format(new Date(), '[MMM dd - h:mm a]')
+      const formattedNote = `\n${timestamp} ${session?.name || 'Staff'}: ${appendNote}`
+      updateData.notes = currentCustomer.notes ? currentCustomer.notes + formattedNote : formattedNote.trim()
+    }
+
+    // Call Status & Smart Response Tracker
+    if (callStatus) {
+      updateData.callStatus = callStatus
+      if (callStatus !== 'NOT_CALLED' && !currentCustomer.firstContactAt) {
+        const now = new Date()
+        updateData.firstContactAt = now
+        // Dynamically compute the exact response cycle natively natively locking tracking metadata cleanly
+        if (currentCustomer.assignedAt) {
+          updateData.responseTime = Math.round((now.getTime() - currentCustomer.assignedAt.getTime()) / 60000)
+        } else {
+          updateData.responseTime = Math.round((now.getTime() - currentCustomer.createdAt.getTime()) / 60000)
+        }
+      }
+    }
 
     const updatedCustomer = await prisma.customer.update({
       where: { id },

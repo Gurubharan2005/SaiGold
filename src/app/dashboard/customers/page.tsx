@@ -86,9 +86,10 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
           <thead>
             <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Customer Data</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Status</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Status & Priority</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Loan Info</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Creation Date</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Response Time</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
@@ -121,8 +122,16 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                       </div>
                     </div>
                   </td>
-                  <td style={{ padding: '16px' }}>
+                  <td style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
                     <span className={`badge badge-${c.status.toLowerCase()}`}>{c.status}</span>
+                    <span style={{ 
+                       fontSize: '11px', fontWeight: 700, padding: '4px 8px', borderRadius: '4px',
+                       background: c.priority === 'HIGH' ? 'rgba(239, 68, 68, 0.1)' : c.priority === 'MEDIUM' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                       color: c.priority === 'HIGH' ? '#EF4444' : c.priority === 'MEDIUM' ? '#F59E0B' : '#10B981',
+                       textTransform: 'uppercase'
+                    }}>
+                      {c.priority} 
+                    </span>
                   </td>
                   <td style={{ padding: '16px' }}>
                     <div style={{ fontWeight: 600, color: 'var(--primary-color)' }}>
@@ -135,8 +144,22 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                   <td style={{ padding: '16px', color: 'var(--text-secondary)', fontSize: '14px' }}>
                     {format(new Date(c.createdAt), 'MMM dd, yyyy')}
                   </td>
+                  <td style={{ padding: '16px', fontWeight: 600 }}>
+                     {c.responseTime === null ? (
+                       <span style={{ color: 'var(--text-secondary)' }}>N/A</span>
+                     ) : c.responseTime < 5 ? (
+                       <span style={{ color: '#10B981' }}>{c.responseTime} min</span>
+                     ) : c.responseTime < 15 ? (
+                       <span style={{ color: '#F59E0B' }}>{c.responseTime} min</span>
+                     ) : (
+                       <span style={{ color: '#EF4444' }}>{c.responseTime} min</span>
+                     )}
+                  </td>
                   <td style={{ padding: '16px', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '12px', alignItems: 'center' }}>
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', alignItems: 'center' }}>
+                      <a href={`https://wa.me/${c.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10B981', fontSize: '13px', textDecoration: 'none', background: 'rgba(16, 185, 129, 0.1)', padding: '6px 10px', borderRadius: '4px', fontWeight: 600 }}>
+                        WA
+                      </a>
                       <a href={`tel:${c.phone}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-color)', fontSize: '13px', textDecoration: 'none', background: 'var(--surface-color)', padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
                         <Phone size={14} color="var(--primary-color)" /> Call
                       </a>

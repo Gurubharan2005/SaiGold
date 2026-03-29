@@ -21,6 +21,20 @@ enum Status {
   CLOSED
 }
 
+enum Priority {
+  HIGH
+  MEDIUM
+  LOW
+}
+
+enum CallStatus {
+  NOT_CALLED
+  CALLED
+  NOT_REACHABLE
+  BUSY
+  INTERESTED
+}
+
 model User {
   id        String   @id @default(uuid())
   name      String
@@ -49,11 +63,21 @@ model Customer {
   loanAmount Float?
   branch     String?
   photoUrl   String?
-  status     Status   @default(WAITING)
-  dueDate    DateTime?
-  notes      String?  @db.Text
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  status       Status      @default(WAITING)
+  priority     Priority    @default(MEDIUM)
+  callStatus   CallStatus  @default(NOT_CALLED)
+  
+  assignedAt     DateTime?
+  firstContactAt DateTime?
+  responseTime   Int?
+  
+  dueDate        DateTime?
+  followUpDate   DateTime?
+  followUpNotes  String?
+  
+  notes        String?     @db.Text
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
 
   // Foreign Keys
   assignedToId String?

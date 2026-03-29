@@ -20,10 +20,10 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Invalid payload structure parameters.' }, { status: 400 })
     }
 
-    // Execute bulk update query mapping assignedToId exactly natively and push into processing tier
+    // Execute bulk update query mapping assignedToId exactly natively and push into processing tier starting the response clock natively
     const result = await prisma.customer.updateMany({
       where: { id: { in: customerIds } },
-      data: { assignedToId, status: 'PROCESSING' }
+      data: { assignedToId, status: 'PROCESSING', assignedAt: new Date() }
     })
 
     return NextResponse.json({ success: true, count: result.count }, { status: 200 })
