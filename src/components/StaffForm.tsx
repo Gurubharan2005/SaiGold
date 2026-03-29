@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus, Loader2 } from 'lucide-react'
 
-export default function StaffForm() {
+export default function StaffForm({ onSuccess }: { onSuccess?: () => void }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({ name: '', email: '', password: '' })
@@ -27,6 +27,7 @@ export default function StaffForm() {
 
       setFormData({ name: '', email: '', password: '' })
       router.refresh()
+      if (onSuccess) onSuccess()
     } catch (error: any) {
       console.error(error)
       alert(error.message)

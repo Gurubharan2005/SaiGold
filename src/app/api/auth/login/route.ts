@@ -16,8 +16,8 @@ export async function POST(req: Request) {
       where: { email }
     })
 
-    if (!user) {
-      return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+    if (!user || !user.isActive) {
+      return NextResponse.json({ error: 'Invalid or revoked credentials' }, { status: 401 })
     }
 
     const isValid = await bcrypt.compare(password, user.password)

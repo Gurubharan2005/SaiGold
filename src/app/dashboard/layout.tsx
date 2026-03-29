@@ -3,6 +3,7 @@ import Link from 'next/link'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import NotificationBell from '@/components/NotificationBell'
+import LocationBroadcaster from '@/components/LocationBroadcaster'
 import { prisma } from '@/lib/prisma'
 
 export default async function DashboardLayout({
@@ -47,6 +48,7 @@ export default async function DashboardLayout({
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-color)' }}>
+      <LocationBroadcaster isStaff={session?.role === 'STAFF'} />
       {/* Sidebar Navigation */}
       <aside style={{ width: '260px', background: 'var(--surface-color)', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
         <div style={{ padding: '24px', borderBottom: '1px solid var(--border-color)' }}>
