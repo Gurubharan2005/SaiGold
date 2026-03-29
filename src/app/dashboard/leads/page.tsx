@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import { Check, X, Phone, MapPin } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import LeadActions from '@/components/LeadActions'
+import DocumentUploader from '@/components/DocumentUploader'
 export const dynamic = 'force-dynamic'
 
 export default async function LeadsPage() {
@@ -64,7 +65,10 @@ export default async function LeadsPage() {
                     {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
                   </td>
                   <td style={{ padding: '16px', textAlign: 'right' }}>
-                    <LeadActions leadId={lead.id} />
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-end' }}>
+                      <LeadActions leadId={lead.id} />
+                      <DocumentUploader customerId={lead.id} />
+                    </div>
                   </td>
                 </tr>
               ))
