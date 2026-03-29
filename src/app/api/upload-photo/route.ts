@@ -28,10 +28,10 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   try {
-    // Avatars can be public or private. We will use public to allow native <img> rendering easily
+    // Avatars must dynamically match the Customer Document vault's Private Storage constraints
     const securePath = `avatars/${Date.now()}-${filename.replace(/[^a-zA-Z0-9.-]/g, '_')}`
     const blob = await put(securePath, request.body, {
-      access: 'public',
+      access: 'private',
     })
 
     return NextResponse.json({ url: blob.url }, { status: 200 })
