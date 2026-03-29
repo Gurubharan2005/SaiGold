@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { Plus, Search, FileSpreadsheet, Phone, MapPin } from 'lucide-react'
+import { Plus, Search, FileSpreadsheet, Phone, MapPin, User } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { cookies } from 'next/headers'
@@ -106,10 +106,19 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             ) : (
               customers.map((c: any) => (
                 <tr key={c.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}>
-                  <td style={{ padding: '16px' }}>
-                    <div style={{ fontWeight: 600, marginBottom: '4px' }}>{c.name}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                      <Phone size={12} /> {c.phone}
+                  <td style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
+                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-color)', overflow: 'hidden', border: '1px solid var(--border-color)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      {c.photoUrl ? (
+                         <img src={c.photoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                         <User size={20} color="var(--text-secondary)" />
+                      )}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 600, marginBottom: '4px' }}>{c.name}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                        <Phone size={12} /> {c.phone}
+                      </div>
                     </div>
                   </td>
                   <td style={{ padding: '16px' }}>
