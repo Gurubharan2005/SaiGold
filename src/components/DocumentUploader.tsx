@@ -29,10 +29,10 @@ export default function DocumentUploader({ customerId }: { customerId: string })
       }
 
       const data = await response.json()
-      
+
       // Clear input
       if (inputFileRef.current) inputFileRef.current.value = ''
-      
+
       // Refresh the page data natively
       router.refresh()
     } catch (error) {
@@ -53,16 +53,16 @@ export default function DocumentUploader({ customerId }: { customerId: string })
         style={{ display: 'none' }}
         id={`doc-upload-${customerId}`}
       />
-      <label 
+      <label
         htmlFor={`doc-upload-${customerId}`}
-        className="btn-secondary" 
-        style={{ 
-          width: '100%', 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
-          gap: '8px', 
-          padding: '10px', 
+        className="btn-secondary"
+        style={{
+          width: '100%',
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '10px',
           cursor: isUploading ? 'not-allowed' : 'pointer',
           opacity: isUploading ? 0.7 : 1
         }}
