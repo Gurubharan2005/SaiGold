@@ -13,7 +13,7 @@ export default async function LeadsPage() {
 
   // Fetch all leads that came from Meta Webhook (Waiting Status)
   const leads = await prisma.customer.findMany({
-    where: { status: 'WAITING' },
+    where: { status: 'WAITING', createdById: null },
     orderBy: { createdAt: 'desc' }
   })
 

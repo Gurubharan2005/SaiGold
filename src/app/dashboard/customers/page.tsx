@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
 import { Plus, Search, FileSpreadsheet, Phone, MapPin, User } from 'lucide-react'
 import Link from 'next/link'
-import { format } from 'date-fns'
+import { format, startOfDay, endOfDay } from 'date-fns'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 
@@ -12,14 +12,22 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
   const { tab } = await searchParams
-  const currentTab = tab || 'new'
+  const currentTab = tab || 'today'
 
   // Contextual Security: Managers see everything. Staff see ONLY the customers they manually registered or are assigned to.
-  const baseWhere: any = { 
-     status: currentTab === 'new' 
-       ? { in: ['WAITING', 'ACCEPTED'] }
-       : { in: ['PROCESSING', 'DUE', 'CLOSED'] }
+  const baseWhere: any = {}
+  
+  if (currentTab === 'today') {
+    baseWhere.createdAt = {
+      gte: startOfDay(new Date()),
+      lte: endOfDay(new Date())
+    }
+  } else if (currentTab === 'ongoing') {
+    baseWhere.status = {
+      in: ['ACCEPTED', 'PROCESSING']
+    }
   }
+
   if (session?.role !== 'MANAGER') {
     baseWhere.OR = [
       { createdById: String(session?.id) },
@@ -37,7 +45,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <h1 style={{ fontSize: '28px', margin: 0 }}>
-            {currentTab === 'ongoing' ? 'Ongoing Customers' : 'New Customers'}
+            {currentTab === 'ongoing' ? 'Ongoing Customers' : 'Today\'s Customers'}
           </h1>
         </div>
         
@@ -88,7 +96,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             {customers.length === 0 ? (
               <tr>
                  <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                  No active customers found. Accept a Meta Lead or add a new customer manually.
+                  No customers found for this criteria.
                 </td>
               </tr>
             ) : (
