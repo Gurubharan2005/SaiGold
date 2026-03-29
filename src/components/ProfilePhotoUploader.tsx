@@ -61,7 +61,15 @@ export default function ProfilePhotoUploader({ customerId, initialPhotoUrl }: { 
         position: 'relative'
       }}>
         {preview ? (
-          <img src={preview} alt="Customer Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          <img 
+            src={preview.startsWith('data:') ? preview : `/api/avatar?url=${encodeURIComponent(preview)}`} 
+            alt="Customer Avatar" 
+            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+            onError={(e) => {
+              // Fallback in case the Proxy fails
+              (e.target as HTMLImageElement).src = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjYTliMGJiIiBzdHJva2Utd2lkdGg9IjIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCI+PHBhdGggZD0iTTE5IDIxdi0yYTRgNCAwIDAgMC00LTRINWE0IDQgMCAwIDAtNCA0djIiPjwvcGF0aD48Y2lyY2xlIGN4PSIxMiIgY3k9IjciIHI9IjQiPjwvY2lyY2xlPjwvc3ZnPg=='; // Raw User Lucide Icon fallback
+            }}
+          />
         ) : (
           <User size={48} color="var(--text-secondary)" />
         )}

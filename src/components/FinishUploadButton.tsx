@@ -9,8 +9,6 @@ export default function FinishUploadButton({ customerId }: { customerId: string 
   const [isLocking, setIsLocking] = useState(false)
 
   const handleFinish = async () => {
-    if (!confirm('Are you sure you want to finish uploading? This will legally seal the documents from Staff view.')) return
-    
     setIsLocking(true)
     try {
       await fetch(`/api/customers/${customerId}`, {
