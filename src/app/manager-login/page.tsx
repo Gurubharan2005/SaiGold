@@ -1,10 +1,10 @@
 'use client'
 
 import { useState } from 'react'
-import { TrendingUp, ArrowRight, Loader2, ArrowLeft } from 'lucide-react'
+import { ShieldAlert, ArrowRight, Loader2, ArrowLeft } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function SalesLoginPage() {
+export default function ManagerLoginPage() {
   const router = useRouter()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -31,15 +31,13 @@ export default function SalesLoginPage() {
         throw new Error(data.error || 'Failed to login')
       }
 
-      // Strict Validation: This login page ONLY allows Sales Managers
-      if (data.role !== 'SALESMAN') {
-         // Clear session (though it was set by the API)
-         // For a better UX, we'd have a logout or just block them
-         throw new Error('This login is reserved for Sales Managers only.')
+      // Strict Validation: This login page ONLY allows Management
+      if (data.role !== 'MANAGER') {
+         throw new Error('This secure portal is strictly reserved for Management tier access.')
       }
 
       // Success!
-      router.push('/dashboard/sales')
+      router.push('/dashboard')
       router.refresh()
       
     } catch (err: any) {
@@ -55,31 +53,31 @@ export default function SalesLoginPage() {
       display: 'flex', 
       alignItems: 'center', 
       justifyContent: 'center',
-      background: 'radial-gradient(circle at top right, rgba(16, 185, 129, 0.05), transparent), radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.05), transparent)'
+      background: 'radial-gradient(circle at top right, rgba(239, 68, 68, 0.05), transparent), radial-gradient(circle at bottom left, rgba(59, 130, 246, 0.05), transparent)'
     }}>
       <div className="card fade-in" style={{ 
         maxWidth: '420px', 
         width: '100%', 
         textAlign: 'center',
-        border: '1px solid rgba(16, 185, 129, 0.2)',
+        border: '1px solid rgba(239, 68, 68, 0.2)',
         boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '24px' }}>
           <div style={{ 
-            background: 'rgba(16, 185, 129, 0.1)', 
+            background: 'rgba(239, 68, 68, 0.1)', 
             padding: '20px', 
             borderRadius: '24px',
-            border: '1px solid rgba(16, 185, 129, 0.2)'
+            border: '1px solid rgba(239, 68, 68, 0.2)'
           }}>
-            <TrendingUp size={44} color="#10B981" strokeWidth={2} />
+            <ShieldAlert size={44} color="#EF4444" strokeWidth={2} />
           </div>
         </div>
         
         <h1 style={{ fontSize: '26px', marginBottom: '8px', fontWeight: 700 }}>
-          Sales <span style={{ color: '#10B981' }}>Executive</span> Portal
+          Management <span style={{ color: '#EF4444' }}>Portal</span>
         </h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '32px', fontSize: '15px' }}>
-          Sai Gold Growth & Conversion Management
+          Sai Gold Global Control & Override Access
         </p>
 
         {error && (
@@ -99,10 +97,10 @@ export default function SalesLoginPage() {
         
         <form onSubmit={handleLogin} style={{ display: 'flex', flexDirection: 'column', gap: '20px', textAlign: 'left' }}>
           <div>
-            <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Sales ID / Email</label>
+            <label style={{ display: 'block', marginBottom: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Manager ID / Email</label>
             <input 
               type="email" 
-              placeholder="sales@saigold.com" 
+              placeholder="admin@saigoldloans.com" 
               style={{ width: '100%', height: '48px', borderRadius: '12px', fontSize: '15px' }}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -130,12 +128,12 @@ export default function SalesLoginPage() {
               height: '52px', 
               fontSize: '16px', 
               fontWeight: 700,
-              background: 'linear-gradient(135deg, #10B981, #059669)',
+              background: 'linear-gradient(135deg, #EF4444, #B91C1C)',
               border: 'none',
-              boxShadow: '0 8px 20px rgba(16, 185, 129, 0.2)'
+              boxShadow: '0 8px 20px rgba(239, 68, 68, 0.2)'
             }}
           >
-            {loading ? <Loader2 size={20} className="animate-spin" /> : 'Enter Sales Portal'}
+            {loading ? <Loader2 size={20} className="animate-spin" /> : 'Enter Management Portal'}
             {!loading && <ArrowRight size={20} />}
           </button>
         </form>
@@ -156,7 +154,7 @@ export default function SalesLoginPage() {
               margin: '0 auto'
             }}
           >
-            <ArrowLeft size={16} /> Back to Main Terminal
+            <ArrowLeft size={16} /> Back to standard Staff Login
           </button>
         </div>
       </div>

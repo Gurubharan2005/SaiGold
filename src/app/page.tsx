@@ -31,6 +31,10 @@ export default function Home() {
         throw new Error(data.error || 'Failed to login')
       }
 
+      if (data.role === 'MANAGER') {
+        throw new Error('Managers must login through the dedicated Manager Portal.')
+      }
+
       // Success!
       if (data.role === 'SALESMAN') {
         router.push('/dashboard/sales')
@@ -64,7 +68,7 @@ export default function Home() {
           Sai Gold <span style={{ color: 'var(--primary-color)' }}>Loans</span>
         </h1>
         <p style={{ color: 'var(--text-secondary)', marginBottom: '24px' }}>
-          Secure CRM System for Manager and Staff
+          Secure CRM System for Sales and Staff
         </p>
 
         {error && (
@@ -78,7 +82,7 @@ export default function Home() {
             <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', color: 'var(--text-secondary)' }}>Email Address</label>
             <input 
               type="email" 
-              placeholder="admin@saigoldloans.com" 
+              placeholder="team@saigoldloans.com" 
               style={{ width: '100%' }}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -104,7 +108,7 @@ export default function Home() {
 
         <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
           <button 
-            onClick={() => router.push('/sales-login')}
+            onClick={() => router.push('/manager-login')}
             style={{ 
               background: 'transparent', 
               border: 'none', 
@@ -118,7 +122,7 @@ export default function Home() {
               margin: '0 auto'
             }}
           >
-            Switch to Sales Manager Login <ArrowRight size={14} />
+            Switch to Manager Login <ArrowRight size={14} />
           </button>
         </div>
       </div>
