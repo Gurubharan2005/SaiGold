@@ -1,5 +1,4 @@
-import { prisma } from '@/lib/prisma'
-import { ArrowLeft, Edit, Phone, MapPin, Calendar, CreditCard, Hash, FileText, Download, Lock } from 'lucide-react'
+import { ArrowLeft, Edit, Phone, MapPin, Calendar, CreditCard, Hash, FileText, Download, Lock, Check } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import CustomerStatusSelect from '@/components/CustomerStatusSelect'
@@ -10,8 +9,11 @@ import CloseLoanButton from '@/components/CloseLoanButton'
 import DueDateSelector from '@/components/DueDateSelector'
 import FinishUploadButton from '@/components/FinishUploadButton'
 import ProfilePhotoUploader from '@/components/ProfilePhotoUploader'
+import { EditProfileModalTrigger } from '@/components/EditProfileModalTrigger'
 import { cookies } from 'next/headers'
+
 import { decrypt } from '@/lib/auth'
+import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
@@ -56,9 +58,7 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
         </div>
         
         <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-          <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px' }}>
-            <Edit size={18} /> Edit Profile
-          </button>
+          {isManager && <EditProfileModalTrigger customer={customer} />}
           <CloseLoanButton customerId={customer.id} />
         </div>
       </div>
@@ -156,10 +156,13 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
             
             {/* Case 1: Staff looking at a Locked Customer with Documents */}
             {!isManager && customer.status !== 'ACCEPTED' && customer.documents.length > 0 && (
-              <div style={{ padding: '24px 16px', background: 'var(--status-waiting)', borderRadius: '8px', textAlign: 'center', opacity: 0.9 }}>
-                <Lock size={24} color="#1a1f2c" style={{ margin: '0 auto 8px auto' }} />
-                <p style={{ fontSize: '13px', color: '#1a1f2c', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
-                  Files Secured. You no longer have clearance to view or alter these Compliance Documents.
+              <div style={{ padding: '24px 16px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px', textAlign: 'center' }}>
+                <div style={{ background: '#10B981', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto' }}>
+                  <Check size={24} color="#FFF" />
+                </div>
+                <h4 style={{ margin: '0 0 4px 0', color: '#10B981', fontSize: '16px' }}>Documents Uploaded Successfully</h4>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
+                  Files are secured and hidden. Awaiting final manual verification from the Sales Manager.
                 </p>
               </div>
             )}

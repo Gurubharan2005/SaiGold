@@ -9,7 +9,11 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   try {
     const body = await req.json()
     const { id } = await params
-    const { status, assignedToId, notes, loanAmount, goldWeight, dueDate, photoUrl, priority, callStatus, branch, followUpDate, followUpNotes, appendNote } = body
+    const { 
+      status, assignedToId, notes, loanAmount, goldWeight, dueDate, photoUrl, 
+      priority, callStatus, branch, followUpDate, followUpNotes, appendNote,
+      name, phone, interestRate, startDate, isVerified, verifiedAt, verifiedById
+    } = body
 
     const cookieStore = await cookies()
     const token = cookieStore.get('auth-token')?.value
@@ -20,6 +24,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
     // We can dynamically define updates based on the exact keys sent.
     const updateData: any = {}
+    if (name) updateData.name = name
+    if (phone) updateData.phone = phone
     if (status) updateData.status = status
     if (assignedToId) {
        updateData.assignedToId = assignedToId
@@ -28,12 +34,19 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (notes !== undefined) updateData.notes = notes
     if (loanAmount !== undefined) updateData.loanAmount = loanAmount
     if (goldWeight !== undefined) updateData.goldWeight = goldWeight
+    if (interestRate !== undefined) updateData.interestRate = interestRate
     if (photoUrl !== undefined) updateData.photoUrl = photoUrl
+    if (startDate) updateData.startDate = new Date(startDate)
     if (dueDate) updateData.dueDate = new Date(dueDate)
     if (priority) updateData.priority = priority
     if (branch !== undefined) updateData.branch = branch
     if (followUpDate) updateData.followUpDate = new Date(followUpDate)
     if (followUpNotes !== undefined) updateData.followUpNotes = followUpNotes
+    
+    // Verification fields
+    if (isVerified !== undefined) updateData.isVerified = isVerified
+    if (verifiedAt) updateData.verifiedAt = new Date(verifiedAt)
+    if (verifiedById) updateData.verifiedById = verifiedById
     
     // Note Appendage Tracking
     if (appendNote) {

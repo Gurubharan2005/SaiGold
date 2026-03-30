@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Phone, MapPin, Loader2, Target, Check, X, Clock } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 import { useEffect } from 'react'
+import { LeadCard } from './LeadCard'
 
 export default function ClientBulkLeadsTable({ 
   leads, 
@@ -122,74 +123,31 @@ export default function ClientBulkLeadsTable({
         </button>
       </div>
 
-      <div className="table-container" style={{ margin: 0 }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
-        <thead>
-          <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
-            <th style={{ padding: '16px', width: '40px', textAlign: 'center' }}>
-              {userRole === 'MANAGER' && (
-                <input 
-                  type="checkbox" 
-                  checked={selectedIds.length === leads.length && leads.length > 0} 
-                  onChange={toggleSelectAll} 
-                  style={{ cursor: 'pointer', accentColor: 'var(--primary-color)' }}
-                />
-              )}
-            </th>
-            <th style={{ padding: '16px 16px 16px 0', fontWeight: 600, color: 'var(--text-secondary)' }}>Customer Name</th>
-            <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Contact Info</th>
-            <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Loan Details</th>
-            <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Received</th>
-          </tr>
-        </thead>
-        <tbody>
-          {leads.length === 0 ? (
-            <tr>
-              <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>
-                No new leads from Meta Ads currently.
-              </td>
-            </tr>
-          ) : (
-            leads.map((lead: any) => (
-              <tr key={lead.id} style={{ borderBottom: '1px solid var(--border-color)', background: selectedIds.includes(lead.id) ? 'rgba(245, 158, 11, 0.05)' : 'transparent', transition: 'background 0.2s' }}>
-                <td style={{ padding: '16px', textAlign: 'center' }}>
-                  {userRole === 'MANAGER' && (
-                    <input 
-                      type="checkbox" 
-                      checked={selectedIds.includes(lead.id)} 
-                      onChange={() => toggleSelect(lead.id)} 
-                      style={{ cursor: 'pointer', accentColor: 'var(--primary-color)' }}
-                    />
-                  )}
-                </td>
-                <td style={{ padding: '16px 16px 16px 0', fontWeight: 500 }}>{lead.name}</td>
-                <td style={{ padding: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
-                    <Phone size={14} color="var(--text-secondary)" /> {lead.phone}
-                  </div>
-                  {lead.branch && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                      <MapPin size={14} /> {lead.branch}
-                    </div>
-                  )}
-                </td>
-                <td style={{ padding: '16px' }}>
-                  {lead.goldWeight ? (
-                    <span style={{ color: 'var(--primary-color)', fontWeight: 600 }}>{lead.goldWeight}g</span>
-                  ) : (
-                    <span style={{ color: 'var(--text-secondary)' }}>N/A</span>
-                  )}
-                  {lead.loanAmount && ` / ₹${lead.loanAmount.toLocaleString()}`}
-                </td>
-                <td style={{ padding: '16px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-                  {formatDistanceToNow(new Date(lead.createdAt), { addSuffix: true })}
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
-    </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px', padding: '24px' }}>
+        {leads.length === 0 ? (
+          <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)', gridColumn: '1 / -1' }}>
+            No new leads from Meta Ads currently.
+          </div>
+        ) : (
+          leads.map((lead: any) => (
+             <div key={lead.id} style={{ position: 'relative' }}>
+               {userRole === 'MANAGER' && (
+                 <div style={{ position: 'absolute', top: '16px', right: '16px', zIndex: 10 }}>
+                   <input 
+                     type="checkbox" 
+                     checked={selectedIds.includes(lead.id)} 
+                     onChange={() => toggleSelect(lead.id)} 
+                     style={{ cursor: 'pointer', accentColor: 'var(--primary-color)', transform: 'scale(1.2)' }}
+                   />
+                 </div>
+               )}
+               <div style={{ opacity: selectedIds.includes(lead.id) ? 0.7 : 1, transition: 'opacity 0.2s', height: '100%' }}>
+                 <LeadCard customer={lead} />
+               </div>
+             </div>
+          ))
+        )}
+      </div>
   </div>
   )
 }
