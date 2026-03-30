@@ -32,7 +32,11 @@ export default function Home() {
       }
 
       // Success!
-      router.push('/dashboard')
+      if (data.role === 'SALESMAN') {
+        router.push('/dashboard/sales')
+      } else {
+        router.push('/dashboard')
+      }
       router.refresh()
       
     } catch (err: any) {
@@ -93,10 +97,30 @@ export default function Home() {
             />
           </div>
           <button type="submit" disabled={loading} className="btn-primary" style={{ width: '100%', marginTop: '8px', opacity: loading ? 0.7 : 1 }}>
-            {loading ? <Loader2 size={18} className="animate-spin" style={{ animation: 'spin 1s linear infinite' }} /> : 'Secure Login'}
+            {loading ? <Loader2 size={18} className="animate-spin" /> : 'Secure Login'}
             {!loading && <ArrowRight size={18} />}
           </button>
         </form>
+
+        <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
+          <button 
+            onClick={() => router.push('/sales-login')}
+            style={{ 
+              background: 'transparent', 
+              border: 'none', 
+              color: 'var(--primary-color)', 
+              fontSize: '14px', 
+              fontWeight: 600, 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              margin: '0 auto'
+            }}
+          >
+            Switch to Sales Manager Login <ArrowRight size={14} />
+          </button>
+        </div>
       </div>
     </div>
   )

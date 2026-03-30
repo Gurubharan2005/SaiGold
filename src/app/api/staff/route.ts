@@ -18,7 +18,7 @@ export async function POST(req: Request) {
     }
 
     // 2. Extract Data
-    const { name, email, password } = await req.json()
+    const { name, email, password, role } = await req.json()
 
     if (!email || !password || !name) {
       return NextResponse.json({ error: 'Name, Email and Password are required' }, { status: 400 })
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'An account with this email already exists' }, { status: 400 })
     }
 
-    // 3. Create the strictly restricted STAFF user
+    // 3. Create the user with specified role (defaulting to STAFF)
     const hashedPassword = await bcrypt.hash(password, 10)
 
     const staff = await prisma.user.create({
@@ -37,7 +37,7 @@ export async function POST(req: Request) {
         name,
         email,
         password: hashedPassword,
-        role: 'STAFF', // Locked by default
+        role: role || 'STAFF', 
       }
     })
 

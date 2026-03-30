@@ -5,8 +5,9 @@ import { formatDistanceToNow } from 'date-fns'
 
 export default function ReadOnlyLeadsTable({ leads }: { leads: any[] }) {
   return (
-    <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+    <div className="card" style={{ padding: '0' }}>
+      <div className="table-container" style={{ margin: 0 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
         <thead>
           <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
             <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Customer Name</th>
@@ -48,5 +49,6 @@ export default function ReadOnlyLeadsTable({ leads }: { leads: any[] }) {
         </tbody>
       </table>
     </div>
+  </div>
   )
 }
