@@ -70,7 +70,7 @@ export default function ClientBulkLeadsTable({
   }
 
   return (
-    <div className="card" style={{ padding: '0', overflow: 'hidden', position: 'relative' }}>
+    <div className="card" style={{ padding: '0', position: 'relative' }}>
       
       {/* Bulk Dispatch Action Bar (Managers Only) */}
       {userRole === 'MANAGER' && selectedIds.length > 0 && (
@@ -122,7 +122,8 @@ export default function ClientBulkLeadsTable({
         </button>
       </div>
 
-      <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+      <div className="table-container" style={{ margin: 0 }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
         <thead>
           <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
             <th style={{ padding: '16px', width: '40px', textAlign: 'center' }}>
@@ -189,5 +190,6 @@ export default function ClientBulkLeadsTable({
         </tbody>
       </table>
     </div>
+  </div>
   )
 }

@@ -89,6 +89,47 @@ input:focus, textarea:focus, select:focus {
   box-shadow: var(--shadow-md);
   padding: 24px;
   backdrop-filter: blur(10px);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1), border-color 0.2s;
+}
+
+.card:hover {
+  border-color: rgba(255, 193, 7, 0.3);
+  box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* Shimmer Animation for Skeletons */
+.shimmer {
+  background: linear-gradient(
+    90deg, 
+    var(--surface-color) 25%, 
+    var(--surface-hover) 50%, 
+    var(--surface-color) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite linear;
+  border-radius: var(--border-radius-sm);
+}
+
+@keyframes shimmer {
+  from { background-position: 200% 0; }
+  to { background-position: -200% 0; }
+}
+
+/* Responsive Table Container */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 24px;
+}
+
+.table-container::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+  background: var(--surface-hover);
+  border-radius: 10px;
 }
 
 .btn-primary {

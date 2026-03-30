@@ -57,7 +57,18 @@ export default async function DashboardLayout({
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-color)' }}>
       <LocationBroadcaster isStaff={session?.role === 'STAFF'} />
       {/* Sidebar Navigation */}
-      <aside style={{ width: '260px', background: 'var(--surface-color)', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column' }}>
+      <aside style={{ 
+        width: '260px', 
+        minWidth: '260px',
+        flexBasis: '260px',
+        background: 'var(--surface-color)', 
+        borderRight: '1px solid var(--border-color)', 
+        display: 'flex', 
+        flexDirection: 'column',
+        position: 'sticky',
+        top: 0,
+        height: '100vh'
+      }}>
         <div style={{ padding: '24px', borderBottom: '1px solid var(--border-color)' }}>
           <Link href="/dashboard" style={{ textDecoration: 'none', color: 'inherit' }}>
             <h2 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', margin: 0, cursor: 'pointer' }}>
@@ -111,8 +122,21 @@ export default async function DashboardLayout({
       </aside>
 
       {/* Main Content */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-        <header style={{ height: '70px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-color)/50', backdropFilter: 'blur(10px)', display: 'flex', alignItems: 'center', padding: '0 32px', justifyContent: 'space-between' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: '100vh', overflow: 'hidden' }}>
+        <header style={{ 
+          height: '70px', 
+          minHeight: '70px',
+          borderBottom: '1px solid var(--border-color)', 
+          background: 'rgba(17, 24, 39, 0.8)', 
+          backdropFilter: 'blur(12px)', 
+          display: 'flex', 
+          alignItems: 'center', 
+          padding: '0 32px', 
+          justifyContent: 'space-between',
+          position: 'sticky',
+          top: 0,
+          zIndex: 50
+        }}>
           <h3 style={{ margin: 0, fontWeight: 500, color: 'var(--text-secondary)' }}>Welcome back, {session?.name || 'User'}</h3>
           
           <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
