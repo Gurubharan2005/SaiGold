@@ -71,7 +71,7 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
              </Link>
           )}
 
-          {(session?.role === 'MANAGER' || session?.role === 'STAFF' || session?.role === 'SALESMAN') && (
+          {(session?.role === 'MANAGER' || session?.role === 'STAFF') && (
             <Link href="/dashboard/customers?tab=ongoing" onClick={onClose} style={navItemStyle('/dashboard/customers?tab=ongoing')}>
               <UserPlus size={20} /> Ongoing Customers
             </Link>

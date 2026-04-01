@@ -70,6 +70,7 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
             src={url} 
             alt={name || 'Document'} 
             onLoad={() => setLoading(false)}
+            referrerPolicy="no-referrer"
             key={url}
             style={{ maxWidth: '98%', maxHeight: '98%', objectFit: 'contain', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', borderRadius: '4px' }} 
             onError={(e) => {
@@ -83,16 +84,18 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
           <iframe 
             src={`${url}#toolbar=0&navpanes=0`} 
             onLoad={() => setLoading(false)}
+            referrerPolicy="no-referrer"
             style={{ width: '100%', height: '100%', border: 'none' }} 
             title="Document Viewer"
           />
         )}
 
-        {/* Fallback Display (Shown if neither image nor iframe works) */}
-        {!isImage && !isPdf && !loading && (
-          <div style={{ textAlign: 'center', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px', padding: '20px' }}>
-             <FileText size={48} strokeWidth={1} />
-             <p>Direct preview is restricted. Use the buttons above to download or open the file.</p>
+        {/* Fallback Display - Always visible as a backup option if iframe is blocked */}
+        {!loading && (
+          <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 100 }}>
+             <a href={url} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', border: '1px solid var(--border-color)', color: 'white', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+               <ExternalLink size={18} /> <span>Preview blocked? Open in New Tab</span>
+             </a>
           </div>
         )}
       </div>
