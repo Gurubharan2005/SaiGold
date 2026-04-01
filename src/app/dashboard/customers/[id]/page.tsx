@@ -10,6 +10,7 @@ import DueDateSelector from '@/components/DueDateSelector'
 import ProfilePhotoUploader from '@/components/ProfilePhotoUploader'
 import { EditProfileModalTrigger } from '@/components/EditProfileModalTrigger'
 import LoanDetailsEditor from '@/components/LoanDetailsEditor'
+import FinishUploadButton from '@/components/FinishUploadButton'
 import { cookies } from 'next/headers'
 
 import { decrypt } from '@/lib/auth'
@@ -65,7 +66,12 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '24px' }}>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+        gap: '24px',
+        alignItems: 'start'
+      }}>
         {/* Main Details */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
@@ -108,6 +114,11 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
               initialWeight={customer.goldWeight} 
               disabled={customer.status !== 'PROCESSING' && !isManager} 
             />
+            {customer.status === 'PROCESSING' && (
+              <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px dashed var(--border-color)' }}>
+                <FinishUploadButton customerId={customer.id} />
+              </div>
+            )}
           </div>
 
           <div className="card">
