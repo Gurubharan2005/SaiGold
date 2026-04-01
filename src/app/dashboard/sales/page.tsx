@@ -14,7 +14,7 @@ export default async function SalesVerificationDesk({
 }: { 
   searchParams: Promise<{ [key: string]: string | undefined }> 
 }) {
-  const { viewUrl, docName, docType } = await searchParams
+  const { viewUrl, docName, docType, viewAllId } = await searchParams
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
@@ -28,6 +28,9 @@ export default async function SalesVerificationDesk({
       assignedTo: { select: { name: true } }
     }
   })
+
+  // Handle Bulk View if viewAllId is present
+  const bulkCustomer = viewAllId ? customers.find(c => c.id === viewAllId) : null
 
   return (
     <div className="fade-in">
@@ -47,7 +50,51 @@ export default async function SalesVerificationDesk({
         </div>
       </div>
 
-      {viewUrl ? (
+      {bulkCustomer ? (
+         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+            <div style={{ 
+              display: 'flex', 
+              justifyContent: 'space-between', 
+              alignItems: 'center', 
+              padding: '16px', 
+              background: 'var(--surface-color)', 
+              borderRadius: '12px',
+              border: '1px solid var(--border-color)',
+              position: 'sticky',
+              top: '80px',
+              zIndex: 100,
+              boxShadow: '0 8px 32px rgba(0,0,0,0.5)'
+            }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <Link href="/dashboard/sales" className="btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}>
+                     Back to Desk
+                  </Link>
+                  <div style={{ fontWeight: 700 }}>{bulkCustomer.name}'s All Documents</div>
+               </div>
+               <div className="badge badge-waiting">{bulkCustomer.documents.length} Files</div>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+               {bulkCustomer.documents.map((doc, idx) => (
+                  <div key={doc.id} style={{ border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden' }}>
+                     <div style={{ padding: '12px 16px', background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontWeight: 600 }}>{idx + 1}. {doc.documentType}</span>
+                        <span style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{doc.documentName}</span>
+                     </div>
+                     <div style={{ height: '70vh', minHeight: '500px' }}>
+                        <DocumentViewer url={doc.documentUrl} name={doc.documentName} type={doc.documentType} />
+                     </div>
+                  </div>
+               ))}
+            </div>
+
+            <div style={{ padding: '40px 0', textAlign: 'center' }}>
+               <Link href="/dashboard/sales" className="btn-primary" style={{ padding: '12px 32px' }}>
+                  Return to Verification Desk
+               </Link>
+            </div>
+         </div>
+      ) : viewUrl ? (
         <DocumentViewer url={viewUrl} name={docName} type={docType} />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -143,9 +190,20 @@ export default async function SalesVerificationDesk({
 
                 {/* Secure Document Render Container */}
                 <div style={{ flex: '2 1 400px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                   <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                     <FileKey size={18} color="var(--primary-color)" /> Sealed Documents ({c.documents.length})
-                   </h3>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <FileKey size={18} color="var(--primary-color)" /> Sealed Documents ({c.documents.length})
+                      </h3>
+                      {c.documents.length > 0 && (
+                        <Link 
+                          href={`?viewAllId=${c.id}`} 
+                          className="btn-primary" 
+                          style={{ padding: '6px 12px', fontSize: '12px', background: 'var(--status-waiting)', border: 'none' }}
+                        >
+                          View All (In-Page)
+                        </Link>
+                      )}
+                   </div>
                    {c.documents.length === 0 ? (
                      <div style={{ padding: '24px', background: 'rgba(239, 68, 68, 0.05)', borderRadius: '8px', border: '1px dashed rgba(239, 68, 68, 0.2)', display: 'flex', gap: '12px', alignItems: 'center' }}>
                        <XCircle size={24} color="#EF4444" />
@@ -164,10 +222,10 @@ export default async function SalesVerificationDesk({
                              </div>
                              <Link 
                                href={`?viewUrl=${encodeURIComponent(doc.documentUrl)}&docName=${encodeURIComponent(doc.documentName)}&docType=${encodeURIComponent(doc.documentType)}`}
-                               className="btn-primary"
+                               className="btn-secondary"
                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', padding: '8px' }}
                              >
-                               View In-Page
+                               Inspect
                              </Link>
                           </div>
                        ))}
