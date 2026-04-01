@@ -25,8 +25,8 @@ export default async function DetailFillingPipeline() {
 
   return (
     <div className="fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '32px' }}>
+        <div style={{ flex: '1 1 300px' }}>
           <h1 style={{ fontSize: '28px', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
             <FileText size={32} color="var(--status-processing)" />
             Detail Filling Pipeline
@@ -36,7 +36,7 @@ export default async function DetailFillingPipeline() {
           </p>
         </div>
         
-        <div className="badge badge-processing" style={{ scale: '1.2' }}>
+        <div className="badge badge-processing" style={{ scale: '1.1', height: 'fit-content' }}>
            {customers.length} Actionable Leads
         </div>
       </div>
@@ -52,9 +52,17 @@ export default async function DetailFillingPipeline() {
            </div>
         ) : (
           customers.map((c: any) => (
-             <div key={c.id} className="card" style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) auto', gap: '24px', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+             <div key={c.id} className="card" style={{ 
+               display: 'flex', 
+               flexDirection: 'row', 
+               flexWrap: 'wrap', 
+               justifyContent: 'space-between', 
+               alignItems: 'center', 
+               gap: '24px',
+               padding: '20px'
+             }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px', minWidth: '240px' }}>
+                    <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                         <User size={24} color="var(--status-processing)" />
                     </div>
                     <div>
@@ -63,7 +71,7 @@ export default async function DetailFillingPipeline() {
                     </div>
                 </div>
 
-                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '24px', flexWrap: 'wrap', justifyContent: 'flex-end', flex: '1 1 auto' }}>
                    <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column', gap: '4px' }}>
                      <span style={{ fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Uploaded Docs</span>
                      <span style={{ fontWeight: 600, color: c.documents.length > 0 ? 'var(--status-accepted)' : 'var(--status-waiting)' }}>
@@ -74,6 +82,7 @@ export default async function DetailFillingPipeline() {
                    <Link 
                      href={`/dashboard/customers/${c.id}`}
                      className="btn-primary"
+                     style={{ minWidth: '180px' }}
                    >
                      Fill Details & Upload <ArrowRight size={18} />
                    </Link>
