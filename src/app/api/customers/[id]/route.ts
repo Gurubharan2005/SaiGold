@@ -12,7 +12,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     const { 
       status, assignedToId, notes, loanAmount, goldWeight, dueDate, photoUrl, 
       priority, callStatus, branch, followUpDate, followUpNotes, appendNote,
-      name, phone, interestRate, startDate, isVerified, verifiedAt, verifiedById
+      name, phone, interestRate, startDate, isVerified, verifiedAt, verifiedById,
+      lastCalledAt, markCalled
     } = body
 
     const cookieStore = await cookies()
@@ -47,6 +48,13 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (isVerified !== undefined) updateData.isVerified = isVerified
     if (verifiedAt) updateData.verifiedAt = new Date(verifiedAt)
     if (verifiedById) updateData.verifiedById = verifiedById
+    
+    // Call dismissal tracking
+    if (markCalled) {
+       updateData.lastCalledAt = new Date()
+    } else if (lastCalledAt) {
+       updateData.lastCalledAt = new Date(lastCalledAt)
+    }
     
     // Note Appendage Tracking
     if (appendNote) {

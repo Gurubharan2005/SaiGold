@@ -57,6 +57,7 @@ model Customer {
   createdBy      User?              @relation("CreatedBy", fields: [createdById], references: [id])
   verifiedBy     User?              @relation("VerifiedBy", fields: [verifiedById], references: [id])
   documents      CustomerDocument[]
+  lastCalledAt   DateTime?
 
   @@map("customer")
 }

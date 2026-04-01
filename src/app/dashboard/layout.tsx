@@ -14,7 +14,9 @@ export default async function DashboardLayout({
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
 
-  const sevenDaysFromNow = new Date()
+  const now = new Date()
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const sevenDaysFromNow = new Date(now)
   sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7)
 
   // Contextually fetch incoming constraints (Dues & Follow-Ups)
@@ -23,23 +25,30 @@ export default async function DashboardLayout({
     OR: [
       { dueDate: { lte: sevenDaysFromNow, not: null } },
       { followUpDate: { lte: sevenDaysFromNow, not: null } }
-    ]
-  }
-
-  if (session?.role !== 'MANAGER') {
-    baseWhere.AND = [
+    ],
+    // DISMISSAL: Only show if NOT CAUGHT TODAY
+    AND: [
       {
-         OR: [
-           { createdById: String(session?.id) },
-           { assignedToId: String(session?.id) }
-         ]
+        OR: [
+          { lastCalledAt: null },
+          { lastCalledAt: { lt: startOfToday } }
+        ]
       }
     ]
   }
 
+  if (session?.role !== 'MANAGER') {
+    baseWhere.AND.push({
+       OR: [
+         { createdById: String(session?.id) },
+         { assignedToId: String(session?.id) }
+       ]
+    })
+  }
+
   const rawNotifications = await prisma.customer.findMany({
     where: baseWhere,
-    select: { id: true, name: true, dueDate: true, followUpDate: true, loanAmount: true },
+    select: { id: true, name: true, phone: true, dueDate: true, followUpDate: true, loanAmount: true },
     orderBy: { createdAt: 'desc' },
     take: 15
   })
@@ -48,6 +57,7 @@ export default async function DashboardLayout({
   const notifications = rawNotifications.map((n: any) => ({
     id: n.id,
     name: n.name,
+    phone: n.phone,
     loanAmount: n.loanAmount,
     dueDate: n.dueDate ? new Date(n.dueDate).toISOString() : n.followUpDate ? new Date(n.followUpDate).toISOString() : new Date().toISOString()
   }))

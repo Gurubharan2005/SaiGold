@@ -2,21 +2,46 @@
 
 import { useState } from 'react'
 import { Bell, AlertCircle } from 'lucide-react'
-import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { formatDistanceToNow } from 'date-fns'
 
 type Notice = {
   id: string
   name: string
+  phone: string
   dueDate: string
   loanAmount: number | null
 }
 
-export default function NotificationBell({ notifications }: { notifications: Notice[] }) {
+export default function NotificationBell({ notifications: propNotifications }: { notifications: Notice[] }) {
   const [isOpen, setIsOpen] = useState(false)
+  const [dismissedIds, setDismissedIds] = useState<string[]>([])
+  const router = useRouter()
 
-  // Only consider items strictly overdue or due within exactly 7 days
+  // Optimistic filtering: Hide items that were just clicked
+  const notifications = propNotifications.filter(n => !dismissedIds.includes(n.id))
   const urgentCount = notifications.length
+
+  const handleCallAndDismiss = async (n: Notice) => {
+    // 1. Optimistically hide the item and trigger dialer
+    setDismissedIds(prev => [...prev, n.id])
+    window.location.href = `tel:${n.phone}`
+
+    // 2. Clear state if menu closes to reset or just background-dismiss
+    try {
+      await fetch(`/api/customers/${n.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ markCalled: true })
+      })
+      
+      // 3. Refresh server data (will stay hidden by prisma where clause next time)
+      router.refresh()
+    } catch (err) {
+      console.error('Failed to dismiss notification:', err)
+      // Rollback if needed, but for "calls" it's usually fine to just leave it hidden
+    }
+  }
 
   return (
     <div style={{ position: 'relative' }}>
@@ -90,10 +115,9 @@ export default function NotificationBell({ notifications }: { notifications: Not
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column' }}>
                   {notifications.map(n => (
                     <li key={n.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
-                      <Link 
-                        href={`/dashboard/customers?tab=ongoing&q=${encodeURIComponent(n.name)}`} 
-                        onClick={() => setIsOpen(false)}
-                        style={{ display: 'flex', gap: '12px', padding: '16px', textDecoration: 'none', transition: 'background 0.2s' }}
+                      <button 
+                        onClick={() => handleCallAndDismiss(n)}
+                        style={{ width: '100%', textAlign: 'left', border: 'none', background: 'transparent', display: 'flex', gap: '12px', padding: '16px', textDecoration: 'none', transition: 'background 0.2s', cursor: 'pointer' }}
                         className="hover-bg-surface-hover"
                       >
                         <AlertCircle size={18} color="var(--status-rejected)" style={{ flexShrink: 0, marginTop: '2px' }} />
@@ -102,8 +126,9 @@ export default function NotificationBell({ notifications }: { notifications: Not
                           <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
                             {n.loanAmount ? `₹${n.loanAmount.toLocaleString()}` : 'No amount'} • Due {formatDistanceToNow(new Date(n.dueDate), { addSuffix: true })}
                           </span>
+                          <span style={{ fontSize: '11px', color: 'var(--primary-color)', fontWeight: 600, marginTop: '4px' }}>Click to Call & Dismiss</span>
                         </div>
-                      </Link>
+                      </button>
                     </li>
                   ))}
                 </ul>
@@ -115,6 +140,7 @@ export default function NotificationBell({ notifications }: { notifications: Not
       
       <style dangerouslySetInnerHTML={{__html: `
         .hover-opacity:hover { opacity: 0.8; }
+        .hover-bg-surface-hover:hover { background: var(--surface-hover); }
       `}} />
     </div>
   )

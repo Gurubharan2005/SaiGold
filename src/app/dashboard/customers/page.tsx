@@ -77,8 +77,10 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
 
       <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
         {/* Simple Toolbar */}
-        <div style={{ padding: '16px', display: 'flex', gap: '16px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-color)' }}>
-          <SearchInput placeholder="Search name or phone..." />
+        <div style={{ padding: '16px', display: 'flex', gap: '16px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-color)', alignItems: 'center' }}>
+          <div style={{ flex: 1 }}>
+            <SearchInput placeholder="Search name or phone..." />
+          </div>
           
           {currentTab !== 'ongoing' && (
             <select style={{ height: '40px', padding: '0 16px', minWidth: '160px', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)', background: 'var(--surface-color)', color: 'var(--text-color)' }}>
