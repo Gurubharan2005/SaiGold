@@ -85,11 +85,11 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
 
           {session?.role === 'MANAGER' && (
             <>
+              <Link href="/dashboard/analytics" onClick={onClose} style={navItemStyle('/dashboard/analytics')}>
+                <Activity size={20} color="var(--primary-color)" /> Funnel Analytics
+              </Link>
               <Link href="/dashboard/staff-monitoring" onClick={onClose} style={navItemStyle('/dashboard/staff-monitoring')}>
                 <Activity size={20} color="var(--status-waiting)" /> Staff Activity
-              </Link>
-              <Link href="/dashboard/performance" onClick={onClose} style={navItemStyle('/dashboard/performance')}>
-                <Activity size={20} /> Performance KPI
               </Link>
               <Link href="/dashboard/documents" onClick={onClose} style={navItemStyle('/dashboard/documents')}>
                 <FileText size={20} /> Documents

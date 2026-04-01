@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
-import { Plus, Search, FileSpreadsheet, Phone, MapPin, User } from 'lucide-react'
+import { Plus, Search, FileSpreadsheet, Phone, MapPin, User, ChevronLeft, ChevronRight } from 'lucide-react'
 import Link from 'next/link'
-import { format, startOfDay, endOfDay } from 'date-fns'
+import { format } from 'date-fns'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import OngoingQuickUpdate from '@/components/OngoingQuickUpdate'
@@ -11,20 +11,27 @@ import DashRealtimeSync from '@/components/DashRealtimeSync'
 
 export const dynamic = 'force-dynamic'
 
-export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ tab?: string, q?: string }> }) {
+export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ tab?: string, q?: string, search?: string, page?: string }> }) {
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
-  const { tab, q } = await searchParams
+  const { tab, q, search, page } = await searchParams
   const currentTab = 'ongoing'
+  
+  // Backwards compatibility for the quick-search input component
+  const activeQuery = search || q || ''
+  
+  // Pagination Definitions
+  const PAGE_SIZE = 15
+  const currentPage = parseInt(page || '1', 10)
 
   // Contextual Security & Organization
   const baseWhere: any = {}
   
-  if (q) {
+  if (activeQuery) {
     baseWhere.OR = [
-      { name: { contains: q, mode: 'insensitive' } },
-      { phone: { contains: q, mode: 'insensitive' } }
+      { name: { contains: activeQuery, mode: 'insensitive' } },
+      { phone: { contains: activeQuery, mode: 'insensitive' } }
     ]
   }
 
@@ -37,10 +44,18 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
      ]
   }
 
-  const customers = await prisma.customer.findMany({
-    where: baseWhere,
-    orderBy: { createdAt: 'desc' }
-  })
+  // Fetch paginated constraints securely
+  const [totalRecords, customers] = await Promise.all([
+    prisma.customer.count({ where: baseWhere }),
+    prisma.customer.findMany({
+      where: baseWhere,
+      orderBy: { createdAt: 'desc' },
+      take: PAGE_SIZE,
+      skip: (currentPage - 1) * PAGE_SIZE,
+    })
+  ])
+
+  const totalPages = Math.max(1, Math.ceil(totalRecords / PAGE_SIZE))
 
   return (
     <div className="fade-in">
@@ -130,16 +145,6 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                   </td>
                   <td style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
                     <span className={`badge badge-${c.status.toLowerCase()}`}>{c.status}</span>
-                    {currentTab !== 'ongoing' && (
-                      <span style={{ 
-                         fontSize: '11px', fontWeight: 700, padding: '4px 8px', borderRadius: '4px',
-                         background: c.priority === 'HIGH' ? 'rgba(239, 68, 68, 0.1)' : c.priority === 'MEDIUM' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                         color: c.priority === 'HIGH' ? '#EF4444' : c.priority === 'MEDIUM' ? '#F59E0B' : '#10B981',
-                         textTransform: 'uppercase'
-                      }}>
-                        {c.priority} 
-                      </span>
-                    )}
                   </td>
                   <td style={{ padding: '16px' }}>
                     {currentTab === 'ongoing' ? (
@@ -162,7 +167,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                        <div style={{ fontWeight: 700, color: 'var(--primary-color)' }}>
                          {c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-'}
                        </div>
-                    ) : (
+                       ) : (
                        <span style={{ color: 'var(--text-secondary)' }}>{format(new Date(c.createdAt), 'MMM dd, yyyy')}</span>
                     )}
                   </td>
@@ -172,15 +177,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                          {c.notes || 'No remainder notes'}
                        </div>
                      ) : (
-                        c.responseTime === null ? (
-                          <span style={{ color: 'var(--text-secondary)' }}>N/A</span>
-                        ) : c.responseTime < 5 ? (
-                          <span style={{ color: '#10B981', fontWeight: 600 }}>{c.responseTime} min</span>
-                        ) : c.responseTime < 15 ? (
-                          <span style={{ color: '#F59E0B', fontWeight: 600 }}>{c.responseTime} min</span>
-                        ) : (
-                          <span style={{ color: '#EF4444', fontWeight: 600 }}>{c.responseTime} min</span>
-                        )
+                        <span style={{ color: 'var(--text-secondary)' }}>N/A</span>
                      )}
                   </td>
                   <td style={{ padding: '16px', textAlign: 'right' }}>
@@ -211,7 +208,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         </table>
         </div>
 
-        {/* Mobile View - Card List (Straight Format) */}
+        {/* Mobile View - Card List */}
         <div className="mobile-only" style={{ display: 'flex', flexDirection: 'column' }}>
           {customers.length === 0 ? (
             <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>No customers found.</div>
@@ -240,16 +237,6 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
                      <span className={`badge badge-${c.status.toLowerCase()}`}>{c.status}</span>
-                     {currentTab !== 'ongoing' && (
-                       <span style={{ 
-                         fontSize: '10px', fontWeight: 800, padding: '2px 6px', borderRadius: '4px',
-                         background: c.priority === 'HIGH' ? 'rgba(239, 68, 68, 0.1)' : c.priority === 'MEDIUM' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                         color: c.priority === 'HIGH' ? '#EF4444' : c.priority === 'MEDIUM' ? '#F59E0B' : '#10B981',
-                         textTransform: 'uppercase'
-                       }}>
-                         {c.priority} 
-                       </span>
-                     )}
                   </div>
                 </div>
 
@@ -307,6 +294,54 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             ))
           )}
         </div>
+
+        {/* Global Pagination Overlay */}
+        {totalPages > 1 && (
+          <div style={{ 
+            padding: '16px 24px', 
+            borderTop: '1px solid var(--border-color)', 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center',
+            background: 'var(--surface-color)',
+            flexWrap: 'wrap',
+            gap: '16px'
+          }}>
+            <span style={{ color: 'var(--text-secondary)', fontSize: '14px', fontWeight: 500 }}>
+              Showing {totalRecords === 0 ? 0 : (currentPage - 1) * PAGE_SIZE + 1} to {Math.min(currentPage * PAGE_SIZE, totalRecords)} of {totalRecords} Records
+            </span>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              {currentPage > 1 ? (
+                <Link 
+                  href={`/dashboard/customers?tab=ongoing${activeQuery ? `&search=${encodeURIComponent(activeQuery)}` : ''}&page=${currentPage - 1}`} 
+                  className="btn-secondary" 
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none' }}
+                >
+                  <ChevronLeft size={16} /> Previous
+                </Link>
+              ) : (
+                <button disabled className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', opacity: 0.5, cursor: 'not-allowed' }}>
+                  <ChevronLeft size={16} /> Previous
+                </button>
+              )}
+              
+              {currentPage < totalPages ? (
+                <Link 
+                  href={`/dashboard/customers?tab=ongoing${activeQuery ? `&search=${encodeURIComponent(activeQuery)}` : ''}&page=${currentPage + 1}`} 
+                  className="btn-primary" 
+                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none' }}
+                >
+                  Next <ChevronRight size={16} />
+                </Link>
+              ) : (
+                <button disabled className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', opacity: 0.5, cursor: 'not-allowed' }}>
+                  Next <ChevronRight size={16} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   )

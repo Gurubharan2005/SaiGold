@@ -12,6 +12,7 @@ import ProfilePhotoUploader from '@/components/ProfilePhotoUploader'
 import { EditProfileModalTrigger } from '@/components/EditProfileModalTrigger'
 import LoanDetailsEditor from '@/components/LoanDetailsEditor'
 import FinishUploadButton from '@/components/FinishUploadButton'
+import CustomerTimeline from '@/components/CustomerTimeline'
 import { cookies } from 'next/headers'
 
 import { decrypt } from '@/lib/auth'
@@ -89,16 +90,16 @@ export default async function CustomerDetailsPage({
                 </span>
               )}
               <CloseLoanButton customerId={customer.id} />
-            </div>
+             </div>
           ) : (
-            // Staff can only request closure if loan is active
-            (customer.status === 'ACCEPTED' || customer.status === 'DUE') ? (
-              <RequestClosureButton customerId={customer.id} />
-            ) : (customer.status as string) === 'CLOSE_REQUESTED' ? (
-              <span className="badge badge-rejected" style={{ padding: '10px 16px', borderRadius: '8px', fontWeight: 600 }}>
-                 Waiting for Manager Approval...
-              </span>
-            ) : null
+             // Staff can only request closure if loan is active
+             (customer.status === 'ACCEPTED' || customer.status === 'DUE') ? (
+               <RequestClosureButton customerId={customer.id} />
+             ) : (customer.status as string) === 'CLOSE_REQUESTED' ? (
+               <span className="badge badge-rejected" style={{ padding: '10px 16px', borderRadius: '8px', fontWeight: 600 }}>
+                  Waiting for Manager Approval...
+               </span>
+             ) : null
           )}
         </div>
       </div>
@@ -259,6 +260,10 @@ export default async function CustomerDetailsPage({
           
         </div>
       </div>
+
+      {/* Audit Timeline Injection */}
+      <CustomerTimeline customer={customer} />
+
     </div>
   )
 }
