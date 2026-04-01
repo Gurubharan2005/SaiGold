@@ -65,14 +65,15 @@ export default function NotificationBell({ notifications }: { notifications: Not
           />
           <div style={{ 
             position: 'absolute', 
-            top: '100%', 
+            top: 'calc(100% + 10px)', 
             right: 0, 
-            width: '320px', 
+            width: 'calc(100vw - 32px)',
+            maxWidth: '320px', 
             background: 'var(--surface-color)', 
             border: '1px solid var(--border-color)', 
-            borderRadius: 'var(--border-radius-sm)', 
-            boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
-            zIndex: 100,
+            borderRadius: '12px', 
+            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            zIndex: 10000,
             overflow: 'hidden'
           }}>
             <div style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>

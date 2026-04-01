@@ -48,21 +48,21 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <h1 style={{ fontSize: '28px', margin: 0 }}>
             {currentTab === 'ongoing' ? 'Ongoing Customers' : 'Today\'s Customers'}
           </h1>
         </div>
         
-        <div style={{ display: 'flex', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: '12px', zIndex: 10 }}>
           {session?.role === 'MANAGER' && (
             <a href="/api/export" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', textDecoration: 'none', color: 'var(--text-color)' }}>
-              <FileSpreadsheet size={18} /> Export Excel
+              <FileSpreadsheet size={18} /> Export
             </a>
           )}
           <Link href="/dashboard/customers/new" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', textDecoration: 'none' }}>
-            <Plus size={18} /> New Customer
+            <Plus size={18} /> New 
           </Link>
         </div>
       </div>
@@ -291,12 +291,12 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                    )}
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                   <a href={`tel:${c.phone}`} className="btn-secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', background: 'var(--surface-color)', border: '1px solid var(--border-color)', color: 'var(--text-color)', fontSize: '14px', borderRadius: '8px' }}>
                     <Phone size={16} /> Call
                   </a>
                   {currentTab === 'ongoing' ? (
-                     <div style={{ flex: 2 }}>
+                     <div style={{ flex: 1 }}>
                         <OngoingQuickUpdate 
                           customerId={c.id} 
                           initialAmount={c.loanAmount} 

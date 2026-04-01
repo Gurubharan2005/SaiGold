@@ -53,16 +53,21 @@ export default function OngoingQuickUpdate({
         onClick={() => setIsOpen(true)}
         className="btn-secondary"
         style={{ 
-          padding: '6px 12px', 
-          fontSize: '13px', 
+          width: '100%',
+          padding: '10px 0', 
+          fontSize: '14px', 
           background: 'var(--status-waiting)', 
           border: 'none', 
           color: 'white',
           fontWeight: 600,
-          borderRadius: '4px'
+          borderRadius: '8px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '8px'
         }}
       >
-        Set Info
+        <Calendar size={16} /> Set Info
       </button>
 
       {isOpen && (
