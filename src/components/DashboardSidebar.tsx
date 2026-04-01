@@ -85,6 +85,9 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
 
           {session?.role === 'MANAGER' && (
             <>
+              <Link href="/dashboard/staff-monitoring" onClick={onClose} style={navItemStyle('/dashboard/staff-monitoring')}>
+                <Activity size={20} color="var(--primary-color)" /> Staff Activity Monitor
+              </Link>
               <Link href="/dashboard/assignments" onClick={onClose} style={navItemStyle('/dashboard/assignments')}>
                 <Target size={20} /> Assigned Leads
               </Link>

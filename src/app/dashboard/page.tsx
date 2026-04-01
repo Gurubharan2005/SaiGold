@@ -53,16 +53,6 @@ export default async function DashboardPage() {
           </div>
 
           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '16px', borderRadius: 'var(--border-radius-md)' }}>
-              <CheckCircle size={28} color="#EF4444" />
-            </div>
-            <div>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>High Priority Processing</p>
-              <h2 style={{ margin: 0, fontSize: '28px' }}>{activeLoans}</h2>
-            </div>
-          </div>
-
-          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
             <div style={{ background: 'rgba(244, 63, 94, 0.1)', padding: '16px', borderRadius: 'var(--border-radius-md)' }}>
               <AlertCircle size={28} color="var(--status-due)" />
             </div>
