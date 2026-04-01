@@ -102,7 +102,6 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
                 </div>
                 <div style={{ color: 'var(--text-color)', fontWeight: 500, fontSize: '12px' }}>{customer.id}</div>
               </div>
-              <DueDateSelector customerId={customer.id} initialDate={customer.dueDate?.toISOString() || null} />
             </div>
           </div>
 
