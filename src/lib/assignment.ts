@@ -8,13 +8,13 @@ export async function getRoundRobinStaffId(): Promise<string | null> {
   try {
     // 1. Find all active staff members
     // Ordering by lastLeadAssignedAt nulls first, then the oldest date.
-    const candidates = await prisma.user.findMany({
+    const candidates = await (prisma.user.findMany as any)({
       where: {
         role: 'STAFF',
         isActive: true,
       },
       orderBy: [
-        { lastLeadAssignedAt: 'asc' }, // Nulls are naturally sorted first in Prisma or handled via explicit sort if needed
+        { lastLeadAssignedAt: 'asc' }, 
         { createdAt: 'asc' },
       ],
       select: {
@@ -32,7 +32,7 @@ export async function getRoundRobinStaffId(): Promise<string | null> {
     const assignee = candidates[0]
 
     // 2. Mark the timestamp to rotate the queue
-    await prisma.user.update({
+    await (prisma.user.update as any)({
       where: { id: assignee.id },
       data: { lastLeadAssignedAt: new Date() },
     })

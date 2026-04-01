@@ -192,7 +192,7 @@ export default async function DashboardPage({
             {myAssignedLeads.length === 0 ? (
               <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>You have no active leads assigned currently.</div>
             ) : (
-              myAssignedLeads.map(lead => (
+              myAssignedLeads.map((lead: any) => (
                 <div key={lead.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--border-color)' }}>
                   <div>
                     <h4 style={{ margin: 0, fontSize: '15px' }}>{lead.name}</h4>
@@ -221,7 +221,7 @@ export default async function DashboardPage({
             {followUpsToday.length === 0 ? (
               <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>You possess no required follow-ups for today.</div>
             ) : (
-              followUpsToday.map(f => (
+              followUpsToday.map((f: any) => (
                 <div key={f.id} style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(245, 158, 11, 0.05)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
                     <h4 style={{ margin: 0, fontSize: '15px', color: '#F59E0B' }}>Call: {f.name}</h4>
