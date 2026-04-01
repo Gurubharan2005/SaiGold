@@ -25,8 +25,8 @@ export default async function SalesVerificationDesk() {
 
   return (
     <div className="fade-in">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-        <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '32px' }}>
+        <div style={{ flex: '1 1 300px' }}>
           <h1 style={{ fontSize: '28px', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
             <ShieldCheck size={32} color="var(--primary-color)" />
             Sales Verification Desk
@@ -36,12 +36,12 @@ export default async function SalesVerificationDesk() {
           </p>
         </div>
         
-        <div className="badge badge-waiting" style={{ scale: '1.2' }}>
+        <div className="badge badge-waiting" style={{ scale: '1.1', height: 'fit-content' }}>
            {customers.length} Pending Verifications
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
         {customers.length === 0 ? (
            <div className="card" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
              <CheckCircle2 size={48} color="#10B981" strokeWidth={1.5} />
@@ -49,11 +49,29 @@ export default async function SalesVerificationDesk() {
            </div>
         ) : (
           customers.map((c: any) => (
-             <div key={c.id} className="card" style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '24px', position: 'relative', overflow: 'hidden' }}>
+             <div key={c.id} className="card" style={{ 
+               display: 'flex', 
+               flexDirection: 'row', 
+               flexWrap: 'wrap', 
+               gap: '24px', 
+               position: 'relative', 
+               overflow: 'hidden',
+               padding: '24px'
+             }}>
                 <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '4px', background: 'var(--status-waiting)' }} />
                 
                 {/* Customer Details Map */}
-                <div style={{ paddingLeft: '12px', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ 
+                  flex: '1 1 300px', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  gap: '16px',
+                  paddingLeft: '12px',
+                  borderRight: '1px solid var(--border-color)',
+                  // Remove border on mobile
+                  borderBottom: '1px solid var(--border-color)',
+                  paddingBottom: '24px'
+                }} className="sales-card-left">
                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                       <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                          <User size={20} color="var(--text-secondary)" />
@@ -64,7 +82,7 @@ export default async function SalesVerificationDesk() {
                       </div>
                    </div>
 
-                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', background: 'var(--surface-hover)', padding: '16px', borderRadius: '8px' }}>
+                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '12px', background: 'var(--surface-hover)', padding: '16px', borderRadius: '8px' }}>
                      <div>
                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Loan Requested</span>
                        <div style={{ fontWeight: 600, color: 'var(--primary-color)' }}>{c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-'}</div>
@@ -73,7 +91,7 @@ export default async function SalesVerificationDesk() {
                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gold Weight</span>
                        <div style={{ fontWeight: 600 }}>{c.goldWeight ? `${c.goldWeight}g` : '-'}</div>
                      </div>
-                     <div>
+                     <div style={{ gridColumn: 'span 2' }}>
                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Handled By</span>
                        <div style={{ fontWeight: 600, color: 'white' }}>{c.assignedTo?.name || 'Unknown'}</div>
                      </div>
@@ -91,7 +109,7 @@ export default async function SalesVerificationDesk() {
                 </div>
 
                 {/* Secure Document Render Container */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <div style={{ flex: '2 1 400px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
                    <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                      <FileKey size={18} color="var(--primary-color)" /> Sealed Documents ({c.documents.length})
                    </h3>
@@ -101,7 +119,7 @@ export default async function SalesVerificationDesk() {
                        <p style={{ margin: 0, fontSize: '13px', color: '#EF4444' }}>Warning: The Staff member sealed this folder without uploading any documentation.</p>
                      </div>
                    ) : (
-                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
                        {c.documents.map((doc: any) => (
                           <div key={doc.id} style={{ padding: '12px', background: 'var(--surface-hover)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
