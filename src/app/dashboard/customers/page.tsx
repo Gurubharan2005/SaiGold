@@ -93,16 +93,22 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Customer Data</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Status & Priority</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Loan Info</th>
-              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Creation Date</th>
-              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Response Time</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                {currentTab === 'ongoing' ? 'Due Date' : 'Loan Info'}
+              </th>
+              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                {currentTab === 'ongoing' ? 'Amount to be Paid' : 'Creation Date'}
+              </th>
+              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>
+                {currentTab === 'ongoing' ? 'Remainder / Notes' : 'Response Time'}
+              </th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
           <tbody>
             {customers.length === 0 ? (
               <tr>
-                 <td colSpan={5} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+                 <td colSpan={6} style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>
                   No customers found for this criteria.
                 </td>
               </tr>
@@ -140,25 +146,45 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                     </span>
                   </td>
                   <td style={{ padding: '16px' }}>
-                    <div style={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-                      {c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-'}
-                    </div>
-                    <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                      {c.goldWeight ? `${c.goldWeight}g` : 'No weight listed'}
-                    </div>
+                    {currentTab === 'ongoing' ? (
+                       <div style={{ fontWeight: 600, color: 'var(--status-rejected)' }}>
+                         {c.dueDate ? format(new Date(c.dueDate), 'MMM dd, yyyy') : 'No Date Set'}
+                       </div>
+                    ) : (
+                      <>
+                        <div style={{ fontWeight: 600, color: 'var(--primary-color)' }}>
+                          {c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-'}
+                        </div>
+                        <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+                          {c.goldWeight ? `${c.goldWeight}g` : 'No weight listed'}
+                        </div>
+                      </>
+                    )}
                   </td>
-                  <td className="hide-mobile" style={{ padding: '16px', color: 'var(--text-secondary)', fontSize: '14px' }}>
-                    {format(new Date(c.createdAt), 'MMM dd, yyyy')}
+                  <td className="hide-mobile" style={{ padding: '16px', fontSize: '14px' }}>
+                    {currentTab === 'ongoing' ? (
+                       <div style={{ fontWeight: 700, color: 'var(--primary-color)' }}>
+                         {c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-'}
+                       </div>
+                    ) : (
+                       <span style={{ color: 'var(--text-secondary)' }}>{format(new Date(c.createdAt), 'MMM dd, yyyy')}</span>
+                    )}
                   </td>
-                  <td className="hide-mobile" style={{ padding: '16px', fontWeight: 600 }}>
-                     {c.responseTime === null ? (
-                       <span style={{ color: 'var(--text-secondary)' }}>N/A</span>
-                     ) : c.responseTime < 5 ? (
-                       <span style={{ color: '#10B981' }}>{c.responseTime} min</span>
-                     ) : c.responseTime < 15 ? (
-                       <span style={{ color: '#F59E0B' }}>{c.responseTime} min</span>
+                  <td className="hide-mobile" style={{ padding: '16px', fontSize: '13px', minWidth: '150px' }}>
+                     {currentTab === 'ongoing' ? (
+                       <div style={{ color: 'var(--text-primary)', fontStyle: 'italic', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                         {c.notes || 'No remainder notes'}
+                       </div>
                      ) : (
-                       <span style={{ color: '#EF4444' }}>{c.responseTime} min</span>
+                        c.responseTime === null ? (
+                          <span style={{ color: 'var(--text-secondary)' }}>N/A</span>
+                        ) : c.responseTime < 5 ? (
+                          <span style={{ color: '#10B981', fontWeight: 600 }}>{c.responseTime} min</span>
+                        ) : c.responseTime < 15 ? (
+                          <span style={{ color: '#F59E0B', fontWeight: 600 }}>{c.responseTime} min</span>
+                        ) : (
+                          <span style={{ color: '#EF4444', fontWeight: 600 }}>{c.responseTime} min</span>
+                        )
                      )}
                   </td>
                   <td style={{ padding: '16px', textAlign: 'right' }}>
@@ -169,9 +195,11 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                       <a href={`tel:${c.phone}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-color)', fontSize: '13px', textDecoration: 'none', background: 'var(--surface-color)', padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
                         <Phone size={14} color="var(--primary-color)" /> Call
                       </a>
-                      <Link href={`/dashboard/customers/${c.id}`} style={{ color: 'var(--primary-color)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
-                        View Details →
-                      </Link>
+                      {currentTab !== 'ongoing' && (
+                        <Link href={`/dashboard/customers/${c.id}`} style={{ color: 'var(--primary-color)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
+                          View Details →
+                        </Link>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -192,11 +220,11 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                   <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                     <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--surface-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)' }}>
                       {c.photoUrl ? (
-                        <img 
-                          src={`/api/avatar?url=${encodeURIComponent(c.photoUrl)}`} 
-                          alt="Profile" 
-                          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
-                        />
+                         <img 
+                           src={`/api/avatar?url=${encodeURIComponent(c.photoUrl)}`} 
+                           alt="Profile" 
+                           style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
+                         />
                       ) : (
                         <User size={20} color="var(--text-secondary)" />
                       )}
@@ -223,22 +251,42 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', background: 'var(--surface-hover)', padding: '12px', borderRadius: '8px', gap: '12px' }}>
                    <div>
-                     <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>Loan Amount</div>
-                     <div style={{ fontWeight: 700, color: 'var(--primary-color)' }}>{c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-'}</div>
+                     <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                        {currentTab === 'ongoing' ? 'Due Date' : 'Loan Amount'}
+                     </div>
+                     <div style={{ fontWeight: 700, color: currentTab === 'ongoing' ? 'var(--status-rejected)' : 'var(--primary-color)' }}>
+                        {currentTab === 'ongoing' 
+                          ? (c.dueDate ? format(new Date(c.dueDate), 'MMM dd') : 'N/A')
+                          : (c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-')}
+                     </div>
                    </div>
                    <div>
-                     <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>Gold Weight</div>
-                     <div style={{ fontWeight: 700 }}>{c.goldWeight ? `${c.goldWeight}g` : '-'}</div>
+                     <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>
+                        {currentTab === 'ongoing' ? 'Amount Due' : 'Gold Weight'}
+                     </div>
+                     <div style={{ fontWeight: 700 }}>
+                        {currentTab === 'ongoing' 
+                          ? (c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-')
+                          : (c.goldWeight ? `${c.goldWeight}g` : '-')}
+                     </div>
                    </div>
+                   {currentTab === 'ongoing' && (
+                     <div style={{ gridColumn: 'span 2' }}>
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>Remainder</div>
+                        <div style={{ fontSize: '13px', color: 'var(--text-primary)', fontStyle: 'italic' }}>{c.notes || 'No notes'}</div>
+                     </div>
+                   )}
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px' }}>
                   <a href={`tel:${c.phone}`} className="btn-secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', background: 'var(--surface-color)', border: '1px solid var(--border-color)', color: 'var(--text-color)', fontSize: '14px', borderRadius: '8px' }}>
                     <Phone size={16} /> Call
                   </a>
-                  <Link href={`/dashboard/customers/${c.id}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
-                    View Details →
-                  </Link>
+                  {currentTab !== 'ongoing' && (
+                    <Link href={`/dashboard/customers/${c.id}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
+                      View Details →
+                    </Link>
+                  )}
                 </div>
               </div>
             ))
