@@ -6,6 +6,7 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import OngoingQuickUpdate from '@/components/OngoingQuickUpdate'
 import SearchInput from '@/components/SearchInput'
+import RequestClosureButton from '@/components/RequestClosureButton'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,7 +40,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
        baseWhere.status = 'WAITING'
     }
   } else if (currentTab === 'ongoing') {
-    baseWhere.status = { in: ['ACCEPTED', 'CLOSE_REQUESTED'] }
+    baseWhere.status = { in: ['ACCEPTED', 'DUE'] }
     if (session?.role !== 'MANAGER') {
        baseWhere.OR = [
          { createdById: String(session?.id) },
@@ -205,16 +206,16 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                         <Phone size={14} color="var(--primary-color)" /> Call
                       </a>
                       {currentTab === 'ongoing' && (
-                        <OngoingQuickUpdate 
-                          customerId={c.id} 
-                          initialAmount={c.loanAmount} 
-                          initialDate={c.dueDate} 
-                          initialNotes={c.notes}
-                        />
+                        <>
+                          <OngoingQuickUpdate 
+                            customerId={c.id} 
+                            initialAmount={c.loanAmount} 
+                            initialDate={c.dueDate} 
+                            initialNotes={c.notes}
+                          />
+                          <RequestClosureButton customerId={c.id} variant="compact" />
+                        </>
                       )}
-                      <Link href={`/dashboard/customers/${c.id}`} style={{ color: 'var(--primary-color)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
-                        View Details →
-                      </Link>
                     </div>
                   </td>
                 </tr>
@@ -300,18 +301,21 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                     <Phone size={16} /> Call
                   </a>
                   {currentTab === 'ongoing' && (
-                     <div style={{ flex: 1 }}>
+                     <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
                         <OngoingQuickUpdate 
                           customerId={c.id} 
                           initialAmount={c.loanAmount} 
                           initialDate={c.dueDate} 
                           initialNotes={c.notes}
                         />
+                        <RequestClosureButton customerId={c.id} variant="compact" />
                      </div>
                   )}
-                  <Link href={`/dashboard/customers/${c.id}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
-                    View Details →
-                  </Link>
+                  {currentTab !== 'ongoing' && (
+                    <Link href={`/dashboard/customers/${c.id}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
+                      View Details →
+                    </Link>
+                  )}
                 </div>
               </div>
             ))

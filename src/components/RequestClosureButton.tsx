@@ -1,16 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, Loader2 } from 'lucide-react'
+import { CheckCircle, Loader2, CircleDashed } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function RequestClosureButton({ customerId }: { customerId: string }) {
+export default function RequestClosureButton({ 
+  customerId, 
+  variant = 'default' 
+}: { 
+  customerId: string,
+  variant?: 'default' | 'compact'
+}) {
   const router = useRouter()
   const [isPending, setIsPending] = useState(false)
 
   const handleRequestClosure = async () => {
     const isConfirmed = window.confirm(
-      'Are you sure you want to request loan closure for this customer? This will flag the record for Manager approval.'
+      'Are you sure you want to request loan closure? This customer will move to the Manager\'s approval queue and disappear from your active list.'
     )
     if (!isConfirmed) return
 
@@ -36,6 +42,34 @@ export default function RequestClosureButton({ customerId }: { customerId: strin
     } finally {
       setIsPending(false)
     }
+  }
+
+  if (variant === 'compact') {
+    return (
+      <button 
+        onClick={handleRequestClosure} 
+        disabled={isPending}
+        title="Request Loan Closure"
+        style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          gap: '6px',
+          padding: '8px 12px',
+          background: 'rgba(239, 68, 68, 0.1)', 
+          color: '#EF4444', 
+          border: '1px solid rgba(239, 68, 68, 0.2)',
+          borderRadius: '6px',
+          cursor: isPending ? 'not-allowed' : 'pointer',
+          fontSize: '13px',
+          fontWeight: 600,
+          flex: 1
+        }}
+      >
+        {isPending ? <Loader2 size={14} className="animate-spin" /> : <CircleDashed size={14} />}
+        {isPending ? '...' : 'Close'}
+      </button>
+    )
   }
 
   return (
