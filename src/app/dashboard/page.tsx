@@ -136,7 +136,7 @@ export default async function DashboardPage({
   const myAssignedLeads = await prisma.customer.findMany({
     where: { 
       assignedToId: String(session?.id), 
-      status: { notIn: ['CLOSED', 'REJECTED', 'PROCESSING', 'VERIFIED', 'ACCEPTED'] } 
+      status: { in: ['WAITING', 'ACCEPTED', 'DUE'] as any[] } 
     },
     orderBy: { assignedAt: 'desc' },
     select: { id: true, name: true, phone: true, status: true, priority: true }
