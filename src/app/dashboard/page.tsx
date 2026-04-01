@@ -184,14 +184,14 @@ export default async function DashboardPage({
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '32px' }}>
         
         {/* ASSIGNED LEADS */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="card" style={{ padding: 0, overflow: 'visible', borderRadius: '12px' }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
             <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Target size={18} color="var(--primary-color)" /> My Active Assignments
             </h3>
             <span className="badge badge-waiting">{myAssignedLeads.length} Total</span>
           </div>
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          <div style={{ maxHeight: '400px', overflowY: 'auto', paddingBottom: '80px' }}>
             {myAssignedLeads.length === 0 ? (
               <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>You have no active leads assigned currently.</div>
             ) : (
@@ -213,14 +213,14 @@ export default async function DashboardPage({
 
 
         {/* TODAY'S FOLLOW UPS */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div className="card" style={{ padding: 0, overflow: 'visible', borderRadius: '12px' }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
             <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Clock size={18} color="#F59E0B" /> Follow-Ups Today
             </h3>
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>{format(todayStart, 'MMM dd')}</span>
           </div>
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+          <div style={{ maxHeight: '400px', overflowY: 'auto', paddingBottom: '80px' }}>
             {followUpsToday.length === 0 ? (
               <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>You possess no required follow-ups for today.</div>
             ) : (

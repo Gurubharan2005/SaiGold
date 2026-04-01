@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Phone, Check, X, Loader2, Clock, MessageCircle } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Phone, Check, X, Loader2, Clock, MessageCircle, MoreVertical } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
 interface QuickStatusActionsProps {
@@ -12,9 +12,22 @@ interface QuickStatusActionsProps {
 export default function QuickStatusActions({ customerId, phone }: QuickStatusActionsProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
+  const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false)
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
+  }, [])
 
   const handleStatusUpdate = async (status: 'PROCESSING' | 'REJECTED' | 'FOLLOW_UP') => {
     setLoading(status)
+    setIsMenuOpen(false)
     try {
       const payload: any = { 
         status,
@@ -42,7 +55,7 @@ export default function QuickStatusActions({ customerId, phone }: QuickStatusAct
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }} ref={menuRef}>
       {/* WhatsApp Button */}
       <a 
         href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`} 
@@ -86,65 +99,71 @@ export default function QuickStatusActions({ customerId, phone }: QuickStatusAct
         <Phone size={18} />
       </a>
 
-      {/* Follow Up Button */}
+      {/* Action Menu Toggle Button */}
       <button
-        onClick={() => handleStatusUpdate('FOLLOW_UP')}
-        disabled={!!loading}
-        style={{ 
+        onClick={() => setIsMenuOpen(!isMenuOpen)}
+        style={{
           padding: '8px', 
           borderRadius: '8px', 
-          background: 'rgba(245, 158, 11, 0.1)', 
-          color: '#F59E0B',
-          border: '1px solid rgba(245, 158, 11, 0.2)',
+          background: 'var(--surface-color)', 
+          color: 'var(--text-primary)',
+          border: '1px solid var(--border-color)',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center'
         }}
-        title="Mark for Follow Up"
+        title="More Actions"
       >
-        {loading === 'FOLLOW_UP' ? <Loader2 size={18} className="animate-spin" /> : <Clock size={18} />}
+        <MoreVertical size={18} />
       </button>
 
-      {/* Accept Button */}
-      <button
-        onClick={() => handleStatusUpdate('PROCESSING')}
-        disabled={!!loading}
-        style={{ 
-          padding: '8px', 
-          borderRadius: '8px', 
-          background: 'rgba(59, 130, 246, 0.1)', 
-          color: '#3B82F6',
-          border: '1px solid rgba(59, 130, 246, 0.2)',
-          cursor: 'pointer',
+      {/* Dropdown Menu */}
+      {isMenuOpen && (
+        <div className="fade-in" style={{
+          position: 'absolute',
+          top: '100%',
+          right: '0',
+          marginTop: '8px',
+          background: 'var(--bg-color)',
+          border: '1px solid var(--border-color)',
+          borderRadius: '8px',
+          boxShadow: 'var(--shadow-lg)',
+          padding: '8px',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-        title="Accept Lead"
-      >
-        {loading === 'PROCESSING' ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
-      </button>
-
-      {/* Reject Button */}
-      <button
-        onClick={() => handleStatusUpdate('REJECTED')}
-        disabled={!!loading}
-        style={{ 
-          padding: '8px', 
-          borderRadius: '8px', 
-          background: 'rgba(239, 68, 68, 0.1)', 
-          color: '#EF4444',
-          border: '1px solid rgba(239, 68, 68, 0.2)',
-          cursor: 'pointer',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center'
-        }}
-        title="Reject Lead"
-      >
-        {loading === 'REJECTED' ? <Loader2 size={18} className="animate-spin" /> : <X size={18} />}
-      </button>
+          flexDirection: 'column',
+          gap: '8px',
+          zIndex: 50,
+          minWidth: '140px'
+        }}>
+           <button 
+             onClick={() => handleStatusUpdate('FOLLOW_UP')} 
+             disabled={!!loading} 
+             style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', width: '100%', borderRadius: '4px', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.1)', cursor: 'pointer' }}
+           >
+              {loading === 'FOLLOW_UP' ? <Loader2 size={16} className="animate-spin" /> : <Clock size={16} />} 
+              <span style={{ fontSize: '13px', fontWeight: 600 }}>Follow Up</span>
+           </button>
+           
+           <button 
+             onClick={() => handleStatusUpdate('PROCESSING')} 
+             disabled={!!loading} 
+             style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', width: '100%', borderRadius: '4px', color: '#3B82F6', background: 'rgba(59, 130, 246, 0.1)', cursor: 'pointer' }}
+           >
+              {loading === 'PROCESSING' ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} 
+              <span style={{ fontSize: '13px', fontWeight: 600 }}>Accept</span>
+           </button>
+           
+           <button 
+             onClick={() => handleStatusUpdate('REJECTED')} 
+             disabled={!!loading} 
+             style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', width: '100%', borderRadius: '4px', color: '#EF4444', background: 'rgba(239, 68, 68, 0.1)', cursor: 'pointer' }}
+           >
+              {loading === 'REJECTED' ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />} 
+              <span style={{ fontSize: '13px', fontWeight: 600 }}>Reject</span>
+           </button>
+        </div>
+      )}
     </div>
   )
 }
