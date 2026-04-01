@@ -97,9 +97,6 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
               <Link href="/dashboard/leads" onClick={onClose} style={navItemStyle('/dashboard/leads')}>
                 <Users size={20} /> Meta Leads
               </Link>
-              <Link href="/dashboard/assign-leads" onClick={onClose} style={navItemStyle('/dashboard/assign-leads')}>
-                <Target size={20} /> Assign Leads
-              </Link>
               <Link href="/dashboard/documents" onClick={onClose} style={navItemStyle('/dashboard/documents')}>
                 <FileText size={20} /> Documents
               </Link>
