@@ -99,14 +99,6 @@ export default async function DashboardPage() {
     select: { id: true, name: true, phone: true, status: true, priority: true }
   })
 
-  const detailFillingLeads = await prisma.customer.findMany({
-    where: {
-      assignedToId: String(session?.id),
-      status: 'PROCESSING'
-    },
-    orderBy: { updatedAt: 'desc' },
-    select: { id: true, name: true, phone: true, priority: true }
-  })
 
   const followUpsToday = await prisma.customer.findMany({
     where: {
@@ -173,34 +165,6 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        {/* DETAIL FILLING PIPELINE */}
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FileText size={18} color="#3B82F6" /> Detail Filling Pipeline
-            </h3>
-            <span className="badge badge-accepted">{detailFillingLeads.length} Actionable</span>
-          </div>
-          <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
-            {detailFillingLeads.length === 0 ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>No leads currently require detail filling. Accept a lead to start.</div>
-            ) : (
-              detailFillingLeads.map(lead => (
-                <div key={lead.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(59, 130, 246, 0.05)' }}>
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: '15px' }}>{lead.name}</h4>
-                    <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><Phone size={12}/> {lead.phone}</p>
-                  </div>
-                  <div>
-                      <Link href={`/dashboard/customers/${lead.id}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 12px', background: 'var(--surface-hover)', borderRadius: '8px', color: 'var(--text-color)', textDecoration: 'none', fontSize: '13px', fontWeight: 600, border: '1px solid var(--border-color)' }}>
-                        Fill Details & Upload
-                      </Link>
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
 
         {/* TODAY'S FOLLOW UPS */}
         <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
