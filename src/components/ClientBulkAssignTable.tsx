@@ -98,10 +98,7 @@ export default function ClientBulkAssignTable({
         </div>
       )}
 
-      {/* Standard Header */}
-      <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-color)' }}>
-        <h2 style={{ fontSize: '18px', margin: 0 }}>Recent Global Acquisitions</h2>
-      </div>
+   {/* Dynamic Action Bar */}
 
       <div className="table-container">
         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '900px' }}>
