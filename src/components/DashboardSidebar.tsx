@@ -71,6 +71,12 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
             </Link>
           )}
 
+          {session?.role === 'MANAGER' && (
+            <Link href="/dashboard/leads" onClick={onClose} style={navItemStyle('/dashboard/leads')}>
+              <Activity size={20} color="var(--status-waiting)" /> Meta Leads
+            </Link>
+          )}
+
           {(session?.role === 'MANAGER' || session?.role === 'STAFF') && (
              <Link href="/dashboard/detail-filling" onClick={onClose} style={navItemStyle('/dashboard/detail-filling')}>
                <FileText size={20} color="var(--status-processing)" /> Detail Filling
