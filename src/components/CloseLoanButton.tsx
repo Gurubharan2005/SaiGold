@@ -4,7 +4,13 @@ import { useState } from 'react'
 import { Trash2, AlertTriangle, Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function CloseLoanButton({ customerId }: { customerId: string }) {
+export default function CloseLoanButton({ 
+  customerId, 
+  isSalesman 
+}: { 
+  customerId: string,
+  isSalesman?: boolean 
+}) {
   const router = useRouter()
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -34,26 +40,48 @@ export default function CloseLoanButton({ customerId }: { customerId: string }) 
     }
   }
 
+  if (!isSalesman) {
+    return (
+      <div style={{ 
+        padding: '12px', 
+        background: 'rgba(245, 158, 11, 0.1)', 
+        border: '1px solid rgba(245, 158, 11, 0.2)', 
+        borderRadius: '8px', 
+        color: '#F59E0B', 
+        fontSize: '13px',
+        fontWeight: 600,
+        display: 'flex',
+        alignItems: 'center',
+        gap: '8px'
+      }}>
+        <AlertTriangle size={16} /> Pending Authorized Approval (Salesman only)
+      </div>
+    )
+  }
+
   return (
     <button 
       onClick={handleCloseLoan} 
       disabled={isDeleting}
       className="btn-primary"
       style={{ 
+        width: '100%',
         display: 'flex', 
         alignItems: 'center', 
+        justifyContent: 'center',
         gap: '8px', 
-        padding: '10px 16px', 
+        padding: '12px 16px', 
         background: 'var(--status-rejected)', 
         color: '#fff', 
         border: 'none',
         cursor: isDeleting ? 'not-allowed' : 'pointer',
-        opacity: isDeleting ? 0.7 : 1
+        opacity: isDeleting ? 0.7 : 1,
+        borderRadius: '8px'
       }}
       title="Permanently Close & Erase"
     >
       {isDeleting ? <Loader2 size={18} className="animate-spin" /> : <Trash2 size={18} />}
-      {isDeleting ? 'Erasing Cloud...' : 'Close Loan & Purge Data'}
+      {isDeleting ? 'Erasing Data...' : 'Final Approve: Purge & Close Loan'}
     </button>
   )
 }

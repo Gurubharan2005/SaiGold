@@ -110,11 +110,20 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
     if (customer.documents && customer.documents.length > 0) {
        const deletePromises = customer.documents.map((doc: any) => del(doc.documentUrl))
        await Promise.allSettled(deletePromises)
+       
+       // Also delete document records from DB but keep the Customer record
+       await prisma.customerDocument.deleteMany({
+         where: { customerId: id }
+       })
     }
 
-    // 3. Drop the customer context mapping from PostgreSQL dynamically cascading deletion to the Document tables automatically
-    await prisma.customer.delete({
-      where: { id }
+    // 3. Mark the customer as CLOSED instead of full deletion
+    await prisma.customer.update({
+      where: { id },
+      data: { 
+        status: 'CLOSED',
+        isVerified: true // Ensure it's marked as verified/archived
+      }
     })
 
     return NextResponse.json({ success: true }, { status: 200 })

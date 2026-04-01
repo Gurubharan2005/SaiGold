@@ -24,11 +24,17 @@ export default async function SalesVerificationDesk({
   const session = token ? await decrypt(token) : null
 
   // Data Fetching based on Tab
+  const statusFilter = currentTab === 'history' 
+    ? 'CLOSED' 
+    : currentTab === 'closures' 
+      ? 'CLOSE_REQUESTED' 
+      : 'VERIFIED'
+
   const customers = await prisma.customer.findMany({
     where: { 
-      status: (currentTab === 'closures' ? 'CLOSE_REQUESTED' : 'VERIFIED') as any
+      status: statusFilter as any
     },
-    orderBy: { updatedAt: 'asc' },
+    orderBy: { updatedAt: 'desc' }, // Latest activity first
     include: {
       documents: true,
       assignedTo: { select: { name: true } }
@@ -48,26 +54,35 @@ export default async function SalesVerificationDesk({
             Verification & Approval Desk
           </h1>
           <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
-            {currentTab === 'closures' 
-              ? 'Review and finalize loan closure requests from staff.' 
-              : 'Review sealed compliance documents to verify customers.'}
+            {currentTab === 'history'
+              ? 'Auditing closed loans and archived customer metrics.'
+              : currentTab === 'closures' 
+                ? 'Review and finalize authorized loan closure requests.' 
+                : 'Review sealed compliance documents to verify customers.'}
           </p>
         </div>
         
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '8px', background: 'rgba(255,255,255,0.03)', padding: '4px', borderRadius: '12px' }}>
            <Link 
              href="?tab=verifications" 
              className={`badge ${currentTab === 'verifications' ? 'badge-waiting' : ''}`}
-             style={{ textDecoration: 'none', padding: '10px 16px', cursor: 'pointer', border: currentTab === 'verifications' ? 'none' : '1px solid var(--border-color)', background: currentTab === 'verifications' ? '' : 'transparent', color: currentTab === 'verifications' ? '' : 'var(--text-secondary)' }}
+             style={{ textDecoration: 'none', padding: '10px 16px', cursor: 'pointer', border: currentTab === 'verifications' ? 'none' : '1px solid var(--border-color)', background: currentTab === 'verifications' ? '#3B82F6' : 'transparent', color: currentTab === 'verifications' ? '#FFF' : 'var(--text-secondary)' }}
            >
               Verifications ({currentTab === 'verifications' ? customers.length : '...'})
            </Link>
            <Link 
              href="?tab=closures" 
              className={`badge ${currentTab === 'closures' ? 'badge-rejected' : ''}`}
-             style={{ textDecoration: 'none', padding: '10px 16px', cursor: 'pointer', border: currentTab === 'closures' ? 'none' : '1px solid var(--border-color)', background: currentTab === 'closures' ? '' : 'transparent', color: currentTab === 'closures' ? '' : 'var(--text-secondary)' }}
+             style={{ textDecoration: 'none', padding: '10px 16px', cursor: 'pointer', border: currentTab === 'closures' ? 'none' : '1px solid var(--border-color)', background: currentTab === 'closures' ? '#EF4444' : 'transparent', color: currentTab === 'closures' ? '#FFF' : 'var(--text-secondary)' }}
            >
-              Closure Requests ({currentTab === 'closures' ? customers.length : '...'})
+              Approvals ({currentTab === 'closures' ? customers.length : '...'})
+           </Link>
+           <Link 
+             href="?tab=history" 
+             className={`badge ${currentTab === 'history' ? 'badge-accepted' : ''}`}
+             style={{ textDecoration: 'none', padding: '10px 16px', cursor: 'pointer', border: currentTab === 'history' ? 'none' : '1px solid var(--border-color)', background: currentTab === 'history' ? '#10B981' : 'transparent', color: currentTab === 'history' ? '#FFF' : 'var(--text-secondary)' }}
+           >
+              History ({currentTab === 'history' ? customers.length : '...'})
            </Link>
         </div>
       </div>
@@ -185,14 +200,23 @@ export default async function SalesVerificationDesk({
                      </div>
                    </div>
 
-                   {currentTab === 'closures' ? (
+                   {currentTab === 'history' ? (
+                     <div style={{ marginTop: 'auto', paddingTop: '16px' }}>
+                        <div style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', padding: '12px', borderRadius: '8px', fontSize: '13px', border: '1px solid rgba(16, 185, 129, 0.2)', textAlign: 'center', fontWeight: 600 }}>
+                           LOAN CLOSED: This record is archived.
+                        </div>
+                     </div>
+                   ) : currentTab === 'closures' ? (
                      <div style={{ marginTop: 'auto', paddingTop: '16px' }}>
                         <div style={{ background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', padding: '12px', borderRadius: '8px', fontSize: '13px', marginBottom: '16px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                           <strong>CLOSURE REQUESTED:</strong> Staff has flagged this loan for permanent closure and data purge.
+                           <strong>CLOSURE REQUESTED:</strong> Staff has flagged this loan for permanent closure.
                         </div>
                         <div style={{ display: 'flex', gap: '8px' }}>
                           <div style={{ flex: 1 }}>
-                            <CloseLoanButton customerId={c.id} />
+                            <CloseLoanButton 
+                              customerId={c.id} 
+                              isSalesman={session?.role === 'SALESMAN'} 
+                            />
                           </div>
                         </div>
                      </div>
@@ -201,7 +225,7 @@ export default async function SalesVerificationDesk({
                    )}
                    
                    <Link 
-                     href={`/dashboard/customers/${c.id}`}
+                     href={`/dashboard/customers/${c.id}?from=ongoing`}
                      style={{ display: 'block', textAlign: 'center', fontSize: '13px', color: 'var(--text-secondary)', textDecoration: 'none', marginTop: '8px' }}
                      className="hover-opacity"
                    >
