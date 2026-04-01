@@ -16,6 +16,7 @@ model User {
   role              Role               @default(STAFF)
   isActive          Boolean            @default(true)
   lat               Float?
+  lng               Float?
   locationUpdatedAt DateTime?
   lastLeadAssignedAt DateTime?
   assignedCustomers  Customer[]         @relation("AssignedTo")
