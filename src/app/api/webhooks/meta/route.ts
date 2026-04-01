@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { getRoundRobinStaffId } from '@/lib/assignment'
 
 // GET handler to verify the webhook from Meta Graph API Settings
 export async function GET(req: Request) {
@@ -78,7 +79,10 @@ export async function POST(req: Request) {
               continue
             }
 
-            // Safely push into PostgreSQL
+            // 4. Fair Round-Robin Lead Distribution
+            const autoAssigneeId = await getRoundRobinStaffId()
+
+            // 5. Safely push into PostgreSQL
             await prisma.customer.create({
               data: {
                 name: leadName,
@@ -86,8 +90,10 @@ export async function POST(req: Request) {
                 goldWeight: parsedGold > 0 ? parsedGold : null,
                 loanAmount: parsedAmount > 0 ? parsedAmount : null,
                 branch: location,
-                status: 'WAITING',
-                notes: `Source: Native Facebook Graph (${leadgenId})`,
+                status: autoAssigneeId ? 'ACCEPTED' : 'WAITING',
+                assignedToId: autoAssigneeId,
+                assignedAt: autoAssigneeId ? new Date() : null,
+                notes: `Source: Native Facebook Graph (${leadgenId})${!autoAssigneeId ? ' (Awaiting Manual Assignment)' : ''}`,
               }
             })
 

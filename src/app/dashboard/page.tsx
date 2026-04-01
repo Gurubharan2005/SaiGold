@@ -1,8 +1,7 @@
 import { prisma } from '@/lib/prisma'
-import { CheckCircle, AlertCircle, Clock, FileText, UserPlus, Target, Navigation, ArrowRight, Phone } from 'lucide-react'
+import { CheckCircle, AlertCircle, Clock, FileText, UserPlus, ArrowRight, Phone, Target } from 'lucide-react'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import ClientBulkAssignTable from '@/components/ClientBulkAssignTable'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import QuickStatusActions from '@/components/QuickStatusActions'
@@ -29,22 +28,6 @@ export default async function DashboardPage({
   if (session?.role === 'MANAGER') {
     const pendingLeads = await prisma.customer.count({ where: { status: 'WAITING' } })
     const dueCustomers = await prisma.customer.count({ where: { status: 'DUE' } })
-
-    const activeStaffList = await prisma.user.findMany({
-      where: { role: 'STAFF', isActive: true },
-      select: { id: true, name: true }
-    })
-
-    const awaitingAssignment = await prisma.customer.findMany({
-      where: { status: 'WAITING' },
-      orderBy: { createdAt: 'desc' },
-      select: {
-        id: true, name: true, phone: true, status: true, loanAmount: true,
-        createdById: true, createdAt: true,
-        assignedTo: { select: { id: true, name: true } }
-      },
-      take: 20 
-    })
 
     // Fetch Operations Desk Data
     const statusFilter = currentTab === 'history' 
@@ -84,7 +67,7 @@ export default async function DashboardPage({
               <Clock size={28} color="var(--status-waiting)" />
             </div>
             <div>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>Pending System Leads</p>
+              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>Awaiting Initial Connect</p>
               <h2 style={{ margin: 0, fontSize: '28px' }}>{pendingLeads}</h2>
             </div>
           </div>
@@ -103,7 +86,7 @@ export default async function DashboardPage({
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px' }}>
            <div className="card" style={{ padding: '24px' }}>
               <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                 <Target size={18} color="var(--primary-color)" /> Live Active Operations
+                 <Target size={18} color="var(--primary-color)" /> Live Team Pulse
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                  {activeOperations.length === 0 ? (
@@ -123,7 +106,7 @@ export default async function DashboardPage({
                  )}
               </div>
               <Link href="/dashboard/staff-monitoring" style={{ display: 'block', marginTop: '16px', textAlign: 'center', fontSize: '12px', color: 'var(--primary-color)', textDecoration: 'none' }}>
-                 View Full Branch Activity Monitor →
+                 View Full Operational Monitor →
               </Link>
            </div>
         </div>
@@ -138,18 +121,6 @@ export default async function DashboardPage({
           viewAllId={viewAllId}
           baseUrl="/dashboard"
         />
-
-        <div style={{ marginTop: '48px' }}>
-          <h2 style={{ fontSize: '20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <Navigation size={22} color="var(--primary-color)" />
-            Leads Awaiting Assignment
-          </h2>
-          <ClientBulkAssignTable 
-            customers={awaitingAssignment} 
-            activeStaffList={activeStaffList} 
-            userRole={'MANAGER'} 
-          />
-        </div>
       </div>
     )
   }
