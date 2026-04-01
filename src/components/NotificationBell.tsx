@@ -90,20 +90,22 @@ export default function NotificationBell({ notifications: propNotifications }: {
           />
           <div style={{ 
             position: 'absolute', 
-            top: 'calc(100% + 10px)', 
-            right: 0, 
-            width: 'calc(100vw - 32px)',
-            maxWidth: '320px', 
+            top: 'calc(100% + 12px)', 
+            right: '-10px', 
+            width: '280px',
+            maxWidth: 'calc(100vw - 32px)', 
             background: 'var(--surface-color)', 
             border: '1px solid var(--border-color)', 
-            borderRadius: '12px', 
-            boxShadow: '0 20px 40px rgba(0,0,0,0.5)',
+            borderRadius: '16px', 
+            boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
             zIndex: 10000,
             overflow: 'hidden'
           }}>
             <div style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 600 }}>Active Due Dates</h4>
-               <span className="badge badge-rejected">{urgentCount} Pending</span>
+               <span className={`badge ${urgentCount > 0 ? 'badge-rejected' : ''}`} style={{ background: urgentCount > 0 ? 'var(--status-rejected)' : 'rgba(255,255,255,0.05)', color: urgentCount > 0 ? '#fff' : 'var(--text-secondary)' }}>
+                 {urgentCount} Pending
+               </span>
             </div>
             
             <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
