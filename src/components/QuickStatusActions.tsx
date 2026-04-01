@@ -13,7 +13,7 @@ export default function QuickStatusActions({ customerId, phone }: QuickStatusAct
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
 
-  const handleStatusUpdate = async (status: 'ACCEPTED' | 'REJECTED') => {
+  const handleStatusUpdate = async (status: 'PROCESSING' | 'REJECTED') => {
     setLoading(status)
     try {
       const res = await fetch(`/api/customers/${customerId}`, {
@@ -58,7 +58,7 @@ export default function QuickStatusActions({ customerId, phone }: QuickStatusAct
 
       {/* Accept Button */}
       <button
-        onClick={() => handleStatusUpdate('ACCEPTED')}
+        onClick={() => handleStatusUpdate('PROCESSING')}
         disabled={!!loading}
         style={{ 
           padding: '8px', 
@@ -73,7 +73,7 @@ export default function QuickStatusActions({ customerId, phone }: QuickStatusAct
         }}
         title="Accept Lead"
       >
-        {loading === 'ACCEPTED' ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
+        {loading === 'PROCESSING' ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
       </button>
 
       {/* Reject Button */}

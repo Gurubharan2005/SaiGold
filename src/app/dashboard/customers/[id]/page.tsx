@@ -60,7 +60,7 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
         </div>
         
         <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-          {(isManager || customer.status === 'ACCEPTED') && <EditProfileModalTrigger customer={customer} />}
+          {(isManager || customer.status === 'PROCESSING') && <EditProfileModalTrigger customer={customer} />}
           <CloseLoanButton customerId={customer.id} />
         </div>
       </div>
@@ -146,12 +146,12 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
              phone={customer.phone}
           />
 
-          {!isManager && customer.status !== 'ACCEPTED' && (
+          {!isManager && customer.status !== 'PROCESSING' && (
             <div className="card" style={{ border: '1px dashed #F59E0B', background: 'rgba(245, 158, 11, 0.05)', textAlign: 'center' }}>
               <Lock size={20} color="#F59E0B" style={{ margin: '0 auto 12px auto' }} />
               <p style={{ fontSize: '13px', color: '#F59E0B', margin: 0, fontWeight: 600 }}>
                 Detailed data entry is locked. <br />
-                Please mark this lead as "ACCEPTED" to enable full profile editing.
+                Please ensure this lead is in the "Detail Filling Option" (Processing) to enable profile editing and uploads.
               </p>
             </div>
           )}
@@ -159,7 +159,7 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
           <div className="card">
             <h3 style={{ fontSize: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>
               Compliance Documents
-              {customer.status === 'ACCEPTED' && (
+              {customer.status === 'PROCESSING' && (
                 <span className="badge badge-accepted">{customer.documents.length} Files</span>
               )}
             </h3>
@@ -167,30 +167,30 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
             {/* Document Rendering Matrix */}
             
             {/* Case 1: Staff looking at a Sealed Customer (Docs are hidden for them) */}
-            {!isManager && !isSalesman && customer.status !== 'ACCEPTED' && customer.documents.length > 0 && (
+            {!isManager && !isSalesman && customer.status !== 'PROCESSING' && customer.status !== 'ACCEPTED' && customer.documents.length > 0 && (
               <div style={{ padding: '24px 16px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ background: '#10B981', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto' }}>
                   <Check size={24} color="#FFF" />
                 </div>
                 <h4 style={{ margin: '0 0 4px 0', color: '#10B981', fontSize: '16px' }}>Documents Sealed</h4>
                 <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
-                  Verification is pending. You no longer have view/edit access to this compliance folder.
+                  Verification is pending or complete. You no longer have view/edit access to this compliance folder.
                 </p>
               </div>
             )}
 
             {/* Case 2: Anyone looking at a Locked Customer with NO Documents */}
-            {customer.status !== 'ACCEPTED' && customer.documents.length === 0 && (
+            {customer.status !== 'PROCESSING' && customer.status !== 'ACCEPTED' && customer.status !== 'VERIFIED' && customer.documents.length === 0 && (
               <div style={{ padding: '24px 16px', background: 'var(--surface-hover)', borderRadius: '8px', textAlign: 'center', border: '1px dashed var(--border-color)' }}>
                 <Lock size={24} color="var(--text-secondary)" style={{ margin: '0 auto 8px auto' }} />
                 <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                  This folder is currently <strong>locked</strong>. Documents can only be uploaded to <strong>ACCEPTED</strong> leads.
+                  This folder is currently <strong>locked</strong>. Documents can only be uploaded during the <strong>Detail Filling</strong> state.
                 </p>
               </div>
             )}
 
-            {/* Document List Rendering (Always visible for Manager/Salesman, Only on ACCEPTED for Staff) */}
-            {(isManager || isSalesman || (!isManager && !isSalesman && customer.status === 'ACCEPTED')) && customer.documents.length > 0 && (
+            {/* Document List Rendering (Always visible for Manager/Salesman, Only on PROCESSING or ACCEPTED for Staff) */}
+            {(isManager || isSalesman || (!isManager && !isSalesman && (customer.status === 'PROCESSING' || customer.status === 'ACCEPTED'))) && customer.documents.length > 0 && (
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {customer.documents.map((doc: any) => (
                   <li key={doc.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '10px', background: 'var(--surface-hover)', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
@@ -200,7 +200,8 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
                           <a href={doc.documentUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)' }} title="Download">
                             <Download size={14} />
                           </a>
-                          <DeleteDocumentButton documentId={doc.id} />
+                          {/* Disable delete if not in PROCESSING */}
+                          {customer.status === 'PROCESSING' && <DeleteDocumentButton documentId={doc.id} />}
                        </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', marginTop: '4px' }}>
@@ -214,8 +215,8 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
               </ul>
             )}
 
-            {/* The Document Uploader Tool (only when ACCEPTED) */}
-            {customer.status === 'ACCEPTED' && (
+            {/* The Document Uploader Tool (only when PROCESSING) */}
+            {customer.status === 'PROCESSING' && (
               <>
                 <DocumentUploader customerId={customer.id} />
                 {!isManager && <FinishUploadButton customerId={customer.id} />}

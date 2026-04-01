@@ -14,7 +14,7 @@ export default function FinishUploadButton({ customerId }: { customerId: string 
       await fetch(`/api/customers/${customerId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'PROCESSING' }), // Moves status out of ACCEPTED, naturally locking the folders for Staff
+        body: JSON.stringify({ status: 'VERIFIED' }), // Sends to salesman, locking it for staff
       })
       router.refresh()
     } catch (error) {
@@ -43,7 +43,7 @@ export default function FinishUploadButton({ customerId }: { customerId: string 
         color: '#1a1f2c'
       }}
     >
-      <Lock size={18} /> {isLocking ? 'Sealing Folder...' : 'Finish & Seal Documents'}
+      <Lock size={18} /> {isLocking ? 'Sending...' : 'Complete & Send to Salesman'}
     </button>
   )
 }

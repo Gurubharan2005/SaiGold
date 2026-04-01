@@ -13,9 +13,9 @@ export default async function SalesVerificationDesk() {
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
 
-  // The Sales Verification Desk strictly pulls 'PROCESSING' customers (i.e. staff has uploaded documents and sealed them)
+  // The Sales Verification Desk strictly pulls 'VERIFIED' customers (i.e. staff has uploaded documents and pushed them to sales)
   const customers = await prisma.customer.findMany({
-    where: { status: 'PROCESSING' },
+    where: { status: 'VERIFIED' },
     orderBy: { updatedAt: 'asc' }, // Oldest first for FIFO verification
     include: {
       documents: true,

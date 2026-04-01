@@ -12,15 +12,14 @@ export default function SalesVerifyActions({ customerId, salesmanId }: { custome
     setLoading(action)
     try {
       const payload: any = {}
-      
       if (action === 'VERIFY') {
-        payload.status = 'VERIFIED'
+        payload.status = 'ACCEPTED' // Approving moves it to 'Ongoing' queue
         payload.isVerified = true
         payload.verifiedById = salesmanId
         payload.verifiedAt = new Date().toISOString()
       } else {
-         // Send back to Staff by resetting the status out of the processing queue
-        payload.status = 'ACCEPTED'
+         // Send back to Staff Detail Filling pipeline by resetting status to processing
+        payload.status = 'PROCESSING'
       }
 
       const res = await fetch(`/api/customers/${customerId}`, {
