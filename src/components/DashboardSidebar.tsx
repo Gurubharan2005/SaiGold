@@ -59,9 +59,15 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
             <LayoutDashboard size={20} color={isActive('/dashboard') ? 'var(--primary-color)' : 'currentColor'} /> Dashboard
           </Link>
 
+          {(session?.role === 'MANAGER' || session?.role === 'SALESMAN') && (
+            <Link href="/dashboard/sales" onClick={onClose} style={navItemStyle('/dashboard/sales')}>
+              <Target size={20} color="var(--status-accepted)" /> Sales Module
+            </Link>
+          )}
+
           {(session?.role === 'MANAGER' || session?.role === 'STAFF') && (
-            <Link href="/dashboard/customers?tab=today" onClick={onClose} style={navItemStyle('/dashboard/customers?tab=today')}>
-              <Users size={20} /> Today Customers
+            <Link href="/dashboard/customers?tab=ongoing" onClick={onClose} style={navItemStyle('/dashboard/customers?tab=ongoing')}>
+              <Users size={20} color="var(--primary-color)" /> Ongoing Customers
             </Link>
           )}
 
@@ -71,31 +77,13 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
              </Link>
           )}
 
-          {(session?.role === 'MANAGER' || session?.role === 'STAFF') && (
-            <Link href="/dashboard/customers?tab=ongoing" onClick={onClose} style={navItemStyle('/dashboard/customers?tab=ongoing')}>
-              <UserPlus size={20} /> Ongoing Customers
-            </Link>
-          )}
-
-          {(session?.role === 'MANAGER' || session?.role === 'SALESMAN') && (
-            <Link href="/dashboard/sales" onClick={onClose} style={navItemStyle('/dashboard/sales')}>
-              <Target size={20} color="var(--status-accepted)" /> Sales Module
-            </Link>
-          )}
-
           {session?.role === 'MANAGER' && (
             <>
               <Link href="/dashboard/staff-monitoring" onClick={onClose} style={navItemStyle('/dashboard/staff-monitoring')}>
-                <Activity size={20} color="var(--primary-color)" /> Staff Activity Monitor
-              </Link>
-              <Link href="/dashboard/assignments" onClick={onClose} style={navItemStyle('/dashboard/assignments')}>
-                <Target size={20} /> Assigned Leads
+                <Activity size={20} color="var(--status-waiting)" /> Staff Activity
               </Link>
               <Link href="/dashboard/performance" onClick={onClose} style={navItemStyle('/dashboard/performance')}>
                 <Activity size={20} /> Performance KPI
-              </Link>
-              <Link href="/dashboard/leads" onClick={onClose} style={navItemStyle('/dashboard/leads')}>
-                <Users size={20} /> Meta Leads
               </Link>
               <Link href="/dashboard/documents" onClick={onClose} style={navItemStyle('/dashboard/documents')}>
                 <FileText size={20} /> Documents
