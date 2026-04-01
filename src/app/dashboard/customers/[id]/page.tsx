@@ -7,9 +7,9 @@ import DocumentUploader from '@/components/DocumentUploader'
 import DeleteDocumentButton from '@/components/DeleteDocumentButton'
 import CloseLoanButton from '@/components/CloseLoanButton'
 import DueDateSelector from '@/components/DueDateSelector'
-import FinishUploadButton from '@/components/FinishUploadButton'
 import ProfilePhotoUploader from '@/components/ProfilePhotoUploader'
 import { EditProfileModalTrigger } from '@/components/EditProfileModalTrigger'
+import LoanDetailsEditor from '@/components/LoanDetailsEditor'
 import { cookies } from 'next/headers'
 
 import { decrypt } from '@/lib/auth'
@@ -102,20 +102,12 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
 
           <div className="card">
             <h2 style={{ fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '16px' }}>Loan & Gold Details</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', color: 'var(--text-secondary)' }}>
-              <div>
-                <span style={{ display: 'block', marginBottom: '4px' }}>Requested Loan Amount</span>
-                <span style={{ color: 'var(--primary-color)', fontWeight: 600, fontSize: '20px' }}>
-                  {customer.loanAmount ? `₹${customer.loanAmount.toLocaleString()}` : '-'}
-                </span>
-              </div>
-              <div>
-                <span style={{ display: 'block', marginBottom: '4px' }}>Estimated Gold Weight</span>
-                <span style={{ color: 'var(--text-color)', fontWeight: 600, fontSize: '20px' }}>
-                  {customer.goldWeight ? `${customer.goldWeight} grams` : '-'}
-                </span>
-              </div>
-            </div>
+            <LoanDetailsEditor 
+              customerId={customer.id} 
+              initialAmount={customer.loanAmount} 
+              initialWeight={customer.goldWeight} 
+              disabled={customer.status !== 'PROCESSING' && !isManager} 
+            />
           </div>
 
           <div className="card">
@@ -130,12 +122,7 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
         {/* Sidebar Actions */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
-          <div className="card">
-            <h3 style={{ fontSize: '16px', marginBottom: '16px' }}>Workflow Stage</h3>
-            <CustomerStatusSelect customerId={customer.id} currentStatus={customer.status} />
-          </div>
-
-          {/* New Sales Action Engine */}
+          {/* New Sales Action Engine (Simplified to Notes only) */}
           <CustomerSalesControl
              customerId={customer.id}
              priority={customer.priority}
@@ -144,6 +131,8 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
              followUpDate={customer.followUpDate?.toISOString() || null}
              followUpNotes={customer.followUpNotes}
              phone={customer.phone}
+             hideLeadAttributes={true}
+             hideFollowUp={true}
           />
 
           {!isManager && customer.status !== 'PROCESSING' && (
@@ -217,10 +206,7 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
 
             {/* The Document Uploader Tool (only when PROCESSING) */}
             {customer.status === 'PROCESSING' && (
-              <>
                 <DocumentUploader customerId={customer.id} />
-                {!isManager && <FinishUploadButton customerId={customer.id} />}
-              </>
             )}
             
           </div>
