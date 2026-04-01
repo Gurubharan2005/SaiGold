@@ -30,13 +30,14 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
 
   if (currentTab === 'today') {
     if (session?.role === 'MANAGER') {
-       // Managers see global leads created today
+       // Managers see global leads created today that are still WAITING
        baseWhere.createdAt = {
          gte: startOfDay(new Date()),
          lte: endOfDay(new Date())
        }
+       baseWhere.status = 'WAITING'
     } else {
-       // Staff specifically see inbound leads assigned to them by manager (WAITING)
+       // Staff specifically see inbound leads assigned to them (WAITING)
        baseWhere.assignedToId = String(session?.id)
        baseWhere.status = 'WAITING'
     }
