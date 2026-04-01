@@ -4,6 +4,15 @@ import "./globals.css";
 export const metadata: Metadata = {
   title: "Sai Gold Loans CRM",
   description: "Secure Gold Loan Management System",
+  icons: {
+    icon: [
+      { url: '/icon.png' },
+      { url: '/favicon.png' },
+    ],
+    apple: [
+      { url: '/apple-icon.png' },
+    ],
+  },
 };
 
 export const viewport: Viewport = {
