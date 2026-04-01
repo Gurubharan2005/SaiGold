@@ -6,17 +6,28 @@ import { useState } from 'react'
 
 export default function DocumentViewer({ url, name, type }: { url: string, name?: string, type?: string }) {
   const [loading, setLoading] = useState(true)
-  const isImage = url.match(/\.(jpeg|jpg|gif|png|webp)/i) || type?.toLowerCase().includes('photo') || type?.toLowerCase().includes('image')
-  const isPdf = url.match(/\.pdf/i) || type?.toLowerCase().includes('pdf')
+  const [error, setError] = useState(false)
+
+  // 1. Sanitize the URL for safe rendering in src attributes
+  // First decode any double-encoding, then use encodeURI for characters like spaces
+  const sanitizedUrl = encodeURI(decodeURIComponent(url))
+
+  // 2. Refined detection that handles URLs with query params/hashes correctly
+  const isImage = sanitizedUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?|#|$)/i) || 
+                  type?.toLowerCase().includes('photo') || 
+                  type?.toLowerCase().includes('image')
+
+  const isPdf = sanitizedUrl.match(/\.pdf(\?|#|$)/i) || 
+                type?.toLowerCase().includes('pdf')
 
   return (
-    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', minHeight: '85vh', maxHeight: '90vh' }}>
+    <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }}>
       {/* Viewer Header - Responsive Reflow */}
       <div style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        padding: '12px 16px', 
+        padding: '10px 16px', 
         background: 'var(--surface-color)', 
         borderBottom: '1px solid var(--border-color)',
         borderRadius: '12px 12px 0 0',
@@ -38,10 +49,10 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
         </div>
 
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flex: '1 1 auto' }}>
-           <a href={url} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ padding: '8px', borderRadius: '8px' }} title="Open Original">
+           <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ padding: '8px', borderRadius: '8px' }} title="Open Original">
              <ExternalLink size={18} />
            </a>
-           <a href={url} download={name || 'document'} className="btn-primary" style={{ padding: '8px 16px', fontSize: '13px', gap: '8px' }}>
+           <a href={sanitizedUrl} download={name || 'document'} className="btn-primary" style={{ padding: '8px 16px', fontSize: '13px', gap: '8px' }}>
              <Download size={16} /> <span>Download</span>
            </a>
         </div>
@@ -50,51 +61,58 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
       {/* Main Viewer Area - Flexible Responsive Container */}
       <div style={{ 
         flex: 1, 
-        background: '#090e1a', 
+        background: '#04070d', 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'center', 
         overflow: 'hidden',
         borderRadius: '0 0 12px 12px',
         position: 'relative',
-        minHeight: '500px'
+        height: 'calc(100vh - 200px)',
       }}>
-        {loading && (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: '#000' }}>
+        {loading && !error && (
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: '#04070d' }}>
             <RefreshCw className="animate-spin" size={32} color="var(--primary-color)" />
           </div>
         )}
 
-        {isImage ? (
+        {error ? (
+           <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '24px' }}>
+              <FileText size={48} strokeWidth={1} style={{ marginBottom: '16px', opacity: 0.5 }} />
+              <p style={{ margin: '0 0 16px 0' }}>Security block or invalid format.</p>
+              <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">
+                Open in New Tab
+              </a>
+           </div>
+        ) : isImage ? (
           <img 
-            src={url} 
+            src={sanitizedUrl} 
             alt={name || 'Document'} 
             onLoad={() => setLoading(false)}
             referrerPolicy="no-referrer"
-            key={url}
-            style={{ maxWidth: '98%', maxHeight: '98%', objectFit: 'contain', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', borderRadius: '4px' }} 
-            onError={(e) => {
+            key={sanitizedUrl}
+            style={{ maxWidth: '98%', maxHeight: '98%', objectFit: 'contain', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', borderRadius: '4px' }} 
+            onError={() => {
               setLoading(false);
-              const target = e.target as HTMLImageElement;
-              target.onerror = null;
-              target.style.display = 'none';
+              setError(true);
             }}
           />
         ) : (
           <iframe 
-            src={`${url}#toolbar=0&navpanes=0`} 
+            src={`${sanitizedUrl}#toolbar=0&navpanes=0`} 
             onLoad={() => setLoading(false)}
             referrerPolicy="no-referrer"
             style={{ width: '100%', height: '100%', border: 'none' }} 
             title="Document Viewer"
+            key={sanitizedUrl}
           />
         )}
 
-        {/* Fallback Display - Always visible as a backup option if iframe is blocked */}
-        {!loading && (
-          <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', zIndex: 100 }}>
-             <a href={url} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(10px)', border: '1px solid var(--border-color)', color: 'white', padding: '10px 20px', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
-               <ExternalLink size={18} /> <span>Preview blocked? Open in New Tab</span>
+        {/* Fallback Display - Visual Cue for mobile users */}
+        {!loading && !error && (
+          <div style={{ position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', zIndex: 100, width: '90%', maxWidth: '300px' }}>
+             <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '8px 16px', borderRadius: '24px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
+               <ExternalLink size={14} /> Full Screen Preview
              </a>
           </div>
         )}
