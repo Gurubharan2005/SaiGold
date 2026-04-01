@@ -30,10 +30,19 @@ export async function POST(request: Request): Promise<NextResponse> {
     return NextResponse.json({ error: 'File body is missing' }, { status: 400 })
   }
 
-  // Security Verification: Is the customer ACCEPTED?
+  // Security Verification: Document uploads are permitted during 'PROCESSING' (Detail Filling) and subsequent stages.
   const customer = await prisma.customer.findUnique({ where: { id: customerId } })
-  if (!customer || customer.status !== 'ACCEPTED') {
-    return NextResponse.json({ error: 'Documents can only be uploaded to explicitly ACCEPTED customers.' }, { status: 403 })
+  const isManager = session.role === 'MANAGER'
+  
+  if (!customer) {
+    return NextResponse.json({ error: 'Customer not found' }, { status: 404 })
+  }
+
+  const allowedStatuses = ['PROCESSING', 'ACCEPTED', 'VERIFIED', 'DUE']
+  if (!isManager && !allowedStatuses.includes(customer.status)) {
+    return NextResponse.json({ 
+      error: `Documents can only be uploaded during the Detail Filling (PROCESSING) stage or for Active Customers.` 
+    }, { status: 403 })
   }
 
   try {
