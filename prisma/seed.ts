@@ -8,20 +8,23 @@ async function main() {
 
   const manager = await prisma.user.upsert({
     where: { email: 'admin@saigoldloans.com' },
-    update: {
-      password: hashedPassword,
-      name: 'Admin Manager',
-      role: 'MANAGER'
-    },
-    create: {
-      email: 'admin@saigoldloans.com',
-      name: 'Admin Manager',
-      password: hashedPassword,
-      role: 'MANAGER',
-    },
+    update: { password: hashedPassword, name: 'Admin Manager', role: 'MANAGER' },
+    create: { email: 'admin@saigoldloans.com', name: 'Admin Manager', password: hashedPassword, role: 'MANAGER' },
   })
 
-  console.log({ manager })
+  const staff = await prisma.user.upsert({
+    where: { email: 'staff@saigoldloans.com' },
+    update: { password: hashedPassword, name: 'Demo Staff', role: 'STAFF' },
+    create: { email: 'staff@saigoldloans.com', name: 'Demo Staff', password: hashedPassword, role: 'STAFF' },
+  })
+
+  const sales = await prisma.user.upsert({
+    where: { email: 'sales@saigoldloans.com' },
+    update: { password: hashedPassword, name: 'Sales Executive', role: 'SALESMAN' },
+    create: { email: 'sales@saigoldloans.com', name: 'Sales Executive', password: hashedPassword, role: 'SALESMAN' },
+  })
+
+  console.log({ manager: manager.email, staff: staff.email, sales: sales.email })
 }
 
 main()

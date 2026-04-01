@@ -35,6 +35,8 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
   const isManager = session?.role === 'MANAGER'
+  const isSalesman = session?.role === 'SALESMAN'
+  const canViewDocs = isManager || isSalesman || (customer.status === 'ACCEPTED')
 
   return (
     <div className="fade-in max-w-4xl">
@@ -154,31 +156,31 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
 
             {/* Document Rendering Matrix */}
             
-            {/* Case 1: Staff looking at a Locked Customer with Documents */}
-            {!isManager && customer.status !== 'ACCEPTED' && customer.documents.length > 0 && (
+            {/* Case 1: Staff looking at a Sealed Customer (Docs are hidden for them) */}
+            {!isManager && !isSalesman && customer.status !== 'ACCEPTED' && customer.documents.length > 0 && (
               <div style={{ padding: '24px 16px', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px', textAlign: 'center' }}>
                 <div style={{ background: '#10B981', width: '40px', height: '40px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px auto' }}>
                   <Check size={24} color="#FFF" />
                 </div>
-                <h4 style={{ margin: '0 0 4px 0', color: '#10B981', fontSize: '16px' }}>Documents Uploaded Successfully</h4>
+                <h4 style={{ margin: '0 0 4px 0', color: '#10B981', fontSize: '16px' }}>Documents Sealed</h4>
                 <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5, fontWeight: 500 }}>
-                  Files are secured and hidden. Awaiting final manual verification from the Sales Manager.
+                  Verification is pending. You no longer have view/edit access to this compliance folder.
                 </p>
               </div>
             )}
 
-            {/* Case 2: Staff looking at a Locked Customer with NO Documents (or Manager seeing locked) */}
-            {(isManager || (!isManager && customer.documents.length === 0)) && customer.status !== 'ACCEPTED' && (
+            {/* Case 2: Anyone looking at a Locked Customer with NO Documents */}
+            {customer.status !== 'ACCEPTED' && customer.documents.length === 0 && (
               <div style={{ padding: '24px 16px', background: 'var(--surface-hover)', borderRadius: '8px', textAlign: 'center', border: '1px dashed var(--border-color)' }}>
                 <Lock size={24} color="var(--text-secondary)" style={{ margin: '0 auto 8px auto' }} />
                 <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0, lineHeight: 1.5 }}>
-                  New documents can strictly only be uploaded to <strong>ACCEPTED</strong> profiles. Change the status to unlock the uploader.
+                  This folder is currently <strong>locked</strong>. Documents can only be uploaded to <strong>ACCEPTED</strong> leads.
                 </p>
               </div>
             )}
 
-            {/* Rendering the actual visible documents (Always for Manager, Only on ACCEPTED for Staff) */}
-            {(isManager || (!isManager && customer.status === 'ACCEPTED')) && customer.documents.length > 0 && (
+            {/* Document List Rendering (Always visible for Manager/Salesman, Only on ACCEPTED for Staff) */}
+            {(isManager || isSalesman || (!isManager && !isSalesman && customer.status === 'ACCEPTED')) && customer.documents.length > 0 && (
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 {customer.documents.map((doc: any) => (
                   <li key={doc.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '10px', background: 'var(--surface-hover)', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>

@@ -214,6 +214,70 @@ h1, h2, h3, h4, h5, h6 {
   background: #334155;
   border-radius: 4px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: #475569;
+/* Responsive Utilities */
+.mobile-show {
+  display: none !important;
+}
+
+/* Sidebar Layout System */
+.sidebar {
+  width: 260px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  background: var(--surface-color);
+  border-right: 1px solid var(--border-color);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.1, 1);
+}
+
+.sidebar-spacer {
+  width: 260px;
+  min-width: 260px;
+  flex-shrink: 0;
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 1024px) {
+  .mobile-show {
+    display: flex !important;
+  }
+  
+  .mobile-hide {
+    display: none !important;
+  }
+
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+    box-shadow: 20px 0 60px rgba(0, 0, 0, 0.8);
+  }
+
+  .sidebar-spacer {
+    display: none !important;
+  }
+
+  .main-content-mobile {
+    padding: 16px !important;
+  }
+
+  .header-mobile {
+    padding: 0 16px !important;
+  }
+}
+
+/* Overlay */
+.sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  z-index: 999;
+  animation: fadeIn 0.2s ease-out;
 }

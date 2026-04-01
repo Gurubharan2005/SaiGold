@@ -80,6 +80,14 @@ export default async function SalesVerificationDesk() {
                    </div>
 
                    <SalesVerifyActions customerId={c.id} salesmanId={String(session?.id)} />
+                   
+                   <Link 
+                     href={`/dashboard/customers/${c.id}`}
+                     style={{ display: 'block', textAlign: 'center', fontSize: '13px', color: 'var(--text-secondary)', textDecoration: 'none', marginTop: '8px' }}
+                     className="hover-opacity"
+                   >
+                     View Comprehensive Customer Profile
+                   </Link>
                 </div>
 
                 {/* Secure Document Render Container */}
