@@ -16,7 +16,7 @@ export default function FinishUploadButton({ customerId }: { customerId: string 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'VERIFIED' }), // Sends to salesman, locking it for staff
       })
-      router.refresh()
+      router.push('/dashboard')
     } catch (error) {
       console.error('Failed to seal documents:', error)
       alert("Failed to seal document folder")
