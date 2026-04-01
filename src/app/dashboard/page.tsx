@@ -146,8 +146,11 @@ export default async function DashboardPage({
   const followUpsToday = await prisma.customer.findMany({
     where: {
       assignedToId: String(session?.id),
-      followUpDate: { gte: todayStart, lte: todayEnd },
-      status: { notIn: ['CLOSED', 'REJECTED'] }
+      status: { notIn: ['CLOSED', 'REJECTED', 'PROCESSING', 'VERIFIED'] },
+      OR: [
+        { followUpDate: { gte: todayStart, lte: todayEnd } },
+        { status: 'FOLLOW_UP' }
+      ]
     },
     select: { id: true, name: true, followUpDate: true, followUpNotes: true, phone: true, priority: true }
   })
@@ -223,14 +226,21 @@ export default async function DashboardPage({
             ) : (
               followUpsToday.map((f: any) => (
                 <div key={f.id} style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(245, 158, 11, 0.05)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                    <h4 style={{ margin: 0, fontSize: '15px', color: '#F59E0B' }}>Call: {f.name}</h4>
-                    <Link href={`/dashboard/customers/${f.id}`} style={{ padding: '4px 8px', background: 'var(--surface-color)', borderRadius: '4px', textDecoration: 'none', border: '1px solid var(--border-color)', color: 'var(--text-color)' }}>
-                      <ArrowRight size={14} />
-                    </Link>
-                  </div>
-                  <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                    <Phone size={12}/> {f.phone}
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '12px' }}>
+                    <div>
+                      <h4 style={{ margin: 0, fontSize: '15px', color: '#F59E0B' }}>Follow Up: {f.name}</h4>
+                      <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Phone size={12}/> {f.phone}
+                      </div>
+                    </div>
+                    <div>
+                      <QuickStatusActions customerId={f.id} phone={f.phone} />
+                      <div style={{ marginTop: '8px', textAlign: 'right' }}>
+                         <Link href={`/dashboard/customers/${f.id}`} style={{ fontSize: '11px', color: 'var(--text-secondary)', textDecoration: 'none' }}>
+                           View Details &rarr;
+                         </Link>
+                      </div>
+                    </div>
                   </div>
                   {f.followUpNotes && (
                     <div style={{ fontSize: '13px', color: 'var(--text-color)', background: 'var(--surface-color)', padding: '8px', borderRadius: '4px', borderLeft: '2px solid #F59E0B' }}>
