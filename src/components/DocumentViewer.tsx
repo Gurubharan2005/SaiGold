@@ -58,13 +58,19 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
           <img 
             src={url} 
             alt={name || 'Document'} 
-            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} 
+            key={url}
+            style={{ maxWidth: '95%', maxHeight: '95%', objectFit: 'contain', boxShadow: '0 20px 50px rgba(0,0,0,0.5)', borderRadius: '8px' }} 
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.onerror = null;
+              target.src = 'https://via.placeholder.com/800x600?text=Error+Loading+Image';
+            }}
           />
         ) : isPdf ? (
-          <iframe 
-            src={`${url}#toolbar=0`} 
+          <embed 
+            src={`${url}#toolbar=0&navpanes=0`} 
+            type="application/pdf"
             style={{ width: '100%', height: '100%', border: 'none' }} 
-            title="PDF Viewer"
           />
         ) : (
           <div style={{ textAlign: 'center', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>

@@ -49,7 +49,7 @@ export async function POST(request: Request): Promise<NextResponse> {
     // 1. Upload to Vercel Blob into a Virtual Folder path natively conforming to Private Store configurations
     const securePath = `customers/${customerId}/${Date.now()}-${filename.replace(/[^a-zA-Z0-9.-]/g, '_')}`
     const blob = await put(securePath, request.body, {
-      access: 'private',
+      access: 'public',
     })
 
     // 2. Save metadata to Prisma CustomerDocument
