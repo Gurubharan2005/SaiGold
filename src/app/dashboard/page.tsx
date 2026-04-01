@@ -7,9 +7,18 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import QuickStatusActions from '@/components/QuickStatusActions'
 
+import ManagerOpsDesk from '@/components/ManagerOpsDesk'
+
 export const dynamic = 'force-dynamic';
 
-export default async function DashboardPage() {
+export default async function DashboardPage({ 
+  searchParams 
+}: { 
+  searchParams: Promise<{ [key: string]: string | undefined }> 
+}) {
+  const { tab, viewUrl, docName, docType, viewAllId } = await searchParams
+  const currentTab = tab || 'verifications'
+
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
@@ -19,7 +28,6 @@ export default async function DashboardPage() {
   // ----------------------------------------------------
   if (session?.role === 'MANAGER') {
     const pendingLeads = await prisma.customer.count({ where: { status: 'WAITING' } })
-    const activeLoans = await prisma.customer.count({ where: { status: 'PROCESSING', priority: 'HIGH' } })
     const dueCustomers = await prisma.customer.count({ where: { status: 'DUE' } })
 
     const activeStaffList = await prisma.user.findMany({
@@ -34,12 +42,28 @@ export default async function DashboardPage() {
         createdById: true, createdAt: true,
         assignedTo: { select: { id: true, name: true } }
       },
-      take: 50
+      take: 20 // Reduced for dashboard density
     })
+
+    // Fetch Operations Desk Data
+    const statusFilter = currentTab === 'history' 
+      ? 'CLOSED' 
+      : currentTab === 'closures' 
+        ? 'CLOSE_REQUESTED' 
+        : 'VERIFIED'
+
+    const opsCustomers = await prisma.customer.findMany({
+      where: { status: statusFilter as any },
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        documents: true,
+        assignedTo: { select: { name: true } }
+      }
+    }) as any[]
 
     return (
       <div className="fade-in">
-        <h1 style={{ fontSize: '28px', marginBottom: '24px' }}>Overview</h1>
+        <h1 style={{ fontSize: '28px', marginBottom: '24px' }}>Branch Overview</h1>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '32px' }}>
           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -62,12 +86,29 @@ export default async function DashboardPage() {
             </div>
           </div>
         </div>
-        
-        <ClientBulkAssignTable 
-          customers={recentCustomers} 
-          activeStaffList={activeStaffList} 
-          userRole={'MANAGER'} 
+
+        <ManagerOpsDesk 
+          currentTab={currentTab}
+          customers={opsCustomers}
+          session={session}
+          viewUrl={viewUrl}
+          docName={docName}
+          docType={docType}
+          viewAllId={viewAllId}
+          baseUrl="/dashboard"
         />
+
+        <div style={{ marginTop: '48px' }}>
+          <h2 style={{ fontSize: '20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Navigation size={22} color="var(--primary-color)" />
+            Manual Lead Assignment
+          </h2>
+          <ClientBulkAssignTable 
+            customers={recentCustomers} 
+            activeStaffList={activeStaffList} 
+            userRole={'MANAGER'} 
+          />
+        </div>
       </div>
     )
   }
