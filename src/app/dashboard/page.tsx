@@ -131,18 +131,6 @@ export default async function DashboardPage() {
              </div>
            </div>
          </Link>
-
-         <Link href="/dashboard/customers?tab=ongoing" style={{ textDecoration: 'none' }}>
-           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', background: 'var(--surface-color)', border: '1px solid var(--border-color)', transition: 'all 0.2s' }}>
-             <div style={{ background: 'rgba(59, 130, 246, 0.1)', padding: '16px', borderRadius: '50%' }}>
-               <Navigation size={24} color="#3B82F6" />
-             </div>
-             <div>
-               <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--text-color)' }}>Ongoing Pipelines</h3>
-               <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>Jump directly back into operations</p>
-             </div>
-           </div>
-         </Link>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '32px' }}>

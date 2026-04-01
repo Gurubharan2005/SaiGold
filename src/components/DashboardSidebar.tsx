@@ -60,14 +60,15 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
           </Link>
 
           {(session?.role === 'MANAGER' || session?.role === 'STAFF') && (
-            <>
-              <Link href="/dashboard/customers?tab=today" onClick={onClose} style={navItemStyle('/dashboard/customers')}>
-                <Users size={20} /> Today Customers
-              </Link>
-              <Link href="/dashboard/customers?tab=ongoing" onClick={onClose} style={navItemStyle('/dashboard/customers')}>
-                <UserPlus size={20} /> Ongoing Customers
-              </Link>
-            </>
+            <Link href="/dashboard/customers?tab=today" onClick={onClose} style={navItemStyle('/dashboard/customers')}>
+              <Users size={20} /> Today Customers
+            </Link>
+          )}
+
+          {session?.role === 'MANAGER' && (
+            <Link href="/dashboard/customers?tab=ongoing" onClick={onClose} style={navItemStyle('/dashboard/customers')}>
+              <UserPlus size={20} /> Ongoing Customers
+            </Link>
           )}
 
           {(session?.role === 'MANAGER' || session?.role === 'SALESMAN') && (
