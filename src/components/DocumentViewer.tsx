@@ -49,12 +49,7 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
         </div>
 
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', flex: '1 1 auto' }}>
-           <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ padding: '8px', borderRadius: '8px' }} title="Open Original">
-             <ExternalLink size={18} />
-           </a>
-           <a href={sanitizedUrl} download={name || 'document'} className="btn-primary" style={{ padding: '8px 16px', fontSize: '13px', gap: '8px' }}>
-             <Download size={16} /> <span>Download</span>
-           </a>
+           {/* Restricted: External Link and Download removed as per user request */}
         </div>
       </div>
 
@@ -79,10 +74,7 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
         {error ? (
            <div style={{ textAlign: 'center', color: 'var(--text-secondary)', padding: '24px' }}>
               <FileText size={48} strokeWidth={1} style={{ marginBottom: '16px', opacity: 0.5 }} />
-              <p style={{ margin: '0 0 16px 0' }}>Security block or invalid format.</p>
-              <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer" className="btn-primary">
-                Open in New Tab
-              </a>
+              <p style={{ margin: '0' }}>Preview restricted or invalid format.</p>
            </div>
         ) : isImage ? (
           <img 
@@ -106,15 +98,6 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
             title="Document Viewer"
             key={sanitizedUrl}
           />
-        )}
-
-        {/* Fallback Display - Visual Cue for mobile users */}
-        {!loading && !error && (
-          <div style={{ position: 'absolute', bottom: '16px', left: '50%', transform: 'translateX(-50%)', zIndex: 100, width: '90%', maxWidth: '300px' }}>
-             <a href={sanitizedUrl} target="_blank" rel="noopener noreferrer" className="btn-secondary" style={{ background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(8px)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', padding: '8px 16px', borderRadius: '24px', fontSize: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 8px 24px rgba(0,0,0,0.5)' }}>
-               <ExternalLink size={14} /> Full Screen Preview
-             </a>
-          </div>
         )}
       </div>
     </div>
