@@ -42,7 +42,7 @@ export default async function StaffMonitoringPage() {
 
   return (
     <div className="fade-in">
-      <DashRealtimeSync intervalMs={10000} />
+      <DashRealtimeSync intervalMs={5000} />
       
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '28px', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
@@ -62,7 +62,8 @@ export default async function StaffMonitoringPage() {
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
             {staffMembers.map((staff) => {
-              const isOnline = staff.locationUpdatedAt && (Date.now() - new Date(staff.locationUpdatedAt).getTime() < 10 * 60 * 1000)
+              // Now strictly checks if staff pinged within the last 2 minutes for high-accuracy liveness
+              const isOnline = staff.locationUpdatedAt && (Date.now() - new Date(staff.locationUpdatedAt).getTime() < 2 * 60 * 1000)
               
               return (
                 <div key={staff.id} className="card" style={{ padding: '0', overflow: 'hidden' }}>

@@ -10,9 +10,9 @@ export default function LocationBroadcaster({ isStaff }: { isStaff: boolean }) {
     let lastSentTime = 0
 
     const sendLocation = async (position: GeolocationPosition) => {
-      // Throttle location updates to once every 30 seconds to prevent Edge API spam
+      // Throttle location updates to once every 10 seconds to improve liveness accuracy
       const now = Date.now()
-      if (now - lastSentTime < 30000) return
+      if (now - lastSentTime < 10000) return
       
       try {
         lastSentTime = now
@@ -33,8 +33,8 @@ export default function LocationBroadcaster({ isStaff }: { isStaff: boolean }) {
       navigator.geolocation.getCurrentPosition(sendLocation)
       watchId = navigator.geolocation.watchPosition(sendLocation, undefined, {
         enableHighAccuracy: true,
-        maximumAge: 60000,
-        timeout: 27000
+        maximumAge: 5000,
+        timeout: 9000
       })
     }
 
