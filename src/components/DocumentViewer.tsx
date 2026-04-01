@@ -9,8 +9,8 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
   const [error, setError] = useState(false)
 
   // 1. Sanitize the URL for safe rendering in src attributes
-  // First decode any double-encoding, then use encodeURI for characters like spaces
-  const sanitizedUrl = encodeURI(decodeURIComponent(url))
+  // Aggressively encode characters that often break mobile browser requests (spaces and parentheses)
+  const sanitizedUrl = url.replace(/ /g, '%20').replace(/\(/g, '%28').replace(/\)/g, '%29')
 
   // 2. Refined detection that handles URLs with query params/hashes correctly
   const isImage = sanitizedUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?|#|$)/i) || 
@@ -63,7 +63,7 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
         overflow: 'hidden',
         borderRadius: '0 0 12px 12px',
         position: 'relative',
-        height: 'calc(100vh - 200px)',
+        height: 'calc(100vh - 160px)',
       }}>
         {loading && !error && (
           <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10, background: '#04070d' }}>
@@ -81,9 +81,8 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
             src={sanitizedUrl} 
             alt={name || 'Document'} 
             onLoad={() => setLoading(false)}
-            referrerPolicy="no-referrer"
             key={sanitizedUrl}
-            style={{ maxWidth: '98%', maxHeight: '98%', objectFit: 'contain', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', borderRadius: '4px' }} 
+            style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain', boxShadow: '0 10px 30px rgba(0,0,0,0.5)', borderRadius: '4px' }} 
             onError={() => {
               setLoading(false);
               setError(true);
@@ -93,7 +92,6 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
           <iframe 
             src={`${sanitizedUrl}#toolbar=0&navpanes=0`} 
             onLoad={() => setLoading(false)}
-            referrerPolicy="no-referrer"
             style={{ width: '100%', height: '100%', border: 'none' }} 
             title="Document Viewer"
             key={sanitizedUrl}
