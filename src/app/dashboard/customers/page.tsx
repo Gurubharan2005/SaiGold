@@ -314,7 +314,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                      </div>
                   )}
                   {currentTab !== 'ongoing' && (
-                    <Link href={`/dashboard/customers/${c.id}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
+                    <Link href={`/dashboard/customers/${c.id}?from=${currentTab}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
                       View Details →
                     </Link>
                   )}

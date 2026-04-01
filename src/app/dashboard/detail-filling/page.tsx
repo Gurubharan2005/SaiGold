@@ -80,7 +80,7 @@ export default async function DetailFillingPipeline() {
                    </div>
                    
                    <Link 
-                     href={`/dashboard/customers/${c.id}`}
+                     href={`/dashboard/customers/${c.id}?from=processing`}
                      className="btn-primary"
                      style={{ minWidth: '180px' }}
                    >

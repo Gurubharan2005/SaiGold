@@ -4,7 +4,13 @@ import { useState } from 'react'
 import { Lock } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
-export default function FinishUploadButton({ customerId }: { customerId: string }) {
+export default function FinishUploadButton({ 
+  customerId, 
+  fromTab 
+}: { 
+  customerId: string,
+  fromTab?: string 
+}) {
   const router = useRouter()
   const [isLocking, setIsLocking] = useState(false)
 
@@ -16,7 +22,14 @@ export default function FinishUploadButton({ customerId }: { customerId: string 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'VERIFIED' }), // Sends to salesman, locking it for staff
       })
-      router.push('/dashboard')
+      
+      const redirectUrl = fromTab === 'processing' 
+        ? '/dashboard/detail-filling' 
+        : fromTab 
+          ? `/dashboard/customers?tab=${fromTab}` 
+          : '/dashboard'
+
+      router.push(redirectUrl)
     } catch (error) {
       console.error('Failed to seal documents:', error)
       alert("Failed to seal document folder")

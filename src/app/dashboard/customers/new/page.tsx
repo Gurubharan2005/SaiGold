@@ -40,7 +40,7 @@ export default function NewCustomerPage() {
       if (!res.ok) throw new Error('Failed to create customer')
       const data = await res.json()
 
-      router.push(`/dashboard/customers/${data.customer.id}`)
+      router.push(`/dashboard/customers/${data.customer.id}?from=today`)
       router.refresh()
     } catch (error) {
       alert("Error saving customer.")
@@ -52,7 +52,7 @@ export default function NewCustomerPage() {
   return (
     <div className="fade-in max-w-3xl">
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
-        <Link href="/dashboard/customers" style={{ color: 'var(--text-secondary)' }}>
+        <Link href="/dashboard/customers?tab=today" style={{ color: 'var(--text-secondary)' }}>
           <ArrowLeft size={24} />
         </Link>
         <h1 style={{ fontSize: '28px', margin: 0 }}>Add New Customer</h1>
@@ -94,7 +94,7 @@ export default function NewCustomerPage() {
           </div>
 
           <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '24px', display: 'flex', justifyContent: 'flex-end', gap: '12px' }}>
-            <Link href="/dashboard/customers" className="btn-secondary" style={{ padding: '10px 24px', textDecoration: 'none' }}>Cancel</Link>
+            <Link href="/dashboard/customers?tab=today" className="btn-secondary" style={{ padding: '10px 24px', textDecoration: 'none' }}>Cancel</Link>
             <button type="submit" className="btn-primary" disabled={loading} style={{ padding: '10px 24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               {loading ? <Loader2 size={18} className="animate-spin" /> : <Save size={18} />} Save Customer
             </button>

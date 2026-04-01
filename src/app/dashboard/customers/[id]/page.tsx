@@ -19,8 +19,15 @@ import { prisma } from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
-export default async function CustomerDetailsPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function CustomerDetailsPage({ 
+  params, 
+  searchParams 
+}: { 
+  params: Promise<{ id: string }>,
+  searchParams: Promise<{ from?: string }>
+}) {
   const { id } = await params
+  const { from } = await searchParams
   const customer = await prisma.customer.findUnique({
     where: { id },
     include: {
@@ -40,6 +47,13 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
   const isSalesman = session?.role === 'SALESMAN'
   const canViewDocs = isManager || isSalesman || (customer.status === 'ACCEPTED')
 
+  // Contextual back link: where did we come from?
+  const backHref = from === 'processing' 
+    ? '/dashboard/detail-filling' 
+    : from 
+      ? `/dashboard/customers?tab=${from}` 
+      : '/dashboard/customers'
+
   return (
     <div className="fade-in max-w-4xl">
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
@@ -48,7 +62,7 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <Link href="/dashboard/customers" style={{ color: 'var(--text-secondary)', paddingRight: '8px', borderRight: '1px solid var(--border-color)' }} className="hover-opacity">
+              <Link href={backHref} style={{ color: 'var(--text-secondary)', paddingRight: '8px', borderRight: '1px solid var(--border-color)' }} className="hover-opacity">
                 <ArrowLeft size={24} />
               </Link>
               <h1 style={{ fontSize: '32px', margin: 0, fontWeight: 700, letterSpacing: '-0.5px' }}>{customer.name}</h1>
@@ -114,10 +128,9 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
                 <div style={{ color: 'var(--text-color)', fontWeight: 500 }}>{customer.branch || 'Not specified'}</div>
               </div>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <Calendar size={16} /> Created On
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontStyle: 'italic', color: 'var(--text-secondary)' }}>
+                  <Calendar size={14} /> Created {format(new Date(customer.createdAt), 'MMM dd, yyyy')}
                 </div>
-                <div style={{ color: 'var(--text-color)', fontWeight: 500 }}>{format(new Date(customer.createdAt), 'MMMM dd, yyyy')}</div>
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
@@ -138,7 +151,7 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
             />
             {customer.status === 'PROCESSING' && (
               <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px dashed var(--border-color)' }}>
-                <FinishUploadButton customerId={customer.id} />
+                <FinishUploadButton customerId={customer.id} fromTab={from} />
               </div>
             )}
           </div>
