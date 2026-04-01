@@ -14,23 +14,30 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   const { tab } = await searchParams
   const currentTab = tab || 'today'
 
-  // Contextual Security: Managers see everything. Staff see ONLY the customers they manually registered or are assigned to.
+  // Contextual Security & Organization
   const baseWhere: any = {}
   
   if (currentTab === 'today') {
-    baseWhere.createdAt = {
-      gte: startOfDay(new Date()),
-      lte: endOfDay(new Date())
+    if (session?.role === 'MANAGER') {
+       // Managers see global leads created today
+       baseWhere.createdAt = {
+         gte: startOfDay(new Date()),
+         lte: endOfDay(new Date())
+       }
+    } else {
+       // Staff specifically see inbound leads assigned to them by manager (WAITING)
+       baseWhere.assignedToId = String(session?.id)
+       baseWhere.status = 'WAITING'
     }
   } else if (currentTab === 'ongoing') {
     baseWhere.status = 'ACCEPTED'
-  }
-
-  if (session?.role !== 'MANAGER') {
-    baseWhere.OR = [
-      { createdById: String(session?.id) },
-      { assignedToId: String(session?.id) }
-    ]
+    if (session?.role !== 'MANAGER') {
+       baseWhere.OR = [
+         { createdById: String(session?.id) },
+         { assignedToId: String(session?.id) },
+         { verifiedById: String(session?.id) }
+       ]
+    }
   }
 
   const customers = await prisma.customer.findMany({
