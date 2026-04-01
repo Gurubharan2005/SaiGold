@@ -39,11 +39,10 @@ export default function Home() {
       localStorage.setItem('isLoggedIn', 'true')
       
       if (data.role === 'SALESMAN') {
-        router.push('/dashboard/sales')
+        window.location.href = '/dashboard/sales'
       } else {
-        router.push('/dashboard')
+        window.location.href = '/dashboard'
       }
-      router.refresh()
       
     } catch (err: any) {
       setError(err.message)
