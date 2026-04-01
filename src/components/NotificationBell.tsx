@@ -91,7 +91,7 @@ export default function NotificationBell({ notifications }: { notifications: Not
                   {notifications.map(n => (
                     <li key={n.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
                       <Link 
-                        href={`/dashboard/customers/${n.id}`} 
+                        href={`/dashboard/customers?tab=ongoing&q=${encodeURIComponent(n.name)}`} 
                         onClick={() => setIsOpen(false)}
                         style={{ display: 'flex', gap: '12px', padding: '16px', textDecoration: 'none', transition: 'background 0.2s' }}
                         className="hover-bg-surface-hover"

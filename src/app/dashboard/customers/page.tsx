@@ -5,19 +5,27 @@ import { format, startOfDay, endOfDay } from 'date-fns'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import OngoingQuickUpdate from '@/components/OngoingQuickUpdate'
+import SearchInput from '@/components/SearchInput'
 
 export const dynamic = 'force-dynamic'
 
-export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ tab?: string, q?: string }> }) {
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
-  const { tab } = await searchParams
+  const { tab, q } = await searchParams
   const currentTab = tab || 'today'
 
   // Contextual Security & Organization
   const baseWhere: any = {}
   
+  if (q) {
+    baseWhere.OR = [
+      { name: { contains: q, mode: 'insensitive' } },
+      { phone: { contains: q, mode: 'insensitive' } }
+    ]
+  }
+
   if (currentTab === 'today') {
     if (session?.role === 'MANAGER') {
        // Managers see global leads created today
@@ -70,21 +78,17 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
         {/* Simple Toolbar */}
         <div style={{ padding: '16px', display: 'flex', gap: '16px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-color)' }}>
-          <div style={{ position: 'relative', flex: 1, maxWidth: '320px' }}>
-            <Search size={16} color="var(--text-secondary)" style={{ position: 'absolute', left: '12px', top: '12px' }} />
-            <input 
-              type="text" 
-              placeholder="Search by name or phone..." 
-              style={{ paddingLeft: '38px', width: '100%', height: '40px' }}
-            />
-          </div>
-          <select style={{ height: '40px', padding: '0 16px', minWidth: '160px' }}>
-            <option value="">All Statuses</option>
-            <option value="PROCESSING">Processing</option>
-            <option value="ACCEPTED">Accepted</option>
-            <option value="DUE">Due</option>
-            <option value="CLOSED">Closed</option>
-          </select>
+          <SearchInput placeholder="Search name or phone..." />
+          
+          {currentTab !== 'ongoing' && (
+            <select style={{ height: '40px', padding: '0 16px', minWidth: '160px', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)', background: 'var(--surface-color)', color: 'var(--text-color)' }}>
+              <option value="">All Statuses</option>
+              <option value="PROCESSING">Processing</option>
+              <option value="ACCEPTED">Accepted</option>
+              <option value="DUE">Due</option>
+              <option value="CLOSED">Closed</option>
+            </select>
+          )}
         </div>
 
         {/* Datatable - Hidden on Mobile */}
