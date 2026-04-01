@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { format, startOfDay, endOfDay } from 'date-fns'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
+import OngoingQuickUpdate from '@/components/OngoingQuickUpdate'
 
 export const dynamic = 'force-dynamic'
 
@@ -136,14 +137,16 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                   </td>
                   <td style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
                     <span className={`badge badge-${c.status.toLowerCase()}`}>{c.status}</span>
-                    <span style={{ 
-                       fontSize: '11px', fontWeight: 700, padding: '4px 8px', borderRadius: '4px',
-                       background: c.priority === 'HIGH' ? 'rgba(239, 68, 68, 0.1)' : c.priority === 'MEDIUM' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                       color: c.priority === 'HIGH' ? '#EF4444' : c.priority === 'MEDIUM' ? '#F59E0B' : '#10B981',
-                       textTransform: 'uppercase'
-                    }}>
-                      {c.priority} 
-                    </span>
+                    {currentTab !== 'ongoing' && (
+                      <span style={{ 
+                         fontSize: '11px', fontWeight: 700, padding: '4px 8px', borderRadius: '4px',
+                         background: c.priority === 'HIGH' ? 'rgba(239, 68, 68, 0.1)' : c.priority === 'MEDIUM' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                         color: c.priority === 'HIGH' ? '#EF4444' : c.priority === 'MEDIUM' ? '#F59E0B' : '#10B981',
+                         textTransform: 'uppercase'
+                      }}>
+                        {c.priority} 
+                      </span>
+                    )}
                   </td>
                   <td style={{ padding: '16px' }}>
                     {currentTab === 'ongoing' ? (
@@ -195,6 +198,14 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                       <a href={`tel:${c.phone}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-color)', fontSize: '13px', textDecoration: 'none', background: 'var(--surface-color)', padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
                         <Phone size={14} color="var(--primary-color)" /> Call
                       </a>
+                      {currentTab === 'ongoing' && (
+                        <OngoingQuickUpdate 
+                          customerId={c.id} 
+                          initialAmount={c.loanAmount} 
+                          initialDate={c.dueDate} 
+                          initialNotes={c.notes}
+                        />
+                      )}
                       {currentTab !== 'ongoing' && (
                         <Link href={`/dashboard/customers/${c.id}`} style={{ color: 'var(--primary-color)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
                           View Details →
@@ -238,14 +249,16 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                   </div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
                      <span className={`badge badge-${c.status.toLowerCase()}`}>{c.status}</span>
-                     <span style={{ 
-                       fontSize: '10px', fontWeight: 800, padding: '2px 6px', borderRadius: '4px',
-                       background: c.priority === 'HIGH' ? 'rgba(239, 68, 68, 0.1)' : c.priority === 'MEDIUM' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)',
-                       color: c.priority === 'HIGH' ? '#EF4444' : c.priority === 'MEDIUM' ? '#F59E0B' : '#10B981',
-                       textTransform: 'uppercase'
-                     }}>
-                       {c.priority} 
-                     </span>
+                     {currentTab !== 'ongoing' && (
+                       <span style={{ 
+                         fontSize: '10px', fontWeight: 800, padding: '2px 6px', borderRadius: '4px',
+                         background: c.priority === 'HIGH' ? 'rgba(239, 68, 68, 0.1)' : c.priority === 'MEDIUM' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                         color: c.priority === 'HIGH' ? '#EF4444' : c.priority === 'MEDIUM' ? '#F59E0B' : '#10B981',
+                         textTransform: 'uppercase'
+                       }}>
+                         {c.priority} 
+                       </span>
+                     )}
                   </div>
                 </div>
 
@@ -282,7 +295,16 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                   <a href={`tel:${c.phone}`} className="btn-secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', background: 'var(--surface-color)', border: '1px solid var(--border-color)', color: 'var(--text-color)', fontSize: '14px', borderRadius: '8px' }}>
                     <Phone size={16} /> Call
                   </a>
-                  {currentTab !== 'ongoing' && (
+                  {currentTab === 'ongoing' ? (
+                     <div style={{ flex: 2 }}>
+                        <OngoingQuickUpdate 
+                          customerId={c.id} 
+                          initialAmount={c.loanAmount} 
+                          initialDate={c.dueDate} 
+                          initialNotes={c.notes}
+                        />
+                     </div>
+                  ) : (
                     <Link href={`/dashboard/customers/${c.id}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
                       View Details →
                     </Link>
