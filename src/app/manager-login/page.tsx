@@ -101,7 +101,7 @@ export default function ManagerLoginPage() {
             <input 
               type="email" 
               placeholder="admin@saigoldloans.com" 
-              style={{ width: '100%', height: '48px', borderRadius: '12px', fontSize: '15px' }}
+              style={{ width: '100%', height: '48px', borderRadius: '12px' }}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required

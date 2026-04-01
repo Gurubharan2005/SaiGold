@@ -67,6 +67,7 @@ input, textarea, select {
   padding: 10px 14px;
   border-radius: var(--border-radius-md);
   outline: none;
+  font-size: 16px;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 

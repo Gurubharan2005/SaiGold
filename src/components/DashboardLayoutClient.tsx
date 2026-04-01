@@ -1,6 +1,4 @@
-'use client'
-
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
 
@@ -12,6 +10,18 @@ interface ClientLayoutProps {
 
 export default function DashboardLayoutClient({ session, notifications, children }: ClientLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+
+  // Security: Handle "Back" button after logout
+  useEffect(() => {
+    const handlePageShow = (event: PageTransitionEvent) => {
+      if (event.persisted) {
+        // Force a reload if the page was restored from the browser's back-forward cache
+        window.location.reload()
+      }
+    }
+    window.addEventListener('pageshow', handlePageShow)
+    return () => window.removeEventListener('pageshow', handlePageShow)
+  }, [])
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: 'var(--bg-color)' }}>

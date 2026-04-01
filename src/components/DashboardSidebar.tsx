@@ -104,9 +104,23 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
           <Link href="/settings" onClick={onClose} style={{ ...navItemStyle('/settings'), color: 'var(--text-secondary)' }}>
             <Settings size={20} /> Settings
           </Link>
-          <Link href="/" style={{ ...navItemStyle('/'), color: 'var(--status-rejected)' }}>
+          <button 
+            onClick={async () => {
+              await fetch('/api/auth/logout', { method: 'POST' })
+              window.location.href = '/'
+            }}
+            style={{ 
+              ...navItemStyle('/'), 
+              width: '100%', 
+              textAlign: 'left', 
+              color: 'var(--status-rejected)', 
+              cursor: 'pointer',
+              border: 'none',
+              background: 'transparent'
+            }}
+          >
             <LogOut size={20} /> Logout
-          </Link>
+          </button>
         </div>
       </aside>
 
