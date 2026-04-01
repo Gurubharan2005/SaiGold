@@ -25,8 +25,10 @@ export async function middleware(request: NextRequest) {
       return NextResponse.redirect(new URL('/dashboard', request.url)) // Bounce back
     }
     
-    // Auth success - forward request
-    return NextResponse.next()
+    // Auth success - forward request with no-cache headers to prevent "back button" issues
+    const response = NextResponse.next()
+    response.headers.set('Cache-Control', 'no-store, max-age=0, must-revalidate')
+    return response
   }
 }
 

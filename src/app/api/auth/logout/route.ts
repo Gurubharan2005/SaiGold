@@ -12,5 +12,13 @@ export async function POST() {
     sameSite: 'lax'
   })
 
+  // Clear the session-active UI cookie
+  cookieStore.set('session-active', '', { 
+    expires: new Date(0),
+    path: '/',
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax'
+  })
+
   return NextResponse.json({ message: 'Auth session purged successfully' })
 }

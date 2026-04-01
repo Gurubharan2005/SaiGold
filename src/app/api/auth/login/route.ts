@@ -42,6 +42,14 @@ export async function POST(req: Request) {
       sameSite: 'lax',
       maxAge: 60 * 60 * 24 // 24 hours
     })
+    
+    // Set a non-httpOnly cookie for the client UI to detect active session
+    cookieStore.set('session-active', 'true', {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 // 24 hours
+    })
 
     return NextResponse.json({ success: true, role: user.role })
     
