@@ -1,14 +1,20 @@
 import { prisma } from '@/lib/prisma'
-import { CheckCircle2, Search, User, FileText, Download, ShieldCheck, FileKey, XCircle } from 'lucide-react'
+import { CheckCircle2, Search, User, FileText, Download, ShieldCheck, FileKey, XCircle, Phone, MessageSquare } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import SalesVerifyActions from '@/components/SalesVerifyActions'
+import DocumentViewer from '@/components/DocumentViewer'
 
 export const dynamic = 'force-dynamic'
 
-export default async function SalesVerificationDesk() {
+export default async function SalesVerificationDesk({ 
+  searchParams 
+}: { 
+  searchParams: Promise<{ [key: string]: string | undefined }> 
+}) {
+  const { viewUrl, docName, docType } = await searchParams
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
@@ -41,46 +47,73 @@ export default async function SalesVerificationDesk() {
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {customers.length === 0 ? (
-           <div className="card" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
-             <CheckCircle2 size={48} color="#10B981" strokeWidth={1.5} />
-             <p style={{ margin: 0, fontSize: '16px', fontWeight: 500 }}>All queues clear. No pending verification requests.</p>
-           </div>
-        ) : (
-          customers.map((c: any) => (
-             <div key={c.id} className="card" style={{ 
-               display: 'flex', 
-               flexDirection: 'row', 
-               flexWrap: 'wrap', 
-               gap: '24px', 
-               position: 'relative', 
-               overflow: 'hidden',
-               padding: '24px'
-             }}>
-                <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '4px', background: 'var(--status-waiting)' }} />
-                
-                {/* Customer Details Map */}
-                <div style={{ 
-                  flex: '1 1 300px', 
-                  display: 'flex', 
-                  flexDirection: 'column', 
-                  gap: '16px',
-                  paddingLeft: '12px',
-                  borderRight: '1px solid var(--border-color)',
-                  // Remove border on mobile
-                  borderBottom: '1px solid var(--border-color)',
-                  paddingBottom: '24px'
-                }} className="sales-card-left">
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                      <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                         <User size={20} color="var(--text-secondary)" />
-                      </div>
-                      <div>
-                        <div style={{ fontWeight: 700, fontSize: '18px' }}>{c.name}</div>
-                        <div style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{c.phone}</div>
-                      </div>
-                   </div>
+      {viewUrl ? (
+        <DocumentViewer url={viewUrl} name={docName} type={docType} />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+          {customers.length === 0 ? (
+             <div className="card" style={{ padding: '48px', textAlign: 'center', color: 'var(--text-secondary)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+               <CheckCircle2 size={48} color="#10B981" strokeWidth={1.5} />
+               <p style={{ margin: 0, fontSize: '16px', fontWeight: 500 }}>All queues clear. No pending verification requests.</p>
+             </div>
+          ) : (
+            customers.map((c: any) => (
+               <div key={c.id} className="card" style={{ 
+                 display: 'flex', 
+                 flexDirection: 'row', 
+                 flexWrap: 'wrap', 
+                 gap: '24px', 
+                 position: 'relative', 
+                 overflow: 'hidden',
+                 padding: '24px'
+               }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, bottom: 0, width: '4px', background: 'var(--status-waiting)' }} />
+                  
+                  {/* Customer Details Map */}
+                  <div style={{ 
+                    flex: '1 1 300px', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    gap: '16px',
+                    paddingLeft: '12px',
+                    borderRight: '1px solid var(--border-color)',
+                    // Remove border on mobile
+                    borderBottom: '1px solid var(--border-color)',
+                    paddingBottom: '24px'
+                  }} className="sales-card-left">
+                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                           <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-color)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <User size={20} color="var(--text-secondary)" />
+                           </div>
+                           <div>
+                             <div style={{ fontWeight: 700, fontSize: '18px' }}>{c.name}</div>
+                             <div style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>{c.phone}</div>
+                           </div>
+                        </div>
+
+                        {/* Communication Quick Actions */}
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                           <a 
+                             href={`tel:${c.phone}`} 
+                             className="btn-secondary" 
+                             style={{ padding: '8px', borderRadius: '50%', color: 'var(--primary-color)' }}
+                             title="Call Customer"
+                           >
+                             <Phone size={18} />
+                           </a>
+                           <a 
+                             href={`https://wa.me/${c.phone.replace(/[^0-9]/g, '')}`} 
+                             target="_blank" 
+                             rel="noopener noreferrer" 
+                             className="btn-secondary" 
+                             style={{ padding: '8px', borderRadius: '50%', color: '#25D366' }}
+                             title="WhatsApp Message"
+                           >
+                             <MessageSquare size={18} />
+                           </a>
+                        </div>
+                     </div>
 
                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', gap: '12px', background: 'var(--surface-hover)', padding: '16px', borderRadius: '8px' }}>
                      <div>
@@ -129,15 +162,13 @@ export default async function SalesVerificationDesk() {
                              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                                {doc.documentName}
                              </div>
-                             <a 
-                               href={doc.documentUrl} 
-                               target="_blank" 
-                               rel="noopener noreferrer" 
-                               className="btn-secondary"
+                             <Link 
+                               href={`?viewUrl=${encodeURIComponent(doc.documentUrl)}&docName=${encodeURIComponent(doc.documentName)}&docType=${encodeURIComponent(doc.documentType)}`}
+                               className="btn-primary"
                                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', fontSize: '12px', padding: '8px' }}
                              >
-                               <Download size={14} /> View File
-                             </a>
+                               View In-Page
+                             </Link>
                           </div>
                        ))}
                      </div>
@@ -146,7 +177,8 @@ export default async function SalesVerificationDesk() {
              </div>
           ))
         )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
