@@ -35,14 +35,15 @@ export default async function DashboardPage({
       select: { id: true, name: true }
     })
 
-    const recentCustomers = await prisma.customer.findMany({
+    const awaitingAssignment = await prisma.customer.findMany({
+      where: { status: 'WAITING' },
       orderBy: { createdAt: 'desc' },
       select: {
         id: true, name: true, phone: true, status: true, loanAmount: true,
         createdById: true, createdAt: true,
         assignedTo: { select: { id: true, name: true } }
       },
-      take: 20 // Reduced for dashboard density
+      take: 20 
     })
 
     // Fetch Operations Desk Data
@@ -59,6 +60,18 @@ export default async function DashboardPage({
         documents: true,
         assignedTo: { select: { name: true } }
       }
+    }) as any[]
+
+    // Fetch Live Active Operations (Staff & Salesman activity)
+    const activeOperations = await prisma.customer.findMany({
+      where: { 
+        status: { in: ['PROCESSING', 'ACCEPTED', 'VERIFIED', 'CLOSE_REQUESTED'] as any[] } 
+      },
+      orderBy: { updatedAt: 'desc' },
+      include: {
+        assignedTo: { select: { name: true } }
+      },
+      take: 5
     }) as any[]
 
     return (
@@ -87,6 +100,34 @@ export default async function DashboardPage({
           </div>
         </div>
 
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+           <div className="card" style={{ padding: '24px' }}>
+              <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                 <Target size={18} color="var(--primary-color)" /> Live Active Operations
+              </h3>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                 {activeOperations.length === 0 ? (
+                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>No active handling currently tracked.</p>
+                 ) : (
+                    activeOperations.map(op => (
+                       <div key={op.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: 'var(--surface-hover)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
+                          <div>
+                             <div style={{ fontWeight: 600, fontSize: '14px' }}>{op.name}</div>
+                             <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{op.assignedTo?.name || 'Unassigned'}</div>
+                          </div>
+                          <span className={`badge badge-${op.status.toLowerCase().replace('_', '-')}`} style={{ fontSize: '10px', padding: '4px 8px' }}>
+                             {op.status}
+                          </span>
+                       </div>
+                    ))
+                 )}
+              </div>
+              <Link href="/dashboard/staff-monitoring" style={{ display: 'block', marginTop: '16px', textAlign: 'center', fontSize: '12px', color: 'var(--primary-color)', textDecoration: 'none' }}>
+                 View Full Branch Activity Monitor →
+              </Link>
+           </div>
+        </div>
+
         <ManagerOpsDesk 
           currentTab={currentTab}
           customers={opsCustomers}
@@ -101,10 +142,10 @@ export default async function DashboardPage({
         <div style={{ marginTop: '48px' }}>
           <h2 style={{ fontSize: '20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
             <Navigation size={22} color="var(--primary-color)" />
-            Manual Lead Assignment
+            Leads Awaiting Assignment
           </h2>
           <ClientBulkAssignTable 
-            customers={recentCustomers} 
+            customers={awaitingAssignment} 
             activeStaffList={activeStaffList} 
             userRole={'MANAGER'} 
           />
