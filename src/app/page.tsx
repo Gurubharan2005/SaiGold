@@ -36,6 +36,8 @@ export default function Home() {
       }
 
       // Success!
+      localStorage.setItem('isLoggedIn', 'true')
+      
       if (data.role === 'SALESMAN') {
         router.push('/dashboard/sales')
       } else {

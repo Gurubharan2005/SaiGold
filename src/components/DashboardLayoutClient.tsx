@@ -21,19 +21,31 @@ export default function DashboardLayoutClient({ session, notifications, children
     }
     window.addEventListener('pageshow', handlePageShow)
 
-    // 2. Local session check: Immediately destroy view if session cookie is gone
+    // 2. Local session check using synchronous localStorage (more reliable on iOS back-button than cookies)
     const checkSession = () => {
-      if (!document.cookie.includes('session-active=true')) {
-        window.location.replace('/') // Immediate redirect, no history
+      // If we are in the browser and the login flag is missing, self-destruct.
+      if (typeof window !== 'undefined' && !localStorage.getItem('isLoggedIn')) {
+        window.location.replace('/') 
       }
     }
 
-    // Check immediately on mount, and then every 200ms to catch fast back-navigations
+    // Check immediately on mount
     checkSession()
+    
+    // Check every 200ms to catch fast back-navigations
     const interval = setInterval(checkSession, 200)
+
+    // Listen for storage events (in case user logs out from another tab)
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'isLoggedIn' && !e.newValue) {
+        window.location.replace('/')
+      }
+    }
+    window.addEventListener('storage', handleStorageChange)
 
     return () => {
       window.removeEventListener('pageshow', handlePageShow)
+      window.removeEventListener('storage', handleStorageChange)
       clearInterval(interval)
     }
   }, [])

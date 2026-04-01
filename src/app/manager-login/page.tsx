@@ -37,6 +37,7 @@ export default function ManagerLoginPage() {
       }
 
       // Success!
+      localStorage.setItem('isLoggedIn', 'true')
       router.push('/dashboard')
       router.refresh()
       

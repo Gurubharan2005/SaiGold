@@ -108,6 +108,8 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
             onClick={async () => {
               // 1. Manually wipe the UI session cookie immediately
               document.cookie = 'session-active=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+              // 1b. Wipe localStorage
+              localStorage.removeItem('isLoggedIn')
               // 2. Clear server-side session
               await fetch('/api/auth/logout', { method: 'POST' })
               // 3. Hard redirect without saving history
