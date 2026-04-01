@@ -41,7 +41,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
        baseWhere.status = 'WAITING'
     }
   } else if (currentTab === 'ongoing') {
-    baseWhere.status = { in: ['ACCEPTED', 'DUE'] }
+    baseWhere.status = 'ACCEPTED'
     if (session?.role !== 'MANAGER') {
        baseWhere.OR = [
          { createdById: String(session?.id) },
