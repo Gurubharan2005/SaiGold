@@ -16,12 +16,12 @@ model User {
   role              Role               @default(STAFF)
   isActive          Boolean            @default(true)
   lat               Float?
-  lng               Float?
   locationUpdatedAt DateTime?
-  assignedCustomers Customer[]         @relation("AssignedTo")
-  createdCustomers  Customer[]         @relation("CreatedBy")
-  verifiedCustomers Customer[]         @relation("VerifiedBy")
-  uploadedDocs      CustomerDocument[] @relation("UploadedBy")
+  lastLeadAssignedAt DateTime?
+  assignedCustomers  Customer[]         @relation("AssignedTo")
+  createdCustomers   Customer[]         @relation("CreatedBy")
+  verifiedCustomers  Customer[]         @relation("VerifiedBy")
+  uploadedDocs       CustomerDocument[] @relation("UploadedBy")
 
   @@map("user")
 }
