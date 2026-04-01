@@ -16,7 +16,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
   const { tab, q } = await searchParams
-  const currentTab = tab || 'today'
+  const currentTab = 'ongoing'
 
   // Contextual Security & Organization
   const baseWhere: any = {}
@@ -28,28 +28,13 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
     ]
   }
 
-  if (currentTab === 'today') {
-    if (session?.role === 'MANAGER') {
-       // Managers see global leads created today that are still WAITING
-       baseWhere.createdAt = {
-         gte: startOfDay(new Date()),
-         lte: endOfDay(new Date())
-       }
-       baseWhere.status = 'WAITING'
-    } else {
-       // Staff specifically see inbound leads assigned to them (WAITING)
-       baseWhere.assignedToId = String(session?.id)
-       baseWhere.status = 'WAITING'
-    }
-  } else if (currentTab === 'ongoing') {
-    baseWhere.status = 'ACCEPTED'
-    if (session?.role !== 'MANAGER') {
-       baseWhere.OR = [
-         { createdById: String(session?.id) },
-         { assignedToId: String(session?.id) },
-         { verifiedById: String(session?.id) }
-       ]
-    }
+  baseWhere.status = 'ACCEPTED'
+  if (session?.role !== 'MANAGER') {
+     baseWhere.OR = [
+       { createdById: String(session?.id) },
+       { assignedToId: String(session?.id) },
+       { verifiedById: String(session?.id) }
+     ]
   }
 
   const customers = await prisma.customer.findMany({
@@ -62,9 +47,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       <DashRealtimeSync intervalMs={10000} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <h1 style={{ fontSize: '28px', margin: 0 }}>
-            {currentTab === 'ongoing' ? 'Ongoing Customers' : 'Today\'s Customers'}
-          </h1>
+          <h1 style={{ fontSize: '28px', margin: 0 }}>Ongoing Customers</h1>
         </div>
         
         <div style={{ display: 'flex', gap: '12px', zIndex: 10 }}>
