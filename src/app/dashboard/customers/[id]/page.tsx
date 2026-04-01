@@ -60,7 +60,7 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
         </div>
         
         <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
-          {isManager && <EditProfileModalTrigger customer={customer} />}
+          {(isManager || customer.status === 'ACCEPTED') && <EditProfileModalTrigger customer={customer} />}
           <CloseLoanButton customerId={customer.id} />
         </div>
       </div>
@@ -145,6 +145,16 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
              followUpNotes={customer.followUpNotes}
              phone={customer.phone}
           />
+
+          {!isManager && customer.status !== 'ACCEPTED' && (
+            <div className="card" style={{ border: '1px dashed #F59E0B', background: 'rgba(245, 158, 11, 0.05)', textAlign: 'center' }}>
+              <Lock size={20} color="#F59E0B" style={{ margin: '0 auto 12px auto' }} />
+              <p style={{ fontSize: '13px', color: '#F59E0B', margin: 0, fontWeight: 600 }}>
+                Detailed data entry is locked. <br />
+                Please mark this lead as "ACCEPTED" to enable full profile editing.
+              </p>
+            </div>
+          )}
 
           <div className="card">
             <h3 style={{ fontSize: '16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between' }}>

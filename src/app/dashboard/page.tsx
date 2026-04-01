@@ -5,6 +5,7 @@ import { decrypt } from '@/lib/auth'
 import ClientBulkAssignTable from '@/components/ClientBulkAssignTable'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import QuickStatusActions from '@/components/QuickStatusActions'
 
 export const dynamic = 'force-dynamic';
 
@@ -155,9 +156,12 @@ export default async function DashboardPage() {
                   </div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                     <span className={`badge badge-${lead.status.toLowerCase()}`}>{lead.status}</span>
-                    <Link href={`/dashboard/customers/${lead.id}`} style={{ padding: '6px 12px', background: 'var(--surface-hover)', borderRadius: '6px', color: 'var(--text-color)', textDecoration: 'none', fontSize: '13px', fontWeight: 600 }}>
-                      Open
-                    </Link>
+                    <QuickStatusActions customerId={lead.id} phone={lead.phone} />
+                    {lead.status === 'ACCEPTED' && (
+                      <Link href={`/dashboard/customers/${lead.id}`} style={{ padding: '8px 12px', background: 'var(--surface-hover)', borderRadius: '8px', color: 'var(--text-color)', textDecoration: 'none', fontSize: '13px', fontWeight: 600, border: '1px solid var(--border-color)' }}>
+                        Fill Details
+                      </Link>
+                    )}
                   </div>
                 </div>
               ))
