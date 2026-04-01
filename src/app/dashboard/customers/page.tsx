@@ -39,7 +39,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
        baseWhere.status = 'WAITING'
     }
   } else if (currentTab === 'ongoing') {
-    baseWhere.status = 'ACCEPTED'
+    baseWhere.status = { in: ['ACCEPTED', 'CLOSE_REQUESTED'] }
     if (session?.role !== 'MANAGER') {
        baseWhere.OR = [
          { createdById: String(session?.id) },
@@ -212,11 +212,9 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                           initialNotes={c.notes}
                         />
                       )}
-                      {currentTab !== 'ongoing' && (
-                        <Link href={`/dashboard/customers/${c.id}`} style={{ color: 'var(--primary-color)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
-                          View Details →
-                        </Link>
-                      )}
+                      <Link href={`/dashboard/customers/${c.id}`} style={{ color: 'var(--primary-color)', fontSize: '14px', fontWeight: 600, textDecoration: 'none' }}>
+                        View Details →
+                      </Link>
                     </div>
                   </td>
                 </tr>
@@ -301,7 +299,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                   <a href={`tel:${c.phone}`} className="btn-secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', background: 'var(--surface-color)', border: '1px solid var(--border-color)', color: 'var(--text-color)', fontSize: '14px', borderRadius: '8px' }}>
                     <Phone size={16} /> Call
                   </a>
-                  {currentTab === 'ongoing' ? (
+                  {currentTab === 'ongoing' && (
                      <div style={{ flex: 1 }}>
                         <OngoingQuickUpdate 
                           customerId={c.id} 
@@ -310,11 +308,10 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                           initialNotes={c.notes}
                         />
                      </div>
-                  ) : (
-                    <Link href={`/dashboard/customers/${c.id}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
-                      View Details →
-                    </Link>
                   )}
+                  <Link href={`/dashboard/customers/${c.id}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
+                    View Details →
+                  </Link>
                 </div>
               </div>
             ))

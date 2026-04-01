@@ -6,6 +6,7 @@ import CustomerSalesControl from '@/components/CustomerSalesControl'
 import DocumentUploader from '@/components/DocumentUploader'
 import DeleteDocumentButton from '@/components/DeleteDocumentButton'
 import CloseLoanButton from '@/components/CloseLoanButton'
+import RequestClosureButton from '@/components/RequestClosureButton'
 import DueDateSelector from '@/components/DueDateSelector'
 import ProfilePhotoUploader from '@/components/ProfilePhotoUploader'
 import { EditProfileModalTrigger } from '@/components/EditProfileModalTrigger'
@@ -60,9 +61,31 @@ export default async function CustomerDetailsPage({ params }: { params: Promise<
           </div>
         </div>
         
-        <div style={{ display: 'flex', gap: '12px', marginTop: '16px' }}>
+        <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center' }}>
           {(isManager || customer.status === 'PROCESSING') && <EditProfileModalTrigger customer={customer} />}
-          <CloseLoanButton customerId={customer.id} />
+          
+          {/* CLOSURE WORKFLOW ENGINE */}
+          {isManager ? (
+            // Manager can always see the delete button if they want, 
+            // but we highlight it when requested
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              {(customer.status as string) === 'CLOSE_REQUESTED' && (
+                <span className="badge badge-rejected" style={{ padding: '8px 12px', borderRadius: '6px' }}>
+                  Closure Approval Requested
+                </span>
+              )}
+              <CloseLoanButton customerId={customer.id} />
+            </div>
+          ) : (
+            // Staff can only request closure if loan is active
+            (customer.status === 'ACCEPTED' || customer.status === 'DUE') ? (
+              <RequestClosureButton customerId={customer.id} />
+            ) : (customer.status as string) === 'CLOSE_REQUESTED' ? (
+              <span className="badge badge-rejected" style={{ padding: '10px 16px', borderRadius: '8px', fontWeight: 600 }}>
+                 Waiting for Manager Approval...
+              </span>
+            ) : null
+          )}
         </div>
       </div>
 

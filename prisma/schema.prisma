@@ -92,6 +92,7 @@ enum Status {
   FOLLOW_UP
   NO_RESPONSE
   VERIFIED
+  CLOSE_REQUESTED
 }
 
 enum Priority {
