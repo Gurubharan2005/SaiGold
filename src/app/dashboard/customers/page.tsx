@@ -7,6 +7,7 @@ import { decrypt } from '@/lib/auth'
 import OngoingQuickUpdate from '@/components/OngoingQuickUpdate'
 import SearchInput from '@/components/SearchInput'
 import RequestClosureButton from '@/components/RequestClosureButton'
+import DashRealtimeSync from '@/components/DashRealtimeSync'
 
 export const dynamic = 'force-dynamic'
 
@@ -57,6 +58,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
 
   return (
     <div className="fade-in">
+      <DashRealtimeSync intervalMs={10000} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
           <h1 style={{ fontSize: '28px', margin: 0 }}>

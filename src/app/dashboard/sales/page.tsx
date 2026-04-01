@@ -7,6 +7,7 @@ import { decrypt } from '@/lib/auth'
 import SalesVerifyActions from '@/components/SalesVerifyActions'
 import DocumentViewer from '@/components/DocumentViewer'
 import CloseLoanButton from '@/components/CloseLoanButton'
+import DashRealtimeSync from '@/components/DashRealtimeSync'
 
 export const dynamic = 'force-dynamic'
 
@@ -39,6 +40,7 @@ export default async function SalesVerificationDesk({
 
   return (
     <div className="fade-in">
+      <DashRealtimeSync intervalMs={10000} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '16px', marginBottom: '32px' }}>
         <div style={{ flex: '1 1 300px' }}>
           <h1 style={{ fontSize: '28px', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
