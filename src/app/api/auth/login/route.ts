@@ -12,6 +12,14 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Email and password required' }, { status: 400 })
     }
 
+    // 1. Connection Check
+    try {
+      await prisma.$connect()
+    } catch (dbError) {
+      console.error('DATABASE CONNECTION FAILED:', dbError)
+      return NextResponse.json({ error: 'Database service unavailable' }, { status: 503 })
+    }
+
     const user = await prisma.user.findUnique({
       where: { email }
     })
@@ -53,8 +61,11 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, role: user.role })
     
-  } catch (error) {
-    console.error('Login Error:', error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+  } catch (error: any) {
+    console.error('CRITICAL LOGIN ERROR:', error)
+    return NextResponse.json({ 
+      error: 'Internal Server Error', 
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+    }, { status: 500 })
   }
 }

@@ -23,9 +23,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       lte: endOfDay(new Date())
     }
   } else if (currentTab === 'ongoing') {
-    baseWhere.status = {
-      in: ['ACCEPTED', 'PROCESSING']
-    }
+    baseWhere.status = 'ACCEPTED'
   }
 
   if (session?.role !== 'MANAGER') {
@@ -81,15 +79,16 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
           </select>
         </div>
 
-        {/* Datatable */}
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+        {/* Datatable - Hidden on Mobile */}
+        <div className="table-container desktop-only">
+          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
           <thead>
             <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Customer Data</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Status & Priority</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Loan Info</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Creation Date</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Response Time</th>
+              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Creation Date</th>
+              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Response Time</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
@@ -141,10 +140,10 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                       {c.goldWeight ? `${c.goldWeight}g` : 'No weight listed'}
                     </div>
                   </td>
-                  <td style={{ padding: '16px', color: 'var(--text-secondary)', fontSize: '14px' }}>
+                  <td className="hide-mobile" style={{ padding: '16px', color: 'var(--text-secondary)', fontSize: '14px' }}>
                     {format(new Date(c.createdAt), 'MMM dd, yyyy')}
                   </td>
-                  <td style={{ padding: '16px', fontWeight: 600 }}>
+                  <td className="hide-mobile" style={{ padding: '16px', fontWeight: 600 }}>
                      {c.responseTime === null ? (
                        <span style={{ color: 'var(--text-secondary)' }}>N/A</span>
                      ) : c.responseTime < 5 ? (
@@ -173,6 +172,71 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             )}
           </tbody>
         </table>
+        </div>
+
+        {/* Mobile View - Card List (Straight Format) */}
+        <div className="mobile-only" style={{ display: 'flex', flexDirection: 'column' }}>
+          {customers.length === 0 ? (
+            <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>No customers found.</div>
+          ) : (
+            customers.map((c: any) => (
+              <div key={c.id} className="mobile-card" style={{ padding: '20px', borderBottom: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                    <div style={{ width: '44px', height: '44px', borderRadius: '50%', background: 'var(--surface-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)' }}>
+                      {c.photoUrl ? (
+                        <img 
+                          src={`/api/avatar?url=${encodeURIComponent(c.photoUrl)}`} 
+                          alt="Profile" 
+                          style={{ width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover' }} 
+                        />
+                      ) : (
+                        <User size={20} color="var(--text-secondary)" />
+                      )}
+                    </div>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '16px' }}>{c.name}</div>
+                      <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                        <Phone size={12} /> {c.phone}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', alignItems: 'flex-end' }}>
+                     <span className={`badge badge-${c.status.toLowerCase()}`}>{c.status}</span>
+                     <span style={{ 
+                       fontSize: '10px', fontWeight: 800, padding: '2px 6px', borderRadius: '4px',
+                       background: c.priority === 'HIGH' ? 'rgba(239, 68, 68, 0.1)' : c.priority === 'MEDIUM' ? 'rgba(245, 158, 11, 0.1)' : 'rgba(16, 185, 129, 0.1)',
+                       color: c.priority === 'HIGH' ? '#EF4444' : c.priority === 'MEDIUM' ? '#F59E0B' : '#10B981',
+                       textTransform: 'uppercase'
+                     }}>
+                       {c.priority} 
+                     </span>
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', background: 'var(--surface-hover)', padding: '12px', borderRadius: '8px', gap: '12px' }}>
+                   <div>
+                     <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>Loan Amount</div>
+                     <div style={{ fontWeight: 700, color: 'var(--primary-color)' }}>{c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-'}</div>
+                   </div>
+                   <div>
+                     <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>Gold Weight</div>
+                     <div style={{ fontWeight: 700 }}>{c.goldWeight ? `${c.goldWeight}g` : '-'}</div>
+                   </div>
+                </div>
+
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <a href={`tel:${c.phone}`} className="btn-secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', background: 'var(--surface-color)', border: '1px solid var(--border-color)', color: 'var(--text-color)', fontSize: '14px', borderRadius: '8px' }}>
+                    <Phone size={16} /> Call
+                  </a>
+                  <Link href={`/dashboard/customers/${c.id}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
+                    View Details →
+                  </Link>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
       </div>
     </div>
   )

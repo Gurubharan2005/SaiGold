@@ -7,6 +7,74 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                String             @id @default(uuid())
+  email             String             @unique
+  password          String
+  name              String
+  createdAt         DateTime           @default(now())
+  role              Role               @default(STAFF)
+  isActive          Boolean            @default(true)
+  lat               Float?
+  lng               Float?
+  locationUpdatedAt DateTime?
+  assignedCustomers Customer[]         @relation("AssignedTo")
+  createdCustomers  Customer[]         @relation("CreatedBy")
+  verifiedCustomers Customer[]         @relation("VerifiedBy")
+  uploadedDocs      CustomerDocument[] @relation("UploadedBy")
+
+  @@map("user")
+}
+
+model Customer {
+  id             String             @id @default(uuid())
+  name           String
+  phone          String
+  goldWeight     Float?
+  loanAmount     Float?
+  branch         String?
+  status         Status             @default(WAITING)
+  dueDate        DateTime?
+  notes          String?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+  assignedToId   String?
+  createdById    String?
+  photoUrl       String?
+  assignedAt     DateTime?
+  callStatus     CallStatus         @default(NOT_CALLED)
+  firstContactAt DateTime?
+  followUpDate   DateTime?
+  followUpNotes  String?
+  priority       Priority           @default(MEDIUM)
+  responseTime   Int?
+  interestRate   Float?
+  isVerified     Boolean            @default(false)
+  startDate      DateTime?
+  verifiedAt     DateTime?
+  verifiedById   String?
+  assignedTo     User?              @relation("AssignedTo", fields: [assignedToId], references: [id])
+  createdBy      User?              @relation("CreatedBy", fields: [createdById], references: [id])
+  verifiedBy     User?              @relation("VerifiedBy", fields: [verifiedById], references: [id])
+  documents      CustomerDocument[]
+
+  @@map("customer")
+}
+
+model CustomerDocument {
+  id           String   @id @default(uuid())
+  documentName String
+  documentType String
+  documentUrl  String
+  uploadedAt   DateTime @default(now())
+  customerId   String
+  uploadedById String
+  customer     Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  uploadedBy   User     @relation("UploadedBy", fields: [uploadedById], references: [id])
+
+  @@map("customer_documents")
+}
+
 enum Role {
   MANAGER
   STAFF
@@ -17,12 +85,12 @@ enum Status {
   WAITING
   PROCESSING
   ACCEPTED
-  FOLLOW_UP
-  NO_RESPONSE
-  VERIFIED
   REJECTED
   DUE
   CLOSED
+  FOLLOW_UP
+  NO_RESPONSE
+  VERIFIED
 }
 
 enum Priority {
@@ -37,86 +105,4 @@ enum CallStatus {
   NOT_REACHABLE
   BUSY
   INTERESTED
-}
-
-model User {
-  id        String   @id @default(uuid())
-  name      String
-  email     String   @unique
-  password  String
-  role      Role     @default(STAFF)
-  isActive  Boolean  @default(true)
-  lat       Float?
-  lng       Float?
-  locationUpdatedAt DateTime?
-  createdAt DateTime @default(now())
-
-  // Relations
-  assignedCustomers Customer[] @relation("AssignedTo")
-  createdCustomers  Customer[] @relation("CreatedBy")
-  verifiedCustomers Customer[] @relation("VerifiedBy")
-  uploadedDocs      CustomerDocument[] @relation("UploadedBy")
-
-  @@map("user")
-}
-
-model Customer {
-  id         String   @id @default(uuid())
-  name       String
-  phone      String
-  goldWeight   Float?
-  loanAmount   Float?
-  interestRate Float?
-  branch       String?
-  photoUrl   String?
-  status       Status      @default(WAITING)
-  priority     Priority    @default(MEDIUM)
-  callStatus   CallStatus  @default(NOT_CALLED)
-  
-  assignedAt     DateTime?
-  firstContactAt DateTime?
-  responseTime   Int?
-  
-  startDate      DateTime?
-  dueDate        DateTime?
-  followUpDate   DateTime?
-  followUpNotes  String?
-
-  isVerified     Boolean     @default(false)
-  verifiedAt     DateTime?
-  verifiedById   String?
-  
-  notes        String?     @db.Text
-  createdAt    DateTime    @default(now())
-  updatedAt    DateTime    @updatedAt
-
-  // Foreign Keys
-  assignedToId String?
-  createdById  String?
-
-  // Relations
-  assignedTo User? @relation("AssignedTo", fields: [assignedToId], references: [id])
-  createdBy  User? @relation("CreatedBy", fields: [createdById], references: [id])
-  verifiedBy User? @relation("VerifiedBy", fields: [verifiedById], references: [id])
-  documents  CustomerDocument[]
-
-  @@map("customer")
-}
-
-model CustomerDocument {
-  id           String   @id @default(uuid())
-  documentName String
-  documentType String
-  documentUrl  String
-  uploadedAt   DateTime @default(now())
-
-  // Foreign Keys
-  customerId   String
-  uploadedById String
-
-  // Relations
-  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  uploadedBy User     @relation("UploadedBy", fields: [uploadedById], references: [id])
-
-  @@map("customer_documents")
 }
