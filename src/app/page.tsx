@@ -31,11 +31,7 @@ export default function Home() {
         throw new Error(data.error || 'Failed to login')
       }
 
-      if (data.role === 'MANAGER') {
-        throw new Error('Managers must login through the dedicated Manager Portal.')
-      }
-
-      // Success!
+      // Success! Redirect based on role
       localStorage.setItem('isLoggedIn', 'true')
       
       if (data.role === 'SALESMAN') {
@@ -107,25 +103,6 @@ export default function Home() {
           </button>
         </form>
 
-        <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--border-color)' }}>
-          <button 
-            onClick={() => router.push('/manager-login')}
-            style={{ 
-              background: 'transparent', 
-              border: 'none', 
-              color: 'var(--primary-color)', 
-              fontSize: '14px', 
-              fontWeight: 600, 
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              margin: '0 auto'
-            }}
-          >
-            Switch to Manager Login <ArrowRight size={14} />
-          </button>
-        </div>
       </div>
     </div>
   )
