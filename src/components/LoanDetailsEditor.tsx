@@ -40,8 +40,8 @@ export default function LoanDetailsEditor({
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
       router.refresh()
-    } catch (e: any) {
-      alert("Failed to save loan details.")
+    } catch {
+      alert('Failed to save loan details.')
     } finally {
       setLoading(false)
     }

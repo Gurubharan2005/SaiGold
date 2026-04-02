@@ -2,9 +2,9 @@
 
 import { useState } from 'react'
 import { Edit } from 'lucide-react'
-import { CustomerEditForm } from './CustomerEditForm'
+import { CustomerEditForm, type CustomerData } from './CustomerEditForm'
 
-export function EditProfileModalTrigger({ customer }: { customer: any }) {
+export function EditProfileModalTrigger({ customer }: { customer: CustomerData }) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (

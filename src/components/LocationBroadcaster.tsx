@@ -24,7 +24,7 @@ export default function LocationBroadcaster({ isStaff }: { isStaff: boolean }) {
              lng: position.coords.longitude
           })
         })
-      } catch (e) {
+      } catch {
         // Silent fail for background sync to avoid disrupting UI
       }
     }

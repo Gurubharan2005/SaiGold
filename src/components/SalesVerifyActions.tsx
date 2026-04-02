@@ -11,7 +11,13 @@ export default function SalesVerifyActions({ customerId, salesmanId }: { custome
   const handleAction = async (action: 'VERIFY' | 'REJECT') => {
     setLoading(action)
     try {
-      const payload: any = {}
+      type VerifyPayload = {
+        status: string
+        isVerified?: boolean
+        verifiedById?: string
+        verifiedAt?: string
+      }
+      const payload: VerifyPayload = { status: '' }
       if (action === 'VERIFY') {
         payload.status = 'ACCEPTED' // Approving moves it to 'Ongoing' queue
         payload.isVerified = true
@@ -30,7 +36,7 @@ export default function SalesVerifyActions({ customerId, salesmanId }: { custome
 
       if (!res.ok) throw new Error('Action failed')
       router.refresh()
-    } catch (e) {
+    } catch {
       alert('Verification Error')
     } finally {
       setLoading(null)

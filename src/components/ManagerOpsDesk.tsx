@@ -1,18 +1,39 @@
 'use client'
 
 import React from 'react'
-import { prisma } from '@/lib/prisma'
-import { CheckCircle2, User, FileText, ShieldCheck, FileKey, XCircle, Phone, MessageSquare } from 'lucide-react'
+import { CheckCircle2, User, FileText, ShieldCheck, FileKey, XCircle, Phone } from 'lucide-react'
 import Link from 'next/link'
 import SalesVerifyActions from '@/components/SalesVerifyActions'
 import DocumentViewer from '@/components/DocumentViewer'
 import CloseLoanButton from '@/components/CloseLoanButton'
 import DashRealtimeSync from '@/components/DashRealtimeSync'
 
+interface CustomerDocument {
+  id: string
+  documentType: string
+  documentName: string
+  documentUrl: string
+}
+
+interface Customer {
+  id: string
+  name: string
+  phone: string
+  loanAmount: number | null
+  goldWeight: number | null
+  assignedTo?: { name: string } | null
+  documents: CustomerDocument[]
+}
+
+interface Session {
+  id: string | number
+  role: string
+}
+
 interface ManagerOpsDeskProps {
   currentTab: string
-  customers: any[]
-  session: any
+  customers: Customer[]
+  session: Session | null
   viewUrl?: string
   docName?: string
   docType?: string
@@ -85,13 +106,13 @@ export default function ManagerOpsDesk({
                   <Link href={`${baseUrl}?tab=${currentTab}`} className="btn-secondary" style={{ padding: '8px 16px', fontSize: '13px' }}>
                      Back to Desk
                   </Link>
-                  <div style={{ fontWeight: 700 }}>{bulkCustomer.name}'s All Documents</div>
+                  <div style={{ fontWeight: 700 }}>{bulkCustomer.name}&apos;s All Documents</div>
                </div>
-               <div className="badge badge-waiting">{(bulkCustomer as any).documents.length} Files</div>
+               <div className="badge badge-waiting">{bulkCustomer.documents.length} Files</div>
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-               {(bulkCustomer as any).documents.map((doc: any, idx: number) => (
+               {bulkCustomer.documents.map((doc: CustomerDocument, idx: number) => (
                   <div key={doc.id} style={{ border: '1px solid var(--border-color)', borderRadius: '16px', overflow: 'hidden' }}>
                      <div style={{ padding: '12px 16px', background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between' }}>
                         <span style={{ fontWeight: 600 }}>{idx + 1}. {doc.documentType}</span>
@@ -120,7 +141,7 @@ export default function ManagerOpsDesk({
                </p>
              </div>
           ) : (
-            customers.map((c: any) => (
+            customers.map((c: Customer) => (
                <div key={c.id} className="card" style={{ 
                  display: 'flex', 
                  flexDirection: 'row', 
@@ -232,7 +253,7 @@ export default function ManagerOpsDesk({
                      </div>
                    ) : (
                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '12px' }}>
-                       {c.documents.map((doc: any) => (
+                       {c.documents.map((doc: CustomerDocument) => (
                           <div key={doc.id} style={{ padding: '12px', background: 'var(--surface-hover)', borderRadius: '8px', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
                                <FileText size={16} color="var(--primary-color)" />

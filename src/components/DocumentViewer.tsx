@@ -1,6 +1,6 @@
 'use client'
 
-import { ArrowLeft, Download, FileText, ExternalLink, RefreshCw } from 'lucide-react'
+import { ArrowLeft, FileText, RefreshCw } from 'lucide-react'
 import Link from 'next/link'
 import { useState } from 'react'
 
@@ -16,9 +16,6 @@ export default function DocumentViewer({ url, name, type }: { url: string, name?
   const isImage = sanitizedUrl.match(/\.(jpeg|jpg|gif|png|webp)(\?|#|$)/i) || 
                   type?.toLowerCase().includes('photo') || 
                   type?.toLowerCase().includes('image')
-
-  const isPdf = sanitizedUrl.match(/\.pdf(\?|#|$)/i) || 
-                type?.toLowerCase().includes('pdf')
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px' }}>

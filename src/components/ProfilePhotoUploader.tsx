@@ -37,9 +37,10 @@ export default function ProfilePhotoUploader({ customerId, initialPhotoUrl }: { 
       })
 
       router.refresh()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Failed to upload photo:', error)
-      alert(`Avatar System offline: ${error.message || String(error)}. Try hard refreshing your cache.`)
+      const msg = error instanceof Error ? error.message : String(error)
+      alert(`Avatar System offline: ${msg}. Try hard refreshing your cache.`)
       setPreview(initialPhotoUrl) // revert
     } finally {
       setIsUploading(false)

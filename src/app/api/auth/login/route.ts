@@ -61,11 +61,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ success: true, role: user.role })
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('CRITICAL LOGIN ERROR:', error)
+    const message = error instanceof Error ? error.message : String(error)
     return NextResponse.json({ 
       error: 'Internal Server Error', 
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined 
+      details: process.env.NODE_ENV === 'development' ? message : undefined 
     }, { status: 500 })
   }
 }

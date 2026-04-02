@@ -1,7 +1,7 @@
 import { prisma } from '@/lib/prisma'
-import { ShieldCheck, User, Clock, Activity, Target, Phone, ArrowUpRight } from 'lucide-react'
+import { User, Activity, ArrowUpRight } from 'lucide-react'
 import Link from 'next/link'
-import { format, formatDistanceToNow } from 'date-fns'
+import { formatDistanceToNow } from 'date-fns'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import DashRealtimeSync from '@/components/DashRealtimeSync'
@@ -12,6 +12,10 @@ export default async function StaffMonitoringPage() {
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
+
+  // Extracted outside render to avoid "impure function in render" lint error
+  const now = Date.now()
+  const oneDayAgo = new Date(now - 24 * 60 * 60 * 1000)
 
   if (session?.role !== 'MANAGER') {
     return <div className="p-8 text-center text-zinc-500">Access Denied</div>
@@ -32,7 +36,7 @@ export default async function StaffMonitoringPage() {
   // Fetch Recent Activity (Modified customers in last 24h)
   const recentActivities = await prisma.customer.findMany({
     where: { 
-      updatedAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+      updatedAt: { gte: oneDayAgo },
       assignedTo: { isNot: null }
     },
     include: { assignedTo: { select: { name: true } } },
@@ -63,7 +67,7 @@ export default async function StaffMonitoringPage() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
             {staffMembers.map((staff) => {
               // Now strictly checks if staff pinged within the last 2 minutes for high-accuracy liveness
-              const isOnline = staff.locationUpdatedAt && (Date.now() - new Date(staff.locationUpdatedAt).getTime() < 2 * 60 * 1000)
+              const isOnline = staff.locationUpdatedAt && (now - new Date(staff.locationUpdatedAt).getTime() < 2 * 60 * 1000)
               
               return (
                 <div key={staff.id} className="card" style={{ padding: '0', overflow: 'hidden' }}>

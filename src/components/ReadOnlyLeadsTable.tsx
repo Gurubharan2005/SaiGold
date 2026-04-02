@@ -3,7 +3,16 @@
 import { Phone, MapPin } from 'lucide-react'
 import { formatDistanceToNow } from 'date-fns'
 
-export default function ReadOnlyLeadsTable({ leads }: { leads: any[] }) {
+interface Lead {
+  id: string
+  name: string
+  phone: string
+  branch?: string | null
+  status: string
+  createdAt: string | Date
+}
+
+export default function ReadOnlyLeadsTable({ leads }: { leads: Lead[] }) {
   return (
     <div className="card" style={{ padding: '0' }}>
       <div className="table-container" style={{ margin: 0 }}>
@@ -24,7 +33,7 @@ export default function ReadOnlyLeadsTable({ leads }: { leads: any[] }) {
               </td>
             </tr>
           ) : (
-            leads.map((lead: any) => (
+            leads.map((lead) => (
               <tr key={lead.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}>
                 <td style={{ padding: '16px', fontWeight: 500 }}>{lead.name}</td>
                 <td style={{ padding: '16px' }}>

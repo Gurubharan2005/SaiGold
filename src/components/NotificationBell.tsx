@@ -9,7 +9,7 @@ type Notice = {
   id: string
   name: string
   phone: string
-  dueDate: string
+  dueDate: string | null
   loanAmount: number | null
 }
 
@@ -25,7 +25,10 @@ export default function NotificationBell({ notifications: propNotifications }: {
   const handleCallAndDismiss = async (n: Notice) => {
     // 1. Optimistically hide the item and trigger dialer
     setDismissedIds(prev => [...prev, n.id])
-    window.location.href = `tel:${n.phone}`
+    // Use a temporary anchor to open the tel: URI without mutating window.location directly
+    const a = document.createElement('a')
+    a.href = `tel:${n.phone}`
+    a.click()
 
     // 2. Clear state if menu closes to reset or just background-dismiss
     try {
@@ -126,7 +129,7 @@ export default function NotificationBell({ notifications: propNotifications }: {
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                           <span style={{ color: 'var(--text-color)', fontWeight: 600, fontSize: '13px' }}>{n.name}</span>
                           <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
-                            {n.loanAmount ? `₹${n.loanAmount.toLocaleString()}` : 'No amount'} • Due {formatDistanceToNow(new Date(n.dueDate), { addSuffix: true })}
+                            {n.loanAmount ? `₹${n.loanAmount.toLocaleString()}` : 'No amount'} • Due {n.dueDate ? formatDistanceToNow(new Date(n.dueDate), { addSuffix: true }) : 'No date set'}
                           </span>
                           <span style={{ fontSize: '11px', color: 'var(--primary-color)', fontWeight: 600, marginTop: '4px' }}>Click to Call & Dismiss</span>
                         </div>

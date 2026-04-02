@@ -5,8 +5,20 @@ import { Phone, MessageSquare, User, Calendar } from 'lucide-react'
 import { format } from 'date-fns'
 import { StatusBadge } from './StatusBadge'
 
+interface Customer {
+  id: string
+  name: string
+  phone: string
+  status: string
+  photoUrl?: string | null
+  loanAmount?: number | null
+  goldWeight?: number | null
+  updatedAt?: string | Date | null
+  followUpDate?: string | Date | null
+}
+
 interface LeadCardProps {
-  customer: any;
+  customer: Customer;
   children?: React.ReactNode;
 }
 

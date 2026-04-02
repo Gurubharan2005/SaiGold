@@ -34,9 +34,9 @@ export default function DocumentUploader({ customerId }: { customerId: string })
       if (inputFileRef.current) inputFileRef.current.value = ''
       
       router.refresh()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('File upload error:', error)
-      alert(error.message)
+      alert(error instanceof Error ? error.message : 'Upload failed')
     } finally {
       setIsUploading(false)
     }

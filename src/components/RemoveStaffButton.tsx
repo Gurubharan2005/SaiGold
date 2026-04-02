@@ -16,8 +16,8 @@ export default function RemoveStaffButton({ staffId, staffName }: { staffId: str
       const res = await fetch(`/api/staff/${staffId}`, { method: 'DELETE' })
       if (!res.ok) throw new Error('Failed to deactivate staff member')
       router.refresh()
-    } catch (error: any) {
-      alert(error.message)
+    } catch (error: unknown) {
+      alert(error instanceof Error ? error.message : 'Failed to deactivate staff member')
       setLoading(false)
     }
   }

@@ -40,8 +40,8 @@ export default function OngoingQuickUpdate({
       
       setIsOpen(false)
       router.refresh()
-    } catch (e: any) {
-      alert("Failed to save loan details.")
+    } catch {
+      alert('Failed to save loan details.')
     } finally {
       setLoading(false)
     }

@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma'
 import NotificationBell from './NotificationBell'
 import { decrypt } from '@/lib/auth'
 import { cookies } from 'next/headers'
+import { Prisma } from '@prisma/client'
 
 /**
  * High-Performance Notification Loader (Streaming)
@@ -19,7 +20,7 @@ export default async function NotificationLoader() {
   sevenDaysFromNow.setDate(sevenDaysFromNow.getDate() + 7)
 
   // Re-use logic from the old layout fetch
-  const baseWhere: any = {
+  const baseWhere: Prisma.CustomerWhereInput = {
     status: { not: 'CLOSED' },
     OR: [
       { dueDate: { lte: sevenDaysFromNow, not: null } },
@@ -32,14 +33,15 @@ export default async function NotificationLoader() {
           { lastCalledAt: { lt: startOfToday } }
         ]
       }
-    ]
+    ],
   }
 
-  if (session?.role !== 'MANAGER') {
-    baseWhere.AND.push({
+  if (session?.role !== 'MANAGER' && session?.id) {
+    const andArray = baseWhere.AND as Prisma.CustomerWhereInput[]
+    andArray.push({
        OR: [
-         { createdById: String(session?.id) },
-         { assignedToId: String(session?.id) }
+         { createdById: String(session.id) },
+         { assignedToId: String(session.id) }
        ]
     })
   }
@@ -53,12 +55,17 @@ export default async function NotificationLoader() {
   })
 
   // Format natively for Client Component hydration
-  const notifications = rawNotifications.map((n: any) => ({
+  const notifications = rawNotifications.map((n) => ({
     id: n.id,
     name: n.name,
     phone: n.phone,
     loanAmount: n.loanAmount,
-    dueDate: n.dueDate ? new Date(n.dueDate).toISOString() : n.followUpDate ? new Date(n.followUpDate).toISOString() : new Date().toISOString()
+    // Prefer dueDate, fall back to followUpDate; null means no schedule set
+    dueDate: n.dueDate
+      ? new Date(n.dueDate).toISOString()
+      : n.followUpDate
+        ? new Date(n.followUpDate).toISOString()
+        : null
   }))
 
   return <NotificationBell notifications={notifications} />

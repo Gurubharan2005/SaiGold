@@ -8,14 +8,8 @@ export async function POST(request: Request): Promise<NextResponse> {
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
 
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-
-  let session
-  try {
-    session = await decrypt(token)
-  } catch (err) {
-    return NextResponse.json({ error: 'Invalid Token' }, { status: 401 })
-  }
+  const session = token ? await decrypt(token) : null
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const filename = searchParams.get('filename')
@@ -64,9 +58,10 @@ export async function POST(request: Request): Promise<NextResponse> {
     })
 
     return NextResponse.json({ blob, document }, { status: 200 })
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : String(error)
     console.error('Failure saving document:', error)
-    return NextResponse.json({ error: `Upload Crash: ${error.message || String(error)}` }, { status: 500 })
+    return NextResponse.json({ error: `Upload Crash: ${msg}` }, { status: 500 })
   }
 }
 

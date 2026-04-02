@@ -29,7 +29,12 @@ export default function QuickStatusActions({ customerId, phone }: QuickStatusAct
     setLoading(status)
     setIsMenuOpen(false)
     try {
-      const payload: any = { 
+      type StatusPayload = {
+        status: string
+        callStatus: string
+        followUpDate?: string
+      }
+      const payload: StatusPayload = { 
         status,
         callStatus: 'CALLED' // Auto-update call status when making a decision
       }

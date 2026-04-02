@@ -3,6 +3,21 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 
+// Allowed hostnames for the media proxy — prevents SSRF attacks
+const ALLOWED_BLOB_HOSTS = [
+  'public.blob.vercel-storage.com',
+  'blob.vercel-storage.com',
+]
+
+function isAllowedBlobUrl(url: string): boolean {
+  try {
+    const { hostname } = new URL(url)
+    return ALLOWED_BLOB_HOSTS.some(h => hostname === h || hostname.endsWith('.' + h))
+  } catch {
+    return false
+  }
+}
+
 /**
  * Unified Media Handler
  * GET: Securely proxy private Vercel Blobs for client-side rendering.
@@ -20,6 +35,11 @@ export async function GET(request: Request) {
   const url = searchParams.get('url')
   
   if (!url) return new NextResponse('Missing URL', { status: 400 })
+
+  // Security: Reject any URL not pointing to Vercel Blob storage (prevents SSRF)
+  if (!isAllowedBlobUrl(url)) {
+    return new NextResponse('Forbidden: URL not allowed', { status: 403 })
+  }
 
   try {
     const res = await fetch(url, {
@@ -45,7 +65,9 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
-  if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  const session = token ? await decrypt(token) : null
+  // Validate token is present AND cryptographically valid
+  if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
   const { searchParams } = new URL(request.url)
   const filename = searchParams.get('filename')
@@ -58,7 +80,7 @@ export async function POST(request: Request) {
     const securePath = `media/${Date.now()}-${filename.replace(/[^a-zA-Z0-9.-]/g, '_')}`
     const blob = await put(securePath, request.body, { access: 'private' })
     return NextResponse.json({ url: blob.url }, { status: 200 })
-  } catch (error: any) {
+  } catch {
     return NextResponse.json({ error: 'Upload Failed' }, { status: 500 })
   }
 }

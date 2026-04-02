@@ -23,9 +23,9 @@ export default function DeleteDocumentButton({ documentId }: { documentId: strin
       }
 
       router.refresh()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error)
-      alert(error.message)
+      alert(error instanceof Error ? error.message : 'Failed to delete document')
     } finally {
       setIsDeleting(false)
     }

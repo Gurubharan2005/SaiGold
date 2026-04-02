@@ -28,9 +28,9 @@ export default function StaffForm({ onSuccess }: { onSuccess?: () => void }) {
       setFormData({ name: '', email: '', password: '', role: 'STAFF' })
       router.refresh()
       if (onSuccess) onSuccess()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error)
-      alert(error.message)
+      alert(error instanceof Error ? error.message : 'Failed to create account')
     } finally {
       setLoading(false)
     }

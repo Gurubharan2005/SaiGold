@@ -4,7 +4,18 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, X, Check } from 'lucide-react'
 
-export function CustomerEditForm({ customer, isOpen, onClose }: { customer: any, isOpen: boolean, onClose: () => void }) {
+export interface CustomerData {
+  id: string
+  name: string
+  phone: string
+  branch?: string | null
+  loanAmount?: number | null
+  goldWeight?: number | null
+  interestRate?: number | null
+  startDate?: string | Date | null
+}
+
+export function CustomerEditForm({ customer, isOpen, onClose }: { customer: CustomerData, isOpen: boolean, onClose: () => void }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   
@@ -29,7 +40,7 @@ export function CustomerEditForm({ customer, isOpen, onClose }: { customer: any,
     setLoading(true)
 
     try {
-      const payload: any = {
+      const payload: Record<string, unknown> = {
         name: formData.name,
         phone: formData.phone,
         branch: formData.branch,

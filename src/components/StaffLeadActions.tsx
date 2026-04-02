@@ -25,7 +25,7 @@ export function StaffLeadActions({ leadId }: { leadId: string }) {
       } else {
         router.refresh()
       }
-    } catch (e) {
+    } catch {
       alert('Network Error')
     } finally {
       setLoading(null)

@@ -33,9 +33,9 @@ export default function CloseLoanButton({
       // Route the user back out immediately since the current URL profile is now globally deleted
       router.push('/dashboard/customers')
       router.refresh()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error)
-      alert(error.message)
+      alert(error instanceof Error ? error.message : 'Failed to close loan')
       setIsDeleting(false)
     }
   }

@@ -4,6 +4,7 @@ import { del } from '@vercel/blob'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { format } from 'date-fns'
+import { Prisma } from '@prisma/client'
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
@@ -24,7 +25,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (!currentCustomer) return NextResponse.json({ error: 'Not found' }, { status: 404 })
 
     // We can dynamically define updates based on the exact keys sent.
-    const updateData: any = {}
+    const updateData: Record<string, unknown> = {}
     if (name) updateData.name = name
     if (phone) updateData.phone = phone
     if (status) updateData.status = status
@@ -108,7 +109,7 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ id: s
 
     // 2. Iterate heavily and purge the Vercel Blob entries via native S3 execution parameters
     if (customer.documents && customer.documents.length > 0) {
-       const deletePromises = customer.documents.map((doc: any) => del(doc.documentUrl))
+       const deletePromises = customer.documents.map((doc) => del(doc.documentUrl))
        await Promise.allSettled(deletePromises)
        
        // Also delete document records from DB but keep the Customer record

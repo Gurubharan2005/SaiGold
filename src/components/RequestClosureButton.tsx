@@ -36,9 +36,9 @@ export default function RequestClosureButton({
       }
 
       router.refresh()
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error(error)
-      alert(error.message)
+      alert(error instanceof Error ? error.message : 'Failed to request closure')
     } finally {
       setIsPending(false)
     }
