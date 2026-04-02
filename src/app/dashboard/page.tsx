@@ -30,7 +30,12 @@ export default async function DashboardPage() {
 
     return (
       <div className="fade-in">
-        <h1 style={{ fontSize: '28px', marginBottom: '24px' }}>Branch Performance Summary</h1>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+          <h1 style={{ fontSize: '28px', margin: 0 }}>Branch Performance Summary</h1>
+          <span style={{ fontSize: '10px', color: 'var(--text-secondary)', background: 'var(--surface-hover)', padding: '4px 8px', borderRadius: '4px' }}>
+            Latest Sync: 14:35 UTC
+          </span>
+        </div>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '32px' }}>
           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
