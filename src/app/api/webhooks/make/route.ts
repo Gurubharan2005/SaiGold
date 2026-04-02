@@ -49,29 +49,33 @@ export async function POST(req: Request) {
     const branch: string = (body.branch || body.city || body.location || '').trim()
     const notes: string = (body.notes || body.ad_name || body.adName || body.campaign_name || '').trim()
 
-    // Validate required fields
-    if (!name || !phone) {
-      console.warn('Make.com: Missing name or phone. Body received:', JSON.stringify(body))
+    // Validate — only name is required, phone can be filled in later by staff
+    if (!name) {
+      console.warn('Make.com: Missing name. Body received:', JSON.stringify(body))
       return NextResponse.json(
-        { error: 'Missing required fields: name and phone are required', received: Object.keys(body) },
+        { error: 'Missing required field: name is required', received: Object.keys(body) },
         { status: 400 }
       )
     }
 
-    // 3. Deduplicate — skip if we already have this phone number as an active lead
-    const existing = await prisma.customer.findFirst({
-      where: {
-        phone: String(phone).trim(),
-        status: { notIn: ['CLOSED', 'REJECTED'] }
-      }
-    })
+    // Phone is optional — staff can call back to get it
+    const finalPhone = phone || 'Not provided'
 
-    if (existing) {
-      console.log(`Make.com: Duplicate lead skipped for phone ${phone}`)
-      return NextResponse.json(
-        { success: true, skipped: true, reason: 'Duplicate lead', existingId: existing.id },
-        { status: 200 }
-      )
+    // 3. Deduplicate — skip if phone is known and already active
+    if (finalPhone !== 'Not provided') {
+      const existing = await prisma.customer.findFirst({
+        where: {
+          phone: finalPhone,
+          status: { notIn: ['CLOSED', 'REJECTED'] }
+        }
+      })
+      if (existing) {
+        console.log(`Make.com: Duplicate lead skipped for phone ${finalPhone}`)
+        return NextResponse.json(
+          { success: true, skipped: true, reason: 'Duplicate lead', existingId: existing.id },
+          { status: 200 }
+        )
+      }
     }
 
     // 4. Auto-assign to a staff member via Round-Robin
@@ -80,8 +84,8 @@ export async function POST(req: Request) {
     // 5. Create the customer record
     const customer = await prisma.customer.create({
       data: {
-        name: String(name).trim(),
-        phone: String(phone).trim(),
+        name: name,
+        phone: finalPhone,
         branch: branch ? String(branch).trim() : null,
         notes: notes ? `[Meta Ad Lead] ${String(notes).trim()}` : '[Meta Ad Lead]',
         status: 'WAITING',
