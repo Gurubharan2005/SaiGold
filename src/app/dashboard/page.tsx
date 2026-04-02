@@ -101,7 +101,7 @@ export default async function DashboardPage() {
   const myAssignedLeads = await prisma.customer.findMany({
     where: { 
       assignedToId: String(session?.id), 
-      status: { in: ['WAITING', 'ACCEPTED', 'DUE'] as any[] } 
+      status: { in: ['WAITING', 'ACCEPTED', 'DUE'] }
     },
     orderBy: { assignedAt: 'desc' },
     select: { id: true, name: true, phone: true, status: true, priority: true }
@@ -134,7 +134,7 @@ export default async function DashboardPage() {
       {/* QUICK ACTIONS */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
          <Link href="/dashboard/customers/new" style={{ textDecoration: 'none' }}>
-           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer', background: 'var(--surface-color)', border: '1px solid var(--border-color)', transition: 'all 0.2s', ':hover': { borderColor: 'var(--primary-color)' } } as any}>
+         <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer' }}>
              <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '50%' }}>
                <UserPlus size={24} color="#10B981" />
              </div>
@@ -160,7 +160,7 @@ export default async function DashboardPage() {
             {myAssignedLeads.length === 0 ? (
               <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>You have no active leads assigned currently.</div>
             ) : (
-              myAssignedLeads.map((lead: any) => (
+              myAssignedLeads.map((lead) => (
                 <div key={lead.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--border-color)' }}>
                   <div>
                     <h4 style={{ margin: 0, fontSize: '15px' }}>{lead.name}</h4>
@@ -189,7 +189,7 @@ export default async function DashboardPage() {
             {followUpsToday.length === 0 ? (
               <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>Great job! You have no more calls scheduled for today.</div>
             ) : (
-              followUpsToday.map((f: any) => (
+              followUpsToday.map((f) => (
                 <div key={f.id} style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(245, 158, 11, 0.05)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '12px' }}>
                     <div>
@@ -209,7 +209,7 @@ export default async function DashboardPage() {
                   </div>
                   {f.followUpNotes && (
                     <div style={{ fontSize: '13px', color: 'var(--text-color)', background: 'var(--surface-color)', padding: '8px', borderRadius: '4px', borderLeft: '2px solid #F59E0B' }}>
-                      "{f.followUpNotes}"
+                      {f.followUpNotes}
                     </div>
                   )}
                 </div>
