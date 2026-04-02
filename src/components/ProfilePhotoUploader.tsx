@@ -20,8 +20,8 @@ export default function ProfilePhotoUploader({ customerId, initialPhotoUrl }: { 
 
     setIsUploading(true)
     try {
-      // 1. Upload to Vercel Blob Avatar Route
-      const res = await fetch(`/api/upload-photo?filename=${encodeURIComponent(file.name)}`, {
+      // 1. Upload to Unified Hub
+      const res = await fetch(`/api/media?filename=${encodeURIComponent(file.name)}`, {
         method: 'POST',
         body: file,
       })
@@ -62,7 +62,7 @@ export default function ProfilePhotoUploader({ customerId, initialPhotoUrl }: { 
       }}>
         {preview ? (
           <img 
-            src={preview.startsWith('data:') ? preview : `/api/avatar?url=${encodeURIComponent(preview)}`} 
+            src={preview.startsWith('data:') ? preview : `/api/media?url=${encodeURIComponent(preview)}`} 
             alt="Customer Avatar" 
             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
             onError={(e) => {

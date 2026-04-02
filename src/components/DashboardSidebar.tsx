@@ -1,6 +1,6 @@
 'use client'
 
-import { LayoutDashboard, Users, UserPlus, FileText, Settings, LogOut, ShieldCheck, Target, Activity, X } from 'lucide-react'
+import { LayoutDashboard, Users, UserPlus, FileText, Settings, LogOut, ShieldCheck, Target, Activity, X, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -86,10 +86,7 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
           {session?.role === 'MANAGER' && (
             <>
               <Link href="/dashboard/analytics" onClick={onClose} style={navItemStyle('/dashboard/analytics')}>
-                <Activity size={20} color="var(--primary-color)" /> Performance Center
-              </Link>
-              <Link href="/dashboard/staff-monitoring" onClick={onClose} style={navItemStyle('/dashboard/staff-monitoring')}>
-                <Activity size={20} color="var(--status-waiting)" /> Staff Monitor
+                <TrendingUp size={20} color="var(--primary-color)" /> Business Performance
               </Link>
               <Link href="/dashboard/documents" onClick={onClose} style={navItemStyle('/dashboard/documents')}>
                 <FileText size={20} /> Documents
