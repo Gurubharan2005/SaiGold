@@ -6,18 +6,9 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import QuickStatusActions from '@/components/QuickStatusActions'
 
-import ManagerOpsDesk from '@/components/ManagerOpsDesk'
-
 export const dynamic = 'force-dynamic';
 
-export default async function DashboardPage({ 
-  searchParams 
-}: { 
-  searchParams: Promise<{ [key: string]: string | undefined }> 
-}) {
-  const { tab, viewUrl, docName, docType, viewAllId } = await searchParams
-  const currentTab = tab || 'verifications'
-
+export default async function DashboardPage() {
   const cookieStore = await cookies()
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
@@ -26,36 +17,16 @@ export default async function DashboardPage({
   // MANAGER VIEW
   // ----------------------------------------------------
   if (session?.role === 'MANAGER') {
-    const pendingLeads = await prisma.customer.count({ where: { status: 'WAITING' } })
-    const dueCustomers = await prisma.customer.count({ where: { status: 'DUE' } })
-
-    // Fetch Operations Desk Data
-    const statusFilter = currentTab === 'history' 
-      ? 'CLOSED' 
-      : currentTab === 'closures' 
-        ? 'CLOSE_REQUESTED' 
-        : 'VERIFIED'
-
-    const opsCustomers = await prisma.customer.findMany({
-      where: { status: statusFilter as any },
-      orderBy: { updatedAt: 'desc' },
-      include: {
-        documents: true,
-        assignedTo: { select: { name: true } }
-      }
-    }) as any[]
-
-    // Fetch newest Meta Leads (createdById is null for webhook leads)
-    const metaLeads = await prisma.customer.findMany({
-      where: { 
-        createdById: null 
-      },
-      orderBy: { createdAt: 'desc' },
-      include: {
-        assignedTo: { select: { name: true } }
-      },
-      take: 5
-    }) as any[]
+    const [pendingLeads, dueCustomers, metaLeads] = await Promise.all([
+      prisma.customer.count({ where: { status: 'WAITING' } }),
+      prisma.customer.count({ where: { status: 'DUE' } }),
+      prisma.customer.findMany({
+        where: { createdById: null },
+        orderBy: { createdAt: 'desc' },
+        include: { assignedTo: { select: { name: true } } },
+        take: 5
+      })
+    ])
 
     return (
       <div className="fade-in">
@@ -110,17 +81,6 @@ export default async function DashboardPage({
               </Link>
            </div>
         </div>
-
-        <ManagerOpsDesk 
-          currentTab={currentTab}
-          customers={opsCustomers}
-          session={session}
-          viewUrl={viewUrl}
-          docName={docName}
-          docType={docType}
-          viewAllId={viewAllId}
-          baseUrl="/dashboard"
-        />
       </div>
     )
   }
