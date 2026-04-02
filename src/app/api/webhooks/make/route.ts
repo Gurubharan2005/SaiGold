@@ -22,12 +22,38 @@ import { getRoundRobinStaffId } from '@/lib/assignment'
 export async function POST(req: Request) {
   try {
     const body = await req.json()
-    const { name, phone, branch, notes } = body
 
-    // 2. Validate required fields
+    // Log raw body so we can see exactly what Make.com is sending
+    console.log('Make.com raw payload:', JSON.stringify(body))
+
+    // Accept multiple field name variants from Facebook Lead Ads
+    const name: string = (
+      body.name ||
+      body.full_name ||
+      body.fullName ||
+      (body.first_name && body.last_name
+        ? `${body.first_name} ${body.last_name}`
+        : body.first_name || body.last_name) ||
+      ''
+    ).trim()
+
+    const phone: string = (
+      body.phone ||
+      body.phone_number ||
+      body.phoneNumber ||
+      body.mobile ||
+      body.contact ||
+      ''
+    ).toString().trim()
+
+    const branch: string = (body.branch || body.city || body.location || '').trim()
+    const notes: string = (body.notes || body.ad_name || body.adName || body.campaign_name || '').trim()
+
+    // Validate required fields
     if (!name || !phone) {
+      console.warn('Make.com: Missing name or phone. Body received:', JSON.stringify(body))
       return NextResponse.json(
-        { error: 'Missing required fields: name and phone are required' },
+        { error: 'Missing required fields: name and phone are required', received: Object.keys(body) },
         { status: 400 }
       )
     }
