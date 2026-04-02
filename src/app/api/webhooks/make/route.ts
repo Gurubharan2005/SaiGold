@@ -21,15 +21,6 @@ import { getRoundRobinStaffId } from '@/lib/assignment'
  */
 export async function POST(req: Request) {
   try {
-    // 1. Verify the secret header to prevent unauthorized pushes
-    const secret = req.headers.get('x-make-secret')
-    const expectedSecret = process.env.MAKE_WEBHOOK_SECRET
-
-    if (expectedSecret && secret !== expectedSecret) {
-      console.warn('Make.com webhook: invalid secret')
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
-    }
-
     const body = await req.json()
     const { name, phone, branch, notes } = body
 
