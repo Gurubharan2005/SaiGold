@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation'
 import { LeadCard } from '@/components/LeadCard'
 import { StaffLeadActions } from '@/components/StaffLeadActions'
 import { User, Target } from 'lucide-react'
+import LiveLeadsRefresh from '@/components/LiveLeadsRefresh'
+import { Prisma } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -22,12 +24,12 @@ export default async function LeadsPage() {
   // 1. Fetch leads based on role
   // Manager sees ALL Meta (Un-closed) leads
   // Staff/Sales sees only THEIR assigned leads
-  const whereClause: any = {
+  const whereClause: Prisma.CustomerWhereInput = {
     status: { in: ['WAITING', 'ACCEPTED', 'PROCESSING', 'VERIFIED', 'FOLLOW_UP', 'NO_RESPONSE'] }
   }
 
   if (!isManager) {
-    whereClause.assignedToId = session.id
+    whereClause.assignedToId = String(session.id)
   }
 
   const leads = await prisma.customer.findMany({
@@ -42,6 +44,7 @@ export default async function LeadsPage() {
 
   return (
     <div className="fade-in">
+      <LiveLeadsRefresh />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div>
           <h1 style={{ fontSize: '28px', margin: 0 }}>
@@ -65,7 +68,7 @@ export default async function LeadsPage() {
             <p>No active Meta leads found in the system.</p>
           </div>
         ) : (
-          leads.map((lead: any) => (
+          leads.map((lead) => (
              <LeadCard key={lead.id} customer={lead}>
                 <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
                    

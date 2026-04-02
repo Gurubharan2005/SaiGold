@@ -1,13 +1,11 @@
-import { ArrowLeft, Edit, Phone, MapPin, Calendar, CreditCard, Hash, FileText, Download, Lock, Check } from 'lucide-react'
+import { ArrowLeft, Phone, MapPin, Calendar, Hash, FileText, Download, Lock, Check } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
-import CustomerStatusSelect from '@/components/CustomerStatusSelect'
 import CustomerSalesControl from '@/components/CustomerSalesControl'
 import DocumentUploader from '@/components/DocumentUploader'
 import DeleteDocumentButton from '@/components/DeleteDocumentButton'
 import CloseLoanButton from '@/components/CloseLoanButton'
 import RequestClosureButton from '@/components/RequestClosureButton'
-import DueDateSelector from '@/components/DueDateSelector'
 import ProfilePhotoUploader from '@/components/ProfilePhotoUploader'
 import { EditProfileModalTrigger } from '@/components/EditProfileModalTrigger'
 import LoanDetailsEditor from '@/components/LoanDetailsEditor'
@@ -46,7 +44,6 @@ export default async function CustomerDetailsPage({
   const session = token ? await decrypt(token) : null
   const isManager = session?.role === 'MANAGER'
   const isSalesman = session?.role === 'SALESMAN'
-  const canViewDocs = isManager || isSalesman || (customer.status === 'ACCEPTED')
 
   // Contextual back link: where did we come from?
   const backHref = from === 'processing' 
@@ -187,7 +184,7 @@ export default async function CustomerDetailsPage({
               <Lock size={20} color="#F59E0B" style={{ margin: '0 auto 12px auto' }} />
               <p style={{ fontSize: '13px', color: '#F59E0B', margin: 0, fontWeight: 600 }}>
                 Detailed data entry is locked. <br />
-                Please ensure this lead is in the "Detail Filling Option" (Processing) to enable profile editing and uploads.
+                 Please ensure this lead is in the &quot;Detail Filling Option&quot; (Processing) to enable profile editing and uploads.
               </p>
             </div>
           )}
@@ -228,7 +225,7 @@ export default async function CustomerDetailsPage({
             {/* Document List Rendering (Always visible for Manager/Salesman, Only on PROCESSING or ACCEPTED for Staff) */}
             {(isManager || isSalesman || (!isManager && !isSalesman && (customer.status === 'PROCESSING' || customer.status === 'ACCEPTED'))) && customer.documents.length > 0 && (
               <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 16px 0', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {customer.documents.map((doc: any) => (
+                {customer.documents.map((doc) => (
                   <li key={doc.id} style={{ display: 'flex', flexDirection: 'column', gap: '4px', padding: '10px', background: 'var(--surface-hover)', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)' }}>
                     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                        <span style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em', fontWeight: 600 }}>{doc.documentType}</span>
