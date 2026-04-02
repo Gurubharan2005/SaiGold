@@ -1,5 +1,13 @@
 import type { Metadata, Viewport } from "next";
+import { Outfit } from "next/font/google"; // High-Performance Font Loading
 import "./globals.css";
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  display: "swap", // Immediate text rendering
+  variable: "--font-outfit",
+});
 
 export const metadata: Metadata = {
   title: "Sai Gold Loans CRM",
@@ -29,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className={outfit.variable}>
       <head>
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />

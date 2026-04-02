@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+/* Global Styling with Native Asset Hosting */
 
 :root {
   /* Dynamic Slate & Gold Theme */
@@ -43,7 +43,7 @@ html {
 }
 
 body {
-  font-family: 'Outfit', sans-serif;
+  font-family: var(--font-outfit), sans-serif;
   background-color: var(--bg-color);
   color: var(--text-primary);
   line-height: 1.5;
