@@ -109,3 +109,14 @@ enum CallStatus {
   BUSY
   INTERESTED
 }
+
+model MetaLeadQueue {
+  id          String   @id @default(uuid())
+  leadgenId   String   @unique
+  formId      String?
+  pageId      String?
+  createdAt   DateTime @default(now())
+  isProcessed Boolean  @default(false)
+
+  @@map("meta_lead_queue")
+}
