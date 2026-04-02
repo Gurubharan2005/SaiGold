@@ -67,29 +67,29 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
 
           {(session?.role === 'MANAGER' || session?.role === 'STAFF') && (
             <Link href="/dashboard/customers?tab=ongoing" onClick={onClose} style={navItemStyle('/dashboard/customers?tab=ongoing')}>
-              <Users size={20} color="var(--primary-color)" /> Ongoing Customers
+              <Users size={20} color="var(--primary-color)" /> Active Customers
             </Link>
           )}
 
           {(session?.role === 'MANAGER' || session?.role === 'STAFF') && (
             <Link href="/dashboard/leads" onClick={onClose} style={navItemStyle('/dashboard/leads')}>
-              <Activity size={20} color="var(--status-waiting)" /> {session?.role === 'MANAGER' ? 'Global Meta Leads' : 'My Meta Leads'}
+              <Activity size={20} color="var(--status-waiting)" /> {session?.role === 'MANAGER' ? 'Facebook Ad Leads' : 'My Ad Leads'}
             </Link>
           )}
 
           {(session?.role === 'MANAGER' || session?.role === 'STAFF') && (
              <Link href="/dashboard/detail-filling" onClick={onClose} style={navItemStyle('/dashboard/detail-filling')}>
-               <FileText size={20} color="var(--status-processing)" /> Detail Filling
+               <FileText size={20} color="var(--status-processing)" /> Loan Master Form
              </Link>
           )}
 
           {session?.role === 'MANAGER' && (
             <>
               <Link href="/dashboard/analytics" onClick={onClose} style={navItemStyle('/dashboard/analytics')}>
-                <Activity size={20} color="var(--primary-color)" /> Funnel Analytics
+                <Activity size={20} color="var(--primary-color)" /> Performance Center
               </Link>
               <Link href="/dashboard/staff-monitoring" onClick={onClose} style={navItemStyle('/dashboard/staff-monitoring')}>
-                <Activity size={20} color="var(--status-waiting)" /> Staff Activity
+                <Activity size={20} color="var(--status-waiting)" /> Staff Monitor
               </Link>
               <Link href="/dashboard/documents" onClick={onClose} style={navItemStyle('/dashboard/documents')}>
                 <FileText size={20} /> Documents

@@ -47,10 +47,10 @@ export default async function StaffMonitoringPage() {
       <div style={{ marginBottom: '32px' }}>
         <h1 style={{ fontSize: '28px', margin: 0, display: 'flex', alignItems: 'center', gap: '12px' }}>
           <Activity size={32} color="var(--primary-color)" />
-          Staff Activity Monitor
+          Branch Staff Monitor
         </h1>
         <p style={{ color: 'var(--text-secondary)', marginTop: '8px' }}>
-          Real-time oversight of staff assignments, active customer handling, and branch efficiency.
+          Real-time view of who is online and which customers they are currently helping.
         </p>
       </div>
 
@@ -58,7 +58,7 @@ export default async function StaffMonitoringPage() {
         
         {/* Staff Operations Grid */}
         <div style={{ gridColumn: 'span 2', display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Branch Personnel</h2>
+          <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Branch Team members</h2>
           
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
             {staffMembers.map((staff) => {
@@ -84,7 +84,7 @@ export default async function StaffMonitoringPage() {
                   
                   <div style={{ padding: '16px' }}>
                     <div style={{ marginBottom: '12px', fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Handling:</span>
+                      <span>Current Load:</span>
                       <span className="badge badge-waiting">{staff.assignedCustomers.length} Customers</span>
                     </div>
                     
@@ -120,11 +120,11 @@ export default async function StaffMonitoringPage() {
 
         {/* Live Activity Feed */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-          <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Live Modification Feed</h2>
+          <h2 style={{ fontSize: '18px', margin: 0, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Live Action Feed</h2>
           
           <div className="card" style={{ padding: '0', flex: 1, minHeight: '600px' }}>
              <div style={{ padding: '16px', borderBottom: '1px solid var(--border-color)', fontWeight: 700, fontSize: '14px', background: 'rgba(16, 185, 129, 0.05)', color: '#10B981', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Activity size={16} /> Recent Actions (Pulse)
+                <Activity size={16} /> Latest Staff Updates
              </div>
              
              <div style={{ padding: '0' }}>

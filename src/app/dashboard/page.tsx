@@ -59,7 +59,7 @@ export default async function DashboardPage({
 
     return (
       <div className="fade-in">
-        <h1 style={{ fontSize: '28px', marginBottom: '24px' }}>Branch Overview</h1>
+        <h1 style={{ fontSize: '28px', marginBottom: '24px' }}>Branch Performance Summary</h1>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '32px' }}>
           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
@@ -67,7 +67,7 @@ export default async function DashboardPage({
               <Clock size={28} color="var(--status-waiting)" />
             </div>
             <div>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>Awaiting Initial Connect</p>
+              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>New Leads (Not Yet Called)</p>
               <h2 style={{ margin: 0, fontSize: '28px' }}>{pendingLeads}</h2>
             </div>
           </div>
@@ -77,7 +77,7 @@ export default async function DashboardPage({
               <AlertCircle size={28} color="var(--status-due)" />
             </div>
             <div>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>Due Customers</p>
+              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>Payments Due Today</p>
               <h2 style={{ margin: 0, fontSize: '28px' }}>{dueCustomers}</h2>
             </div>
           </div>
@@ -86,7 +86,7 @@ export default async function DashboardPage({
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px' }}>
            <div className="card" style={{ padding: '24px' }}>
               <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                 <Target size={18} color="var(--primary-color)" /> Meta Live Leads
+                 <Target size={18} color="var(--primary-color)" /> Latest Facebook Enquiries
               </h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                  {metaLeads.length === 0 ? (
@@ -106,7 +106,7 @@ export default async function DashboardPage({
                  )}
               </div>
               <Link href="/dashboard/leads" style={{ display: 'block', marginTop: '16px', textAlign: 'center', fontSize: '12px', color: 'var(--primary-color)', textDecoration: 'none' }}>
-                 View Full Meta Leads Board →
+                 View All Ad Leads &rarr;
               </Link>
            </div>
         </div>
@@ -161,8 +161,8 @@ export default async function DashboardPage({
       {/* HEADER OVERVIEW */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
-          <h1 style={{ fontSize: '28px', margin: 0 }}>Staff Workspace</h1>
-          <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>Manage assignments and organize priorities actively.</p>
+          <h1 style={{ fontSize: '28px', margin: 0 }}>Sales Dashboard</h1>
+          <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>Manage your assigned leads and track your daily targets.</p>
         </div>
       </div>
 
@@ -173,10 +173,10 @@ export default async function DashboardPage({
              <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '50%' }}>
                <UserPlus size={24} color="#10B981" />
              </div>
-             <div>
-               <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--text-color)' }}>Quick Add Customer</h3>
-               <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>Manually insert walk-ins instantly</p>
-             </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--text-color)' }}>New Walk-in Entry</h3>
+                <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>Instantly register a customer who visited the branch.</p>
+              </div>
            </div>
          </Link>
       </div>
@@ -187,7 +187,7 @@ export default async function DashboardPage({
         <div className="card" style={{ padding: 0, overflow: 'visible', borderRadius: '12px' }}>
           <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
             <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Target size={18} color="var(--primary-color)" /> My Active Assignments
+              <Target size={18} color="var(--primary-color)" /> My Ongoing Leads
             </h3>
             <span className="badge badge-waiting">{myAssignedLeads.length} Total</span>
           </div>
@@ -216,13 +216,13 @@ export default async function DashboardPage({
         <div className="card" style={{ padding: 0, overflow: 'visible', borderRadius: '12px' }}>
           <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
             <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Clock size={18} color="#F59E0B" /> Follow-Ups Today
+              <Clock size={18} color="#F59E0B" /> Today's Calling List
             </h3>
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>{format(todayStart, 'MMM dd')}</span>
           </div>
           <div style={{ maxHeight: '400px', overflowY: 'auto', paddingBottom: '80px' }}>
             {followUpsToday.length === 0 ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>You possess no required follow-ups for today.</div>
+              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>Great job! You have no more calls scheduled for today.</div>
             ) : (
               followUpsToday.map((f: any) => (
                 <div key={f.id} style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(245, 158, 11, 0.05)' }}>
