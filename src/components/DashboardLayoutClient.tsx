@@ -1,16 +1,16 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, ReactNode } from 'react'
 import DashboardSidebar from './DashboardSidebar'
 import DashboardHeader from './DashboardHeader'
 
 interface ClientLayoutProps {
   session: any
-  notifications: any[]
+  noticeSlot?: ReactNode
   children: React.ReactNode
 }
 
-export default function DashboardLayoutClient({ session, notifications, children }: ClientLayoutProps) {
+export default function DashboardLayoutClient({ session, noticeSlot, children }: ClientLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
 
   // Security: Handle "Back" button after logout and active session monitoring
@@ -70,7 +70,7 @@ export default function DashboardLayoutClient({ session, notifications, children
       }}>
         <DashboardHeader 
           session={session} 
-          notifications={notifications} 
+          noticeSlot={noticeSlot} 
           onMenuClick={() => setIsSidebarOpen(true)} 
         />
         

@@ -4,8 +4,8 @@ import "./globals.css";
 
 const outfit = Outfit({
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  display: "swap", // Immediate text rendering
+  weight: ["400", "600"],
+  display: "swap",
   variable: "--font-outfit",
 });
 
@@ -42,7 +42,7 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body className={outfit.className}>
+      <body className={`${outfit.variable} font-sans`}>
         {children}
         <SpeedInsights />
       </body>

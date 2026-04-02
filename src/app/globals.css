@@ -42,7 +42,7 @@ html {
   scroll-behavior: smooth;
 }
 
-body {
+body, .font-sans {
   font-family: var(--font-outfit), sans-serif;
   background-color: var(--bg-color);
   color: var(--text-primary);

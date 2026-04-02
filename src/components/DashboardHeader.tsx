@@ -1,17 +1,16 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, ReactNode } from 'react'
 import { Menu, Search } from 'lucide-react'
-import NotificationBell from '@/components/NotificationBell'
 import { useRouter } from 'next/navigation'
 
 interface HeaderProps {
   session: any
-  notifications: any[]
+  noticeSlot?: ReactNode // Support for Streaming Notifications
   onMenuClick: () => void
 }
 
-export default function DashboardHeader({ session, notifications, onMenuClick }: HeaderProps) {
+export default function DashboardHeader({ session, noticeSlot, onMenuClick }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('')
   const router = useRouter()
 
@@ -81,8 +80,8 @@ export default function DashboardHeader({ session, notifications, onMenuClick }:
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
-        {/* Mobile-only visual spacer for search if needed later, right now hidden */}
-        <NotificationBell notifications={notifications} />
+        {/* The Notification Bell is now a slot for performance streaming */}
+        {noticeSlot}
         <div className={`badge badge-${session?.role === 'MANAGER' ? 'accepted' : 'processing'}`}>
           {session?.role || 'STAFF'}
         </div>

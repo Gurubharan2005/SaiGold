@@ -16,13 +16,21 @@ export default async function AnalyticsDashboard() {
     redirect('/dashboard')
   }
 
-  // Fetch metrics purely on the DB level to prevent large memory overhead
-  const totalLeads = await prisma.customer.count()
-  
-  const statusCounts = await prisma.customer.groupBy({
-    by: ['status'],
-    _count: { status: true }
-  })
+  // Parallelize metrics fetching to eliminate the "DB Waterfall"
+  const [totalLeads, statusCounts, contactedLeads] = await Promise.all([
+    prisma.customer.count(),
+    prisma.customer.groupBy({
+      by: ['status'],
+      _count: { status: true }
+    }),
+    prisma.customer.findMany({
+      where: {
+        assignedAt: { not: null },
+        firstContactAt: { not: null }
+      },
+      select: { assignedAt: true, firstContactAt: true }
+    })
+  ])
 
   // Conversion Map
   const metrics = {
@@ -39,15 +47,6 @@ export default async function AnalyticsDashboard() {
   
   statusCounts.forEach(stat => {
     metrics[stat.status as keyof typeof metrics] = stat._count.status
-  })
-
-  // Calculate Average Response Time for leads that have been assigned and contacted
-  const contactedLeads = await prisma.customer.findMany({
-    where: {
-      assignedAt: { not: null },
-      firstContactAt: { not: null }
-    },
-    select: { assignedAt: true, firstContactAt: true }
   })
 
   let avgResponseMinutes = 0
