@@ -21,6 +21,8 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -32,7 +34,10 @@ export default function RootLayout({
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
       </head>
-      <body>{children}</body>
+      <body>
+        {children}
+        <SpeedInsights />
+      </body>
     </html>
   );
 }
