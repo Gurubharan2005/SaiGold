@@ -99,7 +99,10 @@ export async function POST(
            },
            include: { uploadedBy: { select: { name: true, role: true } } }
          })
-         if (finalRecording) break
+          if (finalRecording) {
+            console.log(`[Recordings-API] Success! DB entry created for ${id} by ${session.id}`)
+            break
+          }
        } catch (e: any) {
          console.warn(`[DB-Retry] Attempt ${i+1} failed:`, e.message)
          error = e

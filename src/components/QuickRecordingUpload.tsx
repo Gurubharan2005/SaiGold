@@ -67,7 +67,7 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
         }
       })
 
-      addLog('Step 4: Secure storage transfer success! Finalizing metadata...')
+      addLog(`Step 4: Storage transfer success! Syncing metadata for ${customerId}...`)
 
       /**
        * STEP 2: Database Sync
@@ -84,6 +84,7 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
 
       if (!res.ok) {
         const d = await res.json().catch(() => ({ error: 'Database Handshake Failed' }))
+        addLog(`CRITICAL ERROR during Database Sync: ${d.error || res.statusText}`)
         throw new Error(d.error || `Server Error ${res.status}`)
       }
 

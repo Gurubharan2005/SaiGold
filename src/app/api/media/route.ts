@@ -51,10 +51,13 @@ export async function GET(request: Request) {
     if (!res.ok) return new NextResponse('Fetch failed', { status: res.status })
 
     const arrayBuffer = await res.arrayBuffer()
+    const contentType = res.headers.get('Content-Type') || 'audio/mpeg'
+    
     return new NextResponse(arrayBuffer, {
       headers: {
-        'Content-Type': res.headers.get('Content-Type') || 'image/jpeg',
-        'Cache-Control': 'public, max-age=86400'
+        'Content-Type': contentType,
+        'Cache-Control': 'public, max-age=86400',
+        'Content-Disposition': `inline; filename="media-${Date.now()}"`
       }
     })
   } catch (err: any) {
