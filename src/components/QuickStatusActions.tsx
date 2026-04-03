@@ -71,36 +71,11 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
-      <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
-          {/* PRIMARY CONVERT ACTION */}
-          <button 
-            onClick={() => handleStatusUpdate('PROCESSING')}
-            disabled={!!loading}
-            style={{ 
-              flex: 1, 
-              background: 'var(--primary-color)', 
-              color: '#111', 
-              fontWeight: 800, 
-              padding: '12px', 
-              borderRadius: '10px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center', 
-              gap: '8px', 
-              fontSize: '14px',
-              boxShadow: 'var(--shadow-glow)'
-            }}
-          >
-            {loading === 'PROCESSING' ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
-            CONVERT TO LOAN
-          </button>
-      </div>
-
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', width: '100%' }}>
         
-        {/* Left Side: Stats & Communication */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }} ref={menuRef}>
+        {/* Primary Interaction Row */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }} ref={menuRef}>
           <RecordingsBadge customerId={customerId} customerName={customerName} />
           
           <a 
@@ -109,8 +84,8 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
             rel="noopener noreferrer"
             title="WhatsApp"
             style={{ 
-              padding: '10px', 
-              borderRadius: '10px', 
+              padding: '12px', 
+              borderRadius: '12px', 
               background: 'rgba(34, 197, 94, 0.1)', 
               color: '#22c55e',
               display: 'flex',
@@ -120,15 +95,15 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
               textDecoration: 'none'
             }}
           >
-            <MessageCircle size={20} />
+            <MessageCircle size={22} />
           </a>
 
           <a 
             href={`tel:${phone}`} 
             title="Direct Call"
             style={{ 
-              padding: '10px', 
-              borderRadius: '10px', 
+              padding: '12px', 
+              borderRadius: '12px', 
               background: 'rgba(16, 185, 129, 0.1)', 
               color: '#10B981',
               display: 'flex',
@@ -138,14 +113,14 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
               textDecoration: 'none'
             }}
           >
-            <Phone size={20} />
+            <Phone size={22} />
           </a>
 
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             style={{
-              padding: '10px', 
-              borderRadius: '10px', 
+              padding: '12px', 
+              borderRadius: '12px', 
               background: 'var(--surface-color)', 
               color: 'var(--text-primary)',
               border: '1px solid var(--border-color)',
@@ -155,7 +130,7 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
               justifyContent: 'center'
             }}
           >
-            <MoreVertical size={20} />
+            <MoreVertical size={22} />
           </button>
 
           {/* Action Dropdown Menu */}
@@ -164,26 +139,49 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
               position: 'absolute',
               bottom: '100%',
               left: '0',
-              marginBottom: '8px',
+              marginBottom: '12px',
               background: 'var(--surface-color)',
               border: '1px solid var(--border-color)',
-              borderRadius: '12px',
-              boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
-              padding: '10px',
+              borderRadius: '16px',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
+              padding: '12px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '8px',
-              minWidth: '180px',
+              gap: '10px',
+              minWidth: '220px',
               zIndex: 2000
             }}>
-              <button onClick={() => handleStatusUpdate('CALLED')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', width: '100%', borderRadius: '8px', color: 'var(--primary-color)', background: 'rgba(255, 193, 7, 0.05)', border: '1px solid rgba(255, 193, 7, 0.1)', fontWeight: 700 }}>
+              <button 
+                onClick={() => handleStatusUpdate('PROCESSING')}
+                disabled={!!loading}
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '10px', 
+                  padding: '14px', 
+                  width: '100%', 
+                  borderRadius: '10px', 
+                  color: '#111', 
+                  background: 'var(--primary-color)', 
+                  border: 'none', 
+                  fontWeight: 800,
+                  fontSize: '14px'
+                }}
+              >
+                {loading === 'PROCESSING' ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
+                CONVERT TO LOAN
+              </button>
+              
+              <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0' }} />
+
+              <button onClick={() => handleStatusUpdate('CALLED')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', width: '100%', borderRadius: '10px', color: 'var(--primary-color)', background: 'rgba(255, 193, 7, 0.05)', border: '1px solid rgba(255, 193, 7, 0.1)', fontWeight: 700 }}>
                 {loading === 'CALLED' ? <Loader2 size={16} className="animate-spin" /> : <Phone size={16} />} 
                 Mark as CALLED
               </button>
-              <button onClick={() => handleStatusUpdate('FOLLOW_UP')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', width: '100%', borderRadius: '8px', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.1)', fontWeight: 700 }}>
+              <button onClick={() => handleStatusUpdate('FOLLOW_UP')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', width: '100%', borderRadius: '10px', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.1)', fontWeight: 700 }}>
                 <Clock size={16} /> Follow Up
               </button>
-              <button onClick={() => handleStatusUpdate('REJECTED')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', width: '100%', borderRadius: '8px', color: '#EF4444', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', fontWeight: 700 }}>
+              <button onClick={() => handleStatusUpdate('REJECTED')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', width: '100%', borderRadius: '10px', color: '#EF4444', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', fontWeight: 700 }}>
                 <X size={16} /> Reject Lead
               </button>
             </div>
