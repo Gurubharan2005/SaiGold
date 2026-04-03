@@ -137,21 +137,24 @@ export default async function DashboardPage() {
               <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>You have no active leads assigned currently.</div>
             ) : (
               myAssignedLeads.map((lead) => (
-                 <div key={lead.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--border-color)' }}>
-                   <div style={{ flex: 1, minWidth: 0 }}>
-                     <h4 style={{ margin: 0, fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.name}</h4>
-                     <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><Phone size={12}/> {lead.phone}</p>
-                   </div>
-                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
-                     <span className={`badge badge-${lead.status.toLowerCase()}`} style={{ fontSize: '10px' }}>{lead.status}</span>
-                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
-                       <QuickStatusActions customerId={lead.id} customerName={lead.name} phone={lead.phone} />
-                       {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED'].includes(lead.status) && (
-                         <Link href={`/dashboard/customers/${lead.id}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 600 }}>
-                           <ExternalLink size={12} /> View Details
-                         </Link>
-                       )}
+                 <div key={lead.id} style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '16px 20px', borderBottom: '1px solid var(--border-color)' }}>
+                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                     <div style={{ minWidth: 0, flex: 1 }}>
+                       <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.name}</h4>
+                       <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                         <Phone size={12} color="var(--primary-color)" /> {lead.phone}
+                       </p>
                      </div>
+                     <span className={`badge badge-${lead.status.toLowerCase()}`} style={{ fontSize: '11px', fontWeight: 800 }}>{lead.status}</span>
+                   </div>
+                   
+                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                     <QuickStatusActions customerId={lead.id} customerName={lead.name} phone={lead.phone} />
+                     {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED'].includes(lead.status) && (
+                       <Link href={`/dashboard/customers/${lead.id}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 700, padding: '4px 0' }}>
+                         <ExternalLink size={14} /> Full Customer Profile &rarr;
+                       </Link>
+                     )}
                    </div>
                  </div>
               ))
