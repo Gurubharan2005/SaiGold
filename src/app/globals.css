@@ -276,12 +276,13 @@ input:focus, textarea:focus, select:focus {
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.badge-waiting { background-color: rgba(245, 158, 11, 0.1); color: var(--status-waiting); border: 1px solid rgba(245, 158, 11, 0.2); }
-.badge-processing { background-color: rgba(59, 130, 246, 0.1); color: var(--status-processing); border: 1px solid rgba(59, 130, 246, 0.2); }
-.badge-accepted { background-color: rgba(16, 185, 129, 0.1); color: var(--status-accepted); border: 1px solid rgba(16, 185, 129, 0.2); }
-.badge-rejected { background-color: rgba(239, 68, 68, 0.1); color: var(--status-rejected); border: 1px solid rgba(239, 68, 68, 0.2); }
-.badge-due { background-color: rgba(244, 63, 94, 0.1); color: var(--status-due); border: 1px solid rgba(244, 63, 94, 0.2); }
-.badge-closed { background-color: rgba(107, 114, 128, 0.1); color: var(--status-closed); border: 1px solid rgba(107, 114, 128, 0.2); }
+.badge-waiting   { background-color: rgba(245, 158, 11, 0.1);  color: var(--status-waiting);    border: 1px solid rgba(245, 158, 11, 0.2); }
+.badge-processing{ background-color: rgba(59, 130, 246, 0.1);  color: var(--status-processing); border: 1px solid rgba(59, 130, 246, 0.2); }
+.badge-accepted  { background-color: rgba(16, 185, 129, 0.1);  color: var(--status-accepted);   border: 1px solid rgba(16, 185, 129, 0.2); }
+.badge-rejected  { background-color: rgba(239, 68, 68, 0.1);   color: var(--status-rejected);   border: 1px solid rgba(239, 68, 68, 0.2);  }
+.badge-follow-up { background-color: rgba(245, 158, 11, 0.1);  color: #F59E0B;                  border: 1px solid rgba(245, 158, 11, 0.2); }
+.badge-due       { background-color: rgba(244, 63, 94, 0.1);   color: var(--status-due);        border: 1px solid rgba(244, 63, 94, 0.2);  }
+.badge-closed    { background-color: rgba(107, 114, 128, 0.1); color: var(--status-closed);     border: 1px solid rgba(107, 114, 128, 0.2);}
 
 /* Typography */
 h1, h2, h3, h4, h5, h6 {

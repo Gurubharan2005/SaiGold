@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import React, { useState } from 'react'
 import { LeadCard } from './LeadCard'
 import { StaffLeadActions } from './StaffLeadActions'
 import QuickRecordingUpload from './QuickRecordingUpload'
