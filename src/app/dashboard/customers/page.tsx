@@ -16,7 +16,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
   const { tab, q, search, page } = await searchParams
-  const currentTab = 'ongoing'
+  const currentTab = tab || 'ongoing'
   
   // Backwards compatibility for the quick-search input component
   const activeQuery = search || q || ''
@@ -35,13 +35,34 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
     ]
   }
 
-  baseWhere.status = 'ACCEPTED'
+  // TAB FILTERING LOGIC
+  if (currentTab === 'ongoing') {
+    baseWhere.status = 'ACCEPTED'
+  } else if (currentTab === 'called') {
+    baseWhere.callStatus = 'CALLED'
+    baseWhere.status = 'WAITING'
+  } else if (currentTab === 'followup') {
+    baseWhere.status = 'FOLLOW_UP'
+  } else if (currentTab === 'rejected') {
+    baseWhere.status = 'REJECTED'
+  }
+
   if (session?.role !== 'MANAGER') {
-     baseWhere.OR = [
+     // Staff/Salesman/Maintenance only see their assigned leads
+     const userFilter = [
        { createdById: String(session?.id) },
        { assignedToId: String(session?.id) },
        { verifiedById: String(session?.id) }
      ]
+     if (baseWhere.OR) {
+        baseWhere.AND = [
+          { OR: baseWhere.OR },
+          { OR: userFilter }
+        ]
+        delete baseWhere.OR
+     } else {
+        baseWhere.OR = userFilter
+     }
   }
 
   // Fetch paginated constraints securely
@@ -62,7 +83,9 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       <DashRealtimeSync intervalMs={10000} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <h1 style={{ fontSize: '28px', margin: 0 }}>Ongoing Customers</h1>
+          <h1 style={{ fontSize: '28px', margin: 0, textTransform: 'capitalize' }}>
+            {currentTab} Customers
+          </h1>
         </div>
         
         <div style={{ display: 'flex', gap: '12px', zIndex: 10 }}>
@@ -77,6 +100,32 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             </>
           )}
         </div>
+      </div>
+
+      <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '24px', gap: '8px', overflowX: 'auto', paddingBottom: '2px' }} className="no-scrollbar">
+        {[
+          { id: 'ongoing', label: 'Active Loans', count: 0 }, // We'll count these later if needed
+          { id: 'called', label: 'Called Leads', count: 0 },
+          { id: 'followup', label: 'Follow-Ups', count: 0 },
+          { id: 'rejected', label: 'Rejected', count: 0 }
+        ].map(t => (
+          <Link 
+            key={t.id}
+            href={`/dashboard/customers?tab=${t.id}`}
+            style={{ 
+              padding: '12px 20px', 
+              textDecoration: 'none', 
+              color: currentTab === t.id ? 'var(--primary-color)' : 'var(--text-secondary)',
+              borderBottom: currentTab === t.id ? '3px solid var(--primary-color)' : '3px solid transparent',
+              fontWeight: currentTab === t.id ? 800 : 500,
+              fontSize: '14px',
+              transition: 'all 0.2s',
+              whiteSpace: 'nowrap'
+            }}
+          >
+            {t.label}
+          </Link>
+        ))}
       </div>
 
       <div className="card" style={{ padding: '0', overflow: 'hidden' }}>
@@ -183,15 +232,11 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                      )}
                   </td>
                   <td style={{ padding: '16px', textAlign: 'right' }}>
-                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', alignItems: 'center' }}>
-                      <a href={`https://wa.me/${c.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10B981', fontSize: '13px', textDecoration: 'none', background: 'rgba(16, 185, 129, 0.1)', padding: '6px 10px', borderRadius: '4px', fontWeight: 600 }}>
-                        WA
-                      </a>
-                      <a href={`tel:${c.phone}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', color: 'var(--text-color)', fontSize: '13px', textDecoration: 'none', background: 'var(--surface-color)', padding: '6px 12px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
-                        <Phone size={14} color="var(--primary-color)" /> Call
-                      </a>
-                      {currentTab === 'ongoing' && (
-                        <>
+                      {currentTab === 'ongoing' ? (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', alignItems: 'center' }}>
+                          <a href={`https://wa.me/${c.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10B981', fontSize: '13px', textDecoration: 'none', background: 'rgba(16, 185, 129, 0.1)', padding: '6px 10px', borderRadius: '4px', fontWeight: 600 }}>
+                            WA
+                          </a>
                           <OngoingQuickUpdate 
                             customerId={c.id} 
                             initialAmount={c.loanAmount} 
@@ -199,9 +244,12 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                             initialNotes={c.notes}
                           />
                           <RequestClosureButton customerId={c.id} variant="compact" />
-                        </>
+                        </div>
+                      ) : (
+                        <Link href={`/dashboard/customers/${c.id}?from=${currentTab}`} style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '13px', fontWeight: 700 }}>
+                          Details &rarr;
+                        </Link>
                       )}
-                    </div>
                   </td>
                 </tr>
               ))
@@ -258,11 +306,11 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                         {currentTab === 'ongoing' ? 'Amount Due' : 'Gold Weight'}
                      </div>
                      <div style={{ fontWeight: 700 }}>
-                        {currentTab === 'ongoing' 
-                          ? (c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-')
-                          : (c.goldWeight ? `${c.goldWeight}g` : '-')}
-                     </div>
-                   </div>
+                         {currentTab === 'ongoing' 
+                           ? (c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-')
+                           : (c.status === 'REJECTED' ? 'REJECTED' : (c.goldWeight ? `${c.goldWeight}g` : '-'))}
+                      </div>
+                    </div>
                    {currentTab === 'ongoing' && (
                      <div style={{ gridColumn: 'span 2' }}>
                         <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: '2px' }}>Remainder</div>
@@ -315,7 +363,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             <div style={{ display: 'flex', gap: '12px' }}>
               {currentPage > 1 ? (
                 <Link 
-                  href={`/dashboard/customers?tab=ongoing${activeQuery ? `&search=${encodeURIComponent(activeQuery)}` : ''}&page=${currentPage - 1}`} 
+                  href={`/dashboard/customers?tab=${currentTab}${activeQuery ? `&search=${encodeURIComponent(activeQuery)}` : ''}&page=${currentPage - 1}`} 
                   className="btn-secondary" 
                   style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none' }}
                 >
@@ -328,18 +376,18 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
               )}
               
               {currentPage < totalPages ? (
-                <Link 
-                  href={`/dashboard/customers?tab=ongoing${activeQuery ? `&search=${encodeURIComponent(activeQuery)}` : ''}&page=${currentPage + 1}`} 
-                  className="btn-primary" 
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none' }}
-                >
-                  Next <ChevronRight size={16} />
-                </Link>
-              ) : (
-                <button disabled className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', opacity: 0.5, cursor: 'not-allowed' }}>
-                  Next <ChevronRight size={16} />
-                </button>
-              )}
+                 <Link 
+                   href={`/dashboard/customers?tab=${currentTab}${activeQuery ? `&search=${encodeURIComponent(activeQuery)}` : ''}&page=${currentPage + 1}`} 
+                   className="btn-primary" 
+                   style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', textDecoration: 'none' }}
+                 >
+                   Next <ChevronRight size={16} />
+                 </Link>
+               ) : (
+                 <button disabled className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '8px 16px', borderRadius: '8px', opacity: 0.5, cursor: 'not-allowed' }}>
+                   Next <ChevronRight size={16} />
+                 </button>
+               )}
             </div>
           </div>
         )}
