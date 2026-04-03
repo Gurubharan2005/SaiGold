@@ -2,7 +2,6 @@
 
 import { useState, useRef } from 'react'
 import { Mic, Upload, X, Loader2, CheckCircle, AlertTriangle } from 'lucide-react'
-import { upload } from '@vercel/blob/client'
 
 interface Props {
   customerId: string
@@ -13,91 +12,77 @@ interface Props {
 export default function QuickRecordingUpload({ customerId, customerName, onUploadDone }: Props) {
   const [open, setOpen] = useState(false)
   const [label, setLabel] = useState('')
-  const [uploading, setUploading] = useState(false)
-  const [stage, setStage] = useState<'idle' | 'uploading' | 'saving' | 'done' | 'error'>('idle')
+  const [stage, setStage] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle')
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const xhrRef = useRef<XMLHttpRequest | null>(null)
 
   const reset = () => {
-    setUploading(false)
     setStage('idle')
     setProgress(0)
     setError('')
     if (fileInputRef.current) fileInputRef.current.value = ''
   }
 
-  const handleUpload = async (file: File) => {
-    setUploading(true)
+  const handleUpload = (file: File) => {
     setStage('uploading')
     setProgress(0)
     setError('')
 
-    let blobUrl = ''
-
-    try {
-      // ── Step 1: Upload file directly to Vercel Blob ──
-      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-      const blob = await upload(
-        `recordings/customer_${customerId}/${Date.now()}_${safeFileName}`,
-        file,
-        {
-          access: 'public',
-          handleUploadUrl: `/api/customers/${customerId}/recordings/upload`,
-          onUploadProgress: (ev) => {
-            setProgress(Math.round(ev.percentage))
-          },
-        }
-      )
-      blobUrl = blob.url
-      console.log('[Upload] Blob URL:', blobUrl)
-    } catch (e: any) {
-      console.error('[Upload] Blob error:', e)
-      setStage('error')
-      setError(`Upload failed: ${e.message || 'Could not reach storage. Check your connection.'}`)
-      setUploading(false)
-      return
-    }
-
-    // ── Step 2: Save URL + label to database ──
-    setStage('saving')
     const autoLabel = label.trim() ||
       `Call – ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`
 
-    try {
-      const controller = new AbortController()
-      const timeout = setTimeout(() => controller.abort(), 15000) // 15s timeout
+    const form = new FormData()
+    form.append('file', file)
+    form.append('label', autoLabel)
 
-      const res = await fetch(`/api/customers/${customerId}/recordings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ audioUrl: blobUrl, label: autoLabel }),
-        signal: controller.signal,
-      })
-      clearTimeout(timeout)
+    const xhr = new XMLHttpRequest()
+    xhrRef.current = xhr
 
-      if (!res.ok) {
-        const d = await res.json().catch(() => ({ error: 'Database save failed' }))
-        throw new Error(d.error || `Server error (${res.status})`)
+    // Real-time progress from XHR upload events
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) {
+        setProgress(Math.round((e.loaded / e.total) * 100))
       }
-
-      // ── Success ──
-      setStage('done')
-      setLabel('')
-      onUploadDone?.()
-      setTimeout(() => { reset(); setOpen(false) }, 2000)
-
-    } catch (e: any) {
-      console.error('[Upload] DB save error:', e)
-      setStage('error')
-      if (e.name === 'AbortError') {
-        setError('Timed out saving to database. File is uploaded — please try again.')
-      } else {
-        setError(`Saved to storage but DB failed: ${e.message}`)
-      }
-    } finally {
-      setUploading(false)
     }
+
+    xhr.onload = () => {
+      if (xhr.status === 200 || xhr.status === 201) {
+        setStage('done')
+        setLabel('')
+        onUploadDone?.()
+        setTimeout(() => { reset(); setOpen(false) }, 2000)
+      } else {
+        let msg = 'Upload failed'
+        try {
+          const d = JSON.parse(xhr.responseText)
+          msg = d.error || msg
+        } catch {}
+        setStage('error')
+        setError(msg)
+      }
+    }
+
+    xhr.onerror = () => {
+      setStage('error')
+      setError('Network error. Please check your connection and try again.')
+    }
+
+    xhr.ontimeout = () => {
+      setStage('error')
+      setError('Upload timed out. Try a smaller file or better connection.')
+    }
+
+    xhr.timeout = 120000 // 2 minutes max
+    xhr.open('POST', `/api/customers/${customerId}/recordings`)
+    xhr.send(form)
+  }
+
+  const cancelUpload = () => {
+    xhrRef.current?.abort()
+    reset()
+    setOpen(false)
   }
 
   if (!open) {
@@ -134,15 +119,14 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
           <Mic size={12} /> Upload Recording for {customerName}
         </span>
         <button
-          onClick={() => { reset(); setOpen(false) }}
+          onClick={cancelUpload}
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: '2px' }}
-          disabled={uploading}
         >
           <X size={14} />
         </button>
       </div>
 
-      {/* Label input — only show when idle */}
+      {/* Label — only when idle */}
       {stage === 'idle' && (
         <input
           type="text"
@@ -161,35 +145,38 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
         onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f) }}
       />
 
-      {/* Status area */}
+      {/* States */}
       {stage === 'done' && (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px', color: '#10B981', fontWeight: 700, fontSize: '13px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', color: '#10B981', fontWeight: 700, fontSize: '13px' }}>
           <CheckCircle size={16} /> Saved successfully!
         </div>
       )}
 
       {stage === 'uploading' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <Loader2 size={13} className="animate-spin" />
-            Uploading file... {progress}%
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <Loader2 size={13} className="animate-spin" />
+              {progress < 100 ? `Uploading... ${progress}%` : 'Processing...'}
+            </span>
+            <button onClick={cancelUpload} style={{ fontSize: '10px', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer' }}>
+              Cancel
+            </button>
           </div>
           <div style={{ background: 'var(--border-color)', borderRadius: '4px', height: '5px', overflow: 'hidden' }}>
-            <div style={{ background: 'var(--primary-color)', height: '100%', width: `${progress}%`, transition: 'width 0.3s ease' }} />
+            <div style={{
+              background: progress < 100 ? 'var(--primary-color)' : '#10B981',
+              height: '100%',
+              width: `${progress}%`,
+              transition: 'width 0.2s ease'
+            }} />
           </div>
-        </div>
-      )}
-
-      {stage === 'saving' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-secondary)', padding: '4px 0' }}>
-          <Loader2 size={13} className="animate-spin" />
-          Saving to database...
         </div>
       )}
 
       {stage === 'error' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '11px', color: '#EF4444', lineHeight: 1.4 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '11px', color: '#EF4444', lineHeight: 1.5 }}>
             <AlertTriangle size={13} style={{ flexShrink: 0, marginTop: '1px' }} />
             {error}
           </div>

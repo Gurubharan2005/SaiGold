@@ -2,7 +2,9 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
+import { put } from '@vercel/blob'
 
+// Allow up to 60 seconds for large audio uploads
 export const maxDuration = 60
 
 // GET — list all recordings for a customer (newest first)
@@ -25,7 +27,7 @@ export async function GET(
   return NextResponse.json(recordings)
 }
 
-// POST — save a recording URL to the database (after client-side blob upload)
+// POST — upload audio file and save to DB in one shot
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -38,57 +40,71 @@ export async function POST(
     if (!session?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const contentType = req.headers.get('content-type') || ''
-    let audioUrl: string | null = null
-    let label: string | null = null
-    let durationSec: number | null = null
 
+    // ── Path A: JSON with pre-uploaded blob URL (from client-side upload) ──
     if (contentType.includes('application/json')) {
-      // Client-side upload flow: receives { audioUrl, label, durationSec }
       const body = await req.json()
-      audioUrl = body.audioUrl
-      label = body.label || null
-      durationSec = body.durationSec ? Number(body.durationSec) : null
-    } else {
-      // Legacy fallback: multipart FormData (small files only)
-      const formData = await req.formData()
-      const file = formData.get('file') as File | null
-      label = formData.get('label') as string | null
-      durationSec = formData.get('durationSec') ? Number(formData.get('durationSec')) : null
+      const { audioUrl, label, durationSec } = body
 
-      if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+      if (!audioUrl) return NextResponse.json({ error: 'No audio URL provided' }, { status: 400 })
 
-      const { put } = await import('@vercel/blob')
-      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
-      const blob = await put(
-        `recordings/customer_${id}/${Date.now()}_${safeFileName}`,
-        file,
-        { access: 'public' }
-      )
-      audioUrl = blob.url
+      const recording = await prisma.callRecording.create({
+        data: {
+          customerId: id,
+          uploadedById: String(session.id),
+          audioUrl,
+          label: label || null,
+          durationSec: durationSec ? Number(durationSec) : null,
+        },
+        include: { uploadedBy: { select: { name: true, role: true } } }
+      })
+      return NextResponse.json(recording, { status: 201 })
     }
 
-    if (!audioUrl) {
-      return NextResponse.json({ error: 'No audio URL provided' }, { status: 400 })
-    }
+    // ── Path B: Direct file stream — fastest path ──
+    // File streams directly from browser → this API → Vercel Blob
+    // Then URL is saved to DB in the same request. One shot, no callbacks.
+    const formData = await req.formData()
+    const file = formData.get('file') as File | null
+    const label = (formData.get('label') as string) || null
+    const durationSec = formData.get('durationSec') ? Number(formData.get('durationSec')) : null
 
-    console.log(`[Recording] Saving to DB: ${audioUrl} for customer ${id}`)
+    if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
 
+    console.log(`[Recording] Streaming upload: "${file.name}" (${(file.size / 1024 / 1024).toFixed(2)} MB)`)
+
+    // Sanitize filename
+    const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+
+    // Stream to Vercel Blob — stored in customer-specific folder
+    const blob = await put(
+      `recordings/customer_${id}/${Date.now()}_${safeFileName}`,
+      file.stream(),
+      {
+        access: 'public',
+        contentType: file.type || 'audio/mpeg',
+      }
+    )
+
+    console.log(`[Recording] Blob stored: ${blob.url}`)
+
+    // Save to DB immediately after upload
     const recording = await prisma.callRecording.create({
       data: {
         customerId: id,
         uploadedById: String(session.id),
-        audioUrl,
+        audioUrl: blob.url,
         label: label || null,
         durationSec,
       },
       include: { uploadedBy: { select: { name: true, role: true } } }
     })
 
-    console.log(`[Recording] Saved: ${recording.id}`)
+    console.log(`[Recording] Saved to DB: ${recording.id}`)
     return NextResponse.json(recording, { status: 201 })
 
   } catch (err: any) {
     console.error('[Recording] Error:', err)
-    return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
+    return NextResponse.json({ error: err.message || 'Upload failed' }, { status: 500 })
   }
 }
