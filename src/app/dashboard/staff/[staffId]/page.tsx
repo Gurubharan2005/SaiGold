@@ -4,15 +4,16 @@ import { decrypt } from '@/lib/auth'
 import { redirect, notFound } from 'next/navigation'
 import { LeadCard } from '@/components/LeadCard'
 import QuickRecordingUpload from '@/components/QuickRecordingUpload'
-import { CheckCircle, Clock, XCircle, ArrowLeft, User, Shield, Mic } from 'lucide-react'
+import KanbanBoard from '@/components/KanbanBoard'
+import { ArrowLeft, User, Shield } from 'lucide-react'
 import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
-const COLUMNS = [
-  { key: 'ACCEPTED',  label: 'Accepted',  icon: CheckCircle, color: '#10B981', bg: 'rgba(16,185,129,0.08)' },
-  { key: 'FOLLOW_UP', label: 'Follow Up', icon: Clock,        color: '#F59E0B', bg: 'rgba(245,158,11,0.08)' },
-  { key: 'REJECTED',  label: 'Rejected',  icon: XCircle,      color: '#EF4444', bg: 'rgba(239,68,68,0.08)'  },
+const COLUMN_META = [
+  { key: 'ACCEPTED',  label: 'Accepted',  color: '#10B981', bg: 'rgba(16,185,129,0.08)' },
+  { key: 'FOLLOW_UP', label: 'Follow Up', color: '#F59E0B', bg: 'rgba(245,158,11,0.08)' },
+  { key: 'REJECTED',  label: 'Rejected',  color: '#EF4444', bg: 'rgba(239,68,68,0.08)'  },
 ]
 
 export default async function StaffProfilePage({
@@ -44,9 +45,9 @@ export default async function StaffProfilePage({
   const total = accepted.length + followUp.length + rejected.length + waiting.length
 
   const columns = [
-    { ...COLUMNS[0], leads: accepted },
-    { ...COLUMNS[1], leads: followUp },
-    { ...COLUMNS[2], leads: rejected },
+    { ...COLUMN_META[0], leads: accepted },
+    { ...COLUMN_META[1], leads: followUp },
+    { ...COLUMN_META[2], leads: rejected },
   ]
 
   return (
@@ -98,41 +99,13 @@ export default async function StaffProfilePage({
         </div>
       )}
 
-      {/* 3-Column Kanban */}
+      {/* 3-column Kanban (responsive) */}
       {total === 0 ? (
         <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text-secondary)', background: 'var(--surface-color)', borderRadius: '12px', border: '1px dashed var(--border-color)' }}>
           No leads assigned to {staff.name} yet.
         </div>
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', alignItems: 'start' }}>
-          {columns.map(col => {
-            const Icon = col.icon
-            return (
-              <div key={col.key}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', padding: '10px 14px', background: col.bg, border: `1px solid ${col.color}30`, borderRadius: '10px' }}>
-                  <Icon size={16} color={col.color} />
-                  <span style={{ fontWeight: 700, fontSize: '14px', color: col.color }}>{col.label}</span>
-                  <span style={{ marginLeft: 'auto', background: col.color, color: '#fff', borderRadius: '999px', padding: '1px 8px', fontSize: '11px', fontWeight: 700 }}>{col.leads.length}</span>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  {col.leads.length === 0 ? (
-                    <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', background: 'var(--surface-color)', borderRadius: '12px', border: '1px dashed var(--border-color)', fontSize: '13px' }}>
-                      No {col.label.toLowerCase()} leads
-                    </div>
-                  ) : (
-                    col.leads.map(lead => (
-                      <LeadCard key={lead.id} customer={lead}>
-                        <div style={{ marginTop: '4px', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
-                          <QuickRecordingUpload customerId={lead.id} customerName={lead.name} />
-                        </div>
-                      </LeadCard>
-                    ))
-                  )}
-                </div>
-              </div>
-            )
-          })}
-        </div>
+        <KanbanBoard columns={columns} isManager={true} />
       )}
     </div>
   )

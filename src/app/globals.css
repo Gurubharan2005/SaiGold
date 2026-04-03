@@ -397,3 +397,23 @@ h1, h2, h3, h4, h5, h6 {
   z-index: 999;
   animation: fadeIn 0.2s ease-out;
 }
+
+/* ── Kanban Responsive ───────────────────────────── */
+.mobile-kanban {
+  display: none;
+}
+.desktop-kanban {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .mobile-kanban {
+    display: block;
+  }
+  .desktop-kanban {
+    display: none;
+  }
+}
