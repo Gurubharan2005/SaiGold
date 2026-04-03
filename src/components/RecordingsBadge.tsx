@@ -20,8 +20,8 @@ export default function RecordingsBadge({ customerId, customerName = 'Customer' 
       .catch(() => {})
   }, [customerId])
 
-  // Don't show if no recordings found initially, unless loading/unknown
-  if (count === null || count === 0) return null
+  // Don't show only if still loading (null)
+  if (count === null) return null
 
   return (
     <>
