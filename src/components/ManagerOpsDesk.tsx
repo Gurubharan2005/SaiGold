@@ -219,7 +219,7 @@ export default function ManagerOpsDesk({
                         </div>
                      </div>
                    ) : (
-                     <SalesVerifyActions customerId={c.id} salesmanId={String(session?.id)} />
+                      <SalesVerifyActions customerId={c.id} fromTab="ongoing" />
                    )}
                    
                    <Link 
