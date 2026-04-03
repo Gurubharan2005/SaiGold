@@ -26,7 +26,7 @@ export async function POST(
         // Generate a token allowing audio uploads up to 50MB
         return {
           allowedContentTypes: [
-            'audio/mpeg', 'audio/mp4', 'audio/wav', 'audio/ogg',
+            'audio/mpeg', 'audio/mp4', 'audio/wav', 'audio/x-wav', 'audio/ogg',
             'audio/webm', 'audio/m4a', 'audio/x-m4a', 'audio/aac',
             'audio/flac', 'audio/3gpp', 'video/mp4', 'application/octet-stream'
           ],

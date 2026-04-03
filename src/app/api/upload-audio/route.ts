@@ -31,9 +31,10 @@ export async function POST(request: Request): Promise<NextResponse> {
          */
         return {
           allowedContentTypes: [
-            'audio/mpeg', 'audio/mp4', 'audio/wav', 'audio/ogg', 
+            'audio/mpeg', 'audio/mp4', 'audio/wav', 'audio/x-wav', 'audio/ogg', 
             'audio/webm', 'audio/m4a', 'audio/x-m4a', 'audio/aac', 
-            'audio/flac', 'audio/3gpp', 'video/mp4', 'application/octet-stream'
+            'audio/flac', 'audio/3gpp', 'audio/x-aiff', 'audio/basic', 'audio/mid',
+            'video/mp4', 'application/octet-stream'
           ],
           maximumSizeInBytes: 52_428_800, // 50MB
           addRandomSuffix: true,
