@@ -2,7 +2,8 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { put } from '@vercel/blob'
+
+export const maxDuration = 60
 
 // GET — list all recordings for a customer (newest first)
 export async function GET(
@@ -17,14 +18,14 @@ export async function GET(
 
   const recordings = await prisma.callRecording.findMany({
     where: { customerId: id },
-    orderBy: { createdAt: 'desc' }, // newest first
+    orderBy: { createdAt: 'desc' },
     include: { uploadedBy: { select: { name: true, role: true } } }
   })
 
   return NextResponse.json(recordings)
 }
 
-// POST — upload a new call recording
+// POST — save a recording URL to the database (after client-side blob upload)
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -36,52 +37,58 @@ export async function POST(
     const session = token ? await decrypt(token) : null
     if (!session?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const formData = await req.formData()
-    const file = formData.get('file') as File | null
-    const label = formData.get('label') as string | null
-    const durationSec = formData.get('durationSec') ? Number(formData.get('durationSec')) : null
+    const contentType = req.headers.get('content-type') || ''
+    let audioUrl: string | null = null
+    let label: string | null = null
+    let durationSec: number | null = null
 
-    if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+    if (contentType.includes('application/json')) {
+      // Client-side upload flow: receives { audioUrl, label, durationSec }
+      const body = await req.json()
+      audioUrl = body.audioUrl
+      label = body.label || null
+      durationSec = body.durationSec ? Number(body.durationSec) : null
+    } else {
+      // Legacy fallback: multipart FormData (small files only)
+      const formData = await req.formData()
+      const file = formData.get('file') as File | null
+      label = formData.get('label') as string | null
+      durationSec = formData.get('durationSec') ? Number(formData.get('durationSec')) : null
 
-    // Validate file extensions
-    if (!file.name.match(/\.(mp3|mp4|wav|ogg|webm|m4a|aac)$/i)) {
-      return NextResponse.json({ error: 'Invalid file type. Please use audio files like mp3, m4a, or wav.' }, { status: 400 })
+      if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+
+      const { put } = await import('@vercel/blob')
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const blob = await put(
+        `recordings/customer_${id}/${Date.now()}_${safeFileName}`,
+        file,
+        { access: 'public' }
+      )
+      audioUrl = blob.url
     }
 
-    console.log(`[Recording] Uploading ${file.name} (${file.size} bytes) for customer ${id}`)
-
-    // Upload to Vercel Blob
-    let blob;
-    try {
-      blob = await put(`recordings/${id}/${Date.now()}-${file.name}`, file, {
-        access: 'public',
-      })
-    } catch (blobErr: any) {
-      console.error('[Recording] Vercel Blob error:', blobErr)
-      return NextResponse.json({ error: `Storage error: ${blobErr.message || 'Unknown'}` }, { status: 500 })
+    if (!audioUrl) {
+      return NextResponse.json({ error: 'No audio URL provided' }, { status: 400 })
     }
 
-    console.log(`[Recording] Blob uploaded: ${blob.url}`)
+    console.log(`[Recording] Saving to DB: ${audioUrl} for customer ${id}`)
 
-    try {
-      const recording = await prisma.callRecording.create({
-        data: {
-          customerId: id,
-          uploadedById: String(session.id),
-          audioUrl: blob.url,
-          label: label || null,
-          durationSec: durationSec,
-        },
-        include: { uploadedBy: { select: { name: true, role: true } } }
-      })
-      console.log(`[Recording] Database record created: ${recording.id}`)
-      return NextResponse.json(recording, { status: 201 })
-    } catch (prismaErr: any) {
-      console.error('[Recording] Prisma error:', prismaErr)
-      return NextResponse.json({ error: `Database error: ${prismaErr.message || 'Unknown'}` }, { status: 500 })
-    }
+    const recording = await prisma.callRecording.create({
+      data: {
+        customerId: id,
+        uploadedById: String(session.id),
+        audioUrl,
+        label: label || null,
+        durationSec,
+      },
+      include: { uploadedBy: { select: { name: true, role: true } } }
+    })
+
+    console.log(`[Recording] Saved: ${recording.id}`)
+    return NextResponse.json(recording, { status: 201 })
+
   } catch (err: any) {
-    console.error('[Recording] General error:', err)
+    console.error('[Recording] Error:', err)
     return NextResponse.json({ error: err.message || 'Internal server error' }, { status: 500 })
   }
 }
