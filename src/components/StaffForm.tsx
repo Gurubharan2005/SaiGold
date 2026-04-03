@@ -69,7 +69,8 @@ export default function StaffForm({ onSuccess }: { onSuccess?: () => void }) {
           style={{ width: '100%', padding: '10px' }}
         >
           <option value="STAFF">Field Staff (Lead Generation)</option>
-          <option value="SALESMAN">Salesperson (Lead Follow-up)</option>
+          <option value="SALESMAN">Salesperson (Verification Desk)</option>
+          <option value="MAINTENANCE">Maintenance (Confirmed Loans Only)</option>
         </select>
       </div>
       <div>

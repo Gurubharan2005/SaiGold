@@ -27,7 +27,7 @@ export default function AddStaffModal() {
               <X size={20} />
             </button>
             <h3 style={{ fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '16px' }}>
-               <ShieldAlert size={20} color="var(--status-rejected)" /> Create Restricted Staff
+               <ShieldAlert size={20} color="var(--status-rejected)" /> Create Restricted Staff <span style={{ color: '#10B981' }}>•</span>
             </h3>
             <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '24px' }}>
               Staff members can view and process normal customer profiles and loans, but they are completely blocked from accessing this administration screen or changing company settings.
