@@ -50,12 +50,18 @@ export async function GET(request: Request) {
     
     if (!res.ok) return new NextResponse('Fetch failed', { status: res.status })
 
-    const arrayBuffer = await res.arrayBuffer()
     const contentType = res.headers.get('Content-Type') || 'audio/mpeg'
-    
-    return new NextResponse(arrayBuffer, {
+    const contentLength = res.headers.get('Content-Length')
+
+    /**
+     * STREAMING PROXY (Critical for iOS Safari)
+     * Piping res.body directly allows the browser to start playing before the download finishes.
+     */
+    return new NextResponse(res.body, {
       headers: {
         'Content-Type': contentType,
+        'Content-Length': contentLength || '',
+        'Accept-Ranges': 'bytes',
         'Cache-Control': 'public, max-age=86400',
         'Content-Disposition': `inline; filename="media-${Date.now()}"`
       }
