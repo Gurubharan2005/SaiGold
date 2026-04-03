@@ -129,7 +129,7 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
       <input
         ref={fileInputRef}
         type="file"
-        accept="audio/*,video/mp4"
+        accept=".mp3, .m4a, .wav, .amr, .aac, audio/*, video/mp4"
         style={{ display: 'none' }}
         onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f) }}
       />
