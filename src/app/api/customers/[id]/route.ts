@@ -45,7 +45,14 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (followUpDate) updateData.followUpDate = new Date(followUpDate)
     if (followUpNotes !== undefined) updateData.followUpNotes = followUpNotes
     
-    // Verification fields
+    // Handle Automated Verification Metadata
+    if (status === 'MAINTENANCE' && session?.role === 'SALESMAN') {
+      updateData.verifiedAt = new Date()
+      updateData.verifiedById = session.id
+      updateData.isVerified = true
+    }
+
+    // Manual field overrides (if provided)
     if (isVerified !== undefined) updateData.isVerified = isVerified
     if (verifiedAt) updateData.verifiedAt = new Date(verifiedAt)
     if (verifiedById) updateData.verifiedById = verifiedById

@@ -4,6 +4,7 @@ import { decrypt } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { Status } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +17,7 @@ export default async function SalesVerificationDesk() {
   const [pendingLeads, historicalLeads] = await Promise.all([
     // 1. Pending Verification: Marked by staff, waiting for salesman
     prisma.customer.findMany({
-      where: { status: 'VERIFIED' },
+      where: { status: 'VERIFIED' as Status },
       orderBy: { updatedAt: 'desc' },
       include: { createdBy: true }
     }),
@@ -24,13 +25,13 @@ export default async function SalesVerificationDesk() {
     prisma.customer.findMany({
       where: { 
         OR: [
-          { status: 'MAINTENANCE' },
-          { status: 'ACCEPTED' } // In case they were already accepted
+          { status: 'MAINTENANCE' as Status },
+          { status: 'ACCEPTED' as Status } 
         ],
-        verifiedById: String(session?.id) 
+        verifiedById: session?.id ? String(session.id) : undefined
       },
       orderBy: { verifiedAt: 'desc' },
-      take: 20, // Keep the history tidy
+      take: 20, 
       include: { createdBy: true }
     })
   ])
