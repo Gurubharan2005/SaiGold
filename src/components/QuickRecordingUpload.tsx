@@ -2,6 +2,7 @@
 
 import { useState, useRef } from 'react'
 import { Mic, Upload, X, Loader2, CheckCircle, AlertTriangle } from 'lucide-react'
+import { upload } from '@vercel/blob/client'
 
 interface Props {
   customerId: string
@@ -12,77 +13,66 @@ interface Props {
 export default function QuickRecordingUpload({ customerId, customerName, onUploadDone }: Props) {
   const [open, setOpen] = useState(false)
   const [label, setLabel] = useState('')
-  const [stage, setStage] = useState<'idle' | 'uploading' | 'done' | 'error'>('idle')
+  const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
   const [error, setError] = useState('')
+  const [done, setDone] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const xhrRef = useRef<XMLHttpRequest | null>(null)
 
-  const reset = () => {
-    setStage('idle')
+  const handleUpload = async (file: File) => {
+    setUploading(true)
     setProgress(0)
     setError('')
-    if (fileInputRef.current) fileInputRef.current.value = ''
-  }
+    setDone(false)
 
-  const handleUpload = (file: File) => {
-    setStage('uploading')
-    setProgress(0)
-    setError('')
+    try {
+      // Step 1: Upload directly to Vercel Blob (bypasses 4.5MB server limit)
+      // Path format: recordings/customer_ID/TIMESTAMP_FILENAME
+      const safeFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_')
+      const blob = await upload(
+        `recordings/customer_${customerId}/${Date.now()}_${safeFileName}`,
+        file,
+        {
+          access: 'public',
+          handleUploadUrl: '/api/recordings/upload-token', // Securely get a token for this file
+          onUploadProgress: (ev) => {
+            setProgress(Math.round(ev.percentage))
+          }
+        }
+      )
 
-    const autoLabel = label.trim() ||
-      `Call – ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`
+      console.log('[Upload] Direct blob upload success:', blob.url)
 
-    const form = new FormData()
-    form.append('file', file)
-    form.append('label', autoLabel)
+      // Step 2: Save the URL to our database
+      const res = await fetch(`/api/customers/${customerId}/recordings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audioUrl: blob.url,
+          label: label.trim() || `Call - ${new Date().toLocaleDateString('en-IN')}`,
+        }),
+      })
 
-    const xhr = new XMLHttpRequest()
-    xhrRef.current = xhr
-
-    // Real-time progress from XHR upload events
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
-        setProgress(Math.round((e.loaded / e.total) * 100))
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({ error: 'DB save failed' }))
+        throw new Error(d.error || 'Failed to save recording to database.')
       }
-    }
 
-    xhr.onload = () => {
-      if (xhr.status === 200 || xhr.status === 201) {
-        setStage('done')
-        setLabel('')
+      setDone(true)
+      setLabel('')
+      setTimeout(() => {
+        setDone(false)
+        setOpen(false)
         onUploadDone?.()
-        setTimeout(() => { reset(); setOpen(false) }, 2000)
-      } else {
-        let msg = 'Upload failed'
-        try {
-          const d = JSON.parse(xhr.responseText)
-          msg = d.error || msg
-        } catch {}
-        setStage('error')
-        setError(msg)
-      }
+      }, 2000)
+
+    } catch (e: any) {
+      console.error('[Upload] Error:', e)
+      setError(e.message || 'Upload failed. Please check your connection.')
+    } finally {
+      setUploading(false)
+      setProgress(0)
     }
-
-    xhr.onerror = () => {
-      setStage('error')
-      setError('Network error. Please check your connection and try again.')
-    }
-
-    xhr.ontimeout = () => {
-      setStage('error')
-      setError('Upload timed out. Try a smaller file or better connection.')
-    }
-
-    xhr.timeout = 120000 // 2 minutes max
-    xhr.open('POST', `/api/customers/${customerId}/recordings`)
-    xhr.send(form)
-  }
-
-  const cancelUpload = () => {
-    xhrRef.current?.abort()
-    reset()
-    setOpen(false)
   }
 
   if (!open) {
@@ -95,7 +85,7 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
           padding: '5px 10px', background: 'rgba(245,158,11,0.1)',
           border: '1px solid rgba(245,158,11,0.3)', borderRadius: '999px',
           fontSize: '11px', fontWeight: 700, color: '#F59E0B',
-          cursor: 'pointer', transition: 'all 0.2s'
+          cursor: 'pointer', transition: 'all 0.2s', width: 'auto'
         }}
       >
         <Mic size={11} /> Add Recording
@@ -111,95 +101,73 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
       padding: '12px',
       display: 'flex',
       flexDirection: 'column',
-      gap: '8px'
+      gap: '8px',
+      width: '100%',
+      maxWidth: '300px'
     }}>
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '12px', fontWeight: 700, color: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Mic size={12} /> Upload Recording for {customerName}
+        <span style={{ fontSize: '11px', fontWeight: 700, color: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+          <Mic size={11} /> Recording for {customerName}
         </span>
-        <button
-          onClick={cancelUpload}
+        <button 
+          onClick={() => { setOpen(false); setError(''); setDone(false); }} 
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: '2px' }}
         >
           <X size={14} />
         </button>
       </div>
 
-      {/* Label — only when idle */}
-      {stage === 'idle' && (
-        <input
-          type="text"
-          placeholder="Label (optional, e.g. Follow Up Call)"
-          value={label}
-          onChange={e => setLabel(e.target.value)}
-          style={{ fontSize: '12px', padding: '8px', width: '100%' }}
-        />
-      )}
+      <input
+        type="text"
+        placeholder="Call label (optional)"
+        value={label}
+        onChange={e => setLabel(e.target.value)}
+        disabled={uploading}
+        style={{ fontSize: '12px', padding: '6px 10px', borderRadius: '6px', border: '1px solid var(--border-color)', background: 'var(--surface-color)', width: '100%' }}
+      />
 
       <input
         ref={fileInputRef}
         type="file"
-        accept=".mp3,.mp4,.wav,.ogg,.webm,.m4a,.aac,.flac,audio/*"
+        accept="audio/*,video/mp4"
         style={{ display: 'none' }}
         onChange={e => { const f = e.target.files?.[0]; if (f) handleUpload(f) }}
       />
 
-      {/* States */}
-      {stage === 'done' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px', color: '#10B981', fontWeight: 700, fontSize: '13px' }}>
-          <CheckCircle size={16} /> Saved successfully!
+      {done ? (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '8px', color: '#10B981', fontWeight: 700, fontSize: '12px' }}>
+          <CheckCircle size={14} /> Saved and Ready
         </div>
-      )}
-
-      {stage === 'uploading' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Loader2 size={13} className="animate-spin" />
-              {progress < 100 ? `Uploading... ${progress}%` : 'Processing...'}
+      ) : uploading ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-secondary)' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Loader2 size={12} className="animate-spin" /> {progress < 100 ? 'Uploading...' : 'Finalizing...'}
             </span>
-            <button onClick={cancelUpload} style={{ fontSize: '10px', color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer' }}>
-              Cancel
-            </button>
+            <span>{progress}%</span>
           </div>
-          <div style={{ background: 'var(--border-color)', borderRadius: '4px', height: '5px', overflow: 'hidden' }}>
-            <div style={{
-              background: progress < 100 ? 'var(--primary-color)' : '#10B981',
-              height: '100%',
-              width: `${progress}%`,
-              transition: 'width 0.2s ease'
-            }} />
+          <div style={{ background: 'var(--border-color)', borderRadius: '4px', height: '4px', overflow: 'hidden' }}>
+            <div style={{ background: 'var(--primary-color)', height: '100%', width: `${progress}%`, transition: 'width 0.3s' }} />
           </div>
         </div>
-      )}
-
-      {stage === 'error' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '6px', fontSize: '11px', color: '#EF4444', lineHeight: 1.5 }}>
-            <AlertTriangle size={13} style={{ flexShrink: 0, marginTop: '1px' }} />
-            {error}
-          </div>
-          <button
-            onClick={reset}
-            style={{ fontSize: '11px', padding: '6px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: '6px', color: '#EF4444', cursor: 'pointer' }}
-          >
-            Try Again
-          </button>
-        </div>
-      )}
-
-      {stage === 'idle' && (
+      ) : (
         <button
           onClick={() => fileInputRef.current?.click()}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
-            padding: '9px', background: 'var(--primary-color)', border: 'none',
-            borderRadius: '8px', color: '#111', fontWeight: 700, cursor: 'pointer', fontSize: '12px'
+            padding: '8px', background: 'var(--primary-color)', border: 'none',
+            borderRadius: '6px', color: '#111', fontWeight: 700, cursor: 'pointer', fontSize: '12px', width: '100%'
           }}
         >
-          <Upload size={13} /> Choose Audio File
+          <Upload size={13} /> {error ? 'Try Again' : 'Select Audio File'}
         </button>
+      )}
+
+      {error && (
+        <div style={{ fontSize: '10px', color: '#EF4444', display: 'flex', alignItems: 'flex-start', gap: '4px', lineHeight: 1.4 }}>
+          <AlertTriangle size={12} style={{ marginTop: '1px', flexShrink: 0 }} />
+          <span>{error}</span>
+        </div>
       )}
     </div>
   )
