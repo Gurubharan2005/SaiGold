@@ -17,15 +17,9 @@ export default async function DashboardPage() {
   // MANAGER VIEW
   // ----------------------------------------------------
   if (session?.role === 'MANAGER') {
-    const [pendingLeads, dueCustomers, metaLeads] = await Promise.all([
+    const [pendingLeads, dueCustomers] = await Promise.all([
       prisma.customer.count({ where: { status: 'WAITING' } }),
       prisma.customer.count({ where: { status: 'DUE' } }),
-      prisma.customer.findMany({
-        where: { createdById: null },
-        orderBy: { createdAt: 'desc' },
-        include: { assignedTo: { select: { name: true } } },
-        take: 5
-      })
     ])
 
     return (
@@ -57,34 +51,6 @@ export default async function DashboardPage() {
               <h2 style={{ margin: 0, fontSize: '28px' }}>{dueCustomers}</h2>
             </div>
           </div>
-        </div>
-
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-           <div className="card" style={{ padding: '24px' }}>
-              <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                 <Target size={18} color="var(--primary-color)" /> Latest Facebook Enquiries
-              </h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                 {metaLeads.length === 0 ? (
-                    <p style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>No meta leads currently detected.</p>
-                 ) : (
-                    metaLeads.map(lead => (
-                       <div key={lead.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px', background: 'var(--surface-hover)', borderRadius: '8px', border: '1px solid var(--border-color)' }}>
-                          <div>
-                             <div style={{ fontWeight: 600, fontSize: '14px' }}>{lead.name}</div>
-                             <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{lead.assignedTo?.name || 'Unassigned'}</div>
-                          </div>
-                          <span className={`badge badge-${lead.status.toLowerCase().replace('_', '-')}`} style={{ fontSize: '10px', padding: '4px 8px' }}>
-                             {lead.status}
-                          </span>
-                       </div>
-                    ))
-                 )}
-              </div>
-              <Link href="/dashboard/leads" style={{ display: 'block', marginTop: '16px', textAlign: 'center', fontSize: '12px', color: 'var(--primary-color)', textDecoration: 'none' }}>
-                 View All Ad Leads &rarr;
-              </Link>
-           </div>
         </div>
       </div>
     )

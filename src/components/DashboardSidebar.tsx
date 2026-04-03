@@ -59,7 +59,7 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
             <LayoutDashboard size={20} color={isActive('/dashboard') ? 'var(--primary-color)' : 'currentColor'} /> Dashboard
           </Link>
 
-          {(session?.role === 'MANAGER' || session?.role === 'SALESMAN') && (
+          {session?.role === 'SALESMAN' && (
             <Link href="/dashboard/sales" onClick={onClose} style={navItemStyle('/dashboard/sales')}>
               <Target size={20} color="var(--status-accepted)" /> Sales Module
             </Link>
