@@ -16,7 +16,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
   const { tab, q, search, page } = await searchParams
-  const currentTab = tab || 'ongoing'
+  const currentTab = tab || 'called'
   
   // Backwards compatibility for the quick-search input component
   const activeQuery = search || q || ''
@@ -104,7 +104,6 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
 
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '24px', gap: '8px', overflowX: 'auto', paddingBottom: '2px' }} className="no-scrollbar">
         {[
-          { id: 'ongoing', label: 'Active Loans', count: 0 }, // We'll count these later if needed
           { id: 'called', label: 'Called Leads', count: 0 },
           { id: 'followup', label: 'Follow-Ups', count: 0 },
           { id: 'rejected', label: 'Rejected', count: 0 }
@@ -135,15 +134,12 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             <SearchInput placeholder="Search name or phone..." />
           </div>
           
-          {currentTab !== 'ongoing' && (
             <select style={{ height: '40px', padding: '0 16px', minWidth: '160px', borderRadius: 'var(--border-radius-sm)', border: '1px solid var(--border-color)', background: 'var(--surface-color)', color: 'var(--text-color)' }}>
               <option value="">All Statuses</option>
               <option value="PROCESSING">Processing</option>
-              <option value="ACCEPTED">Accepted</option>
-              <option value="DUE">Due</option>
-              <option value="CLOSED">Closed</option>
+              <option value="WAITING">Waiting</option>
+              <option value="REJECTED">Rejected</option>
             </select>
-          )}
         </div>
 
         {/* Datatable - Hidden on Mobile */}
@@ -152,16 +148,9 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
           <thead>
             <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Customer Data</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Status & Priority</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                {currentTab === 'ongoing' ? 'Due Date' : 'Loan Info'}
-              </th>
-              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                {currentTab === 'ongoing' ? 'Amount to be Paid' : 'Creation Date'}
-              </th>
-              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>
-                {currentTab === 'ongoing' ? 'Remainder / Notes' : 'Response Time'}
-              </th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Loan Info</th>
+              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Creation Date</th>
+              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Response Time</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
@@ -232,24 +221,9 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                      )}
                   </td>
                   <td style={{ padding: '16px', textAlign: 'right' }}>
-                      {currentTab === 'ongoing' ? (
-                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', alignItems: 'center' }}>
-                          <a href={`https://wa.me/${c.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10B981', fontSize: '13px', textDecoration: 'none', background: 'rgba(16, 185, 129, 0.1)', padding: '6px 10px', borderRadius: '4px', fontWeight: 600 }}>
-                            WA
-                          </a>
-                          <OngoingQuickUpdate 
-                            customerId={c.id} 
-                            initialAmount={c.loanAmount} 
-                            initialDate={c.dueDate} 
-                            initialNotes={c.notes}
-                          />
-                          <RequestClosureButton customerId={c.id} variant="compact" />
-                        </div>
-                      ) : (
-                        <Link href={`/dashboard/customers/${c.id}?from=${currentTab}`} style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '13px', fontWeight: 700 }}>
-                          Details &rarr;
-                        </Link>
-                      )}
+                    <Link href={`/dashboard/customers/${c.id}?from=${currentTab}`} style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '13px', fontWeight: 700 }}>
+                      Details &rarr;
+                    </Link>
                   </td>
                 </tr>
               ))
@@ -306,9 +280,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                         {currentTab === 'ongoing' ? 'Amount Due' : 'Gold Weight'}
                      </div>
                      <div style={{ fontWeight: 700 }}>
-                         {currentTab === 'ongoing' 
-                           ? (c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-')
-                           : (c.status === 'REJECTED' ? 'REJECTED' : (c.goldWeight ? `${c.goldWeight}g` : '-'))}
+                         {c.status === 'REJECTED' ? 'REJECTED' : (c.goldWeight ? `${c.goldWeight}g` : '-')}
                       </div>
                     </div>
                    {currentTab === 'ongoing' && (
@@ -323,22 +295,9 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                   <a href={`tel:${c.phone}`} className="btn-secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', background: 'var(--surface-color)', border: '1px solid var(--border-color)', color: 'var(--text-color)', fontSize: '14px', borderRadius: '8px' }}>
                     <Phone size={16} /> Call
                   </a>
-                  {currentTab === 'ongoing' && (
-                     <div style={{ flex: 1, display: 'flex', gap: '8px' }}>
-                        <OngoingQuickUpdate 
-                          customerId={c.id} 
-                          initialAmount={c.loanAmount} 
-                          initialDate={c.dueDate} 
-                          initialNotes={c.notes}
-                        />
-                        <RequestClosureButton customerId={c.id} variant="compact" />
-                     </div>
-                  )}
-                  {currentTab !== 'ongoing' && (
-                    <Link href={`/dashboard/customers/${c.id}?from=${currentTab}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
-                      View Details →
-                    </Link>
-                  )}
+                  <Link href={`/dashboard/customers/${c.id}?from=${currentTab}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
+                    View Details →
+                  </Link>
                 </div>
               </div>
             ))
