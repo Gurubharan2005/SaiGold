@@ -71,126 +71,195 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%', marginTop: '6px' }}>
+      
+      {/* ROW 1: Communication & Audio Tools (Mobile Scrollable) */}
+      <div className="no-scrollbar" style={{ display: 'flex', alignItems: 'center', gap: '8px', overflowX: 'auto', paddingBottom: '2px', touchAction: 'pan-x' }}>
+        <RecordingsBadge customerId={customerId} customerName={customerName} />
         
-        {/* Primary Interaction Row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }} ref={menuRef}>
-          <RecordingsBadge customerId={customerId} customerName={customerName} />
-          
+        <div style={{ display: 'flex', gap: '8px', flex: 1 }}>
           <a 
             href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`} 
             target="_blank" 
             rel="noopener noreferrer"
             title="WhatsApp"
             style={{ 
-              padding: '12px', 
-              borderRadius: '12px', 
-              background: 'rgba(34, 197, 94, 0.1)', 
+              padding: '10px 12px', 
+              borderRadius: '10px', 
+              background: 'rgba(34, 197, 94, 0.12)', 
               color: '#22c55e',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               border: '1px solid rgba(34, 197, 94, 0.2)',
-              textDecoration: 'none'
+              textDecoration: 'none',
+              minWidth: '44px'
             }}
           >
-            <MessageCircle size={22} />
+            <MessageCircle size={18} />
           </a>
 
           <a 
             href={`tel:${phone}`} 
             title="Direct Call"
             style={{ 
-              padding: '12px', 
-              borderRadius: '12px', 
-              background: 'rgba(16, 185, 129, 0.1)', 
+              padding: '10px 12px', 
+              borderRadius: '10px', 
+              background: 'rgba(16, 185, 129, 0.12)', 
               color: '#10B981',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               border: '1px solid rgba(16, 185, 129, 0.2)',
-              textDecoration: 'none'
+              textDecoration: 'none',
+              minWidth: '44px'
             }}
           >
-            <Phone size={22} />
+            <Phone size={18} />
           </a>
 
+          <div style={{ flexShrink: 0 }}>
+            <QuickRecordingUpload customerId={customerId} customerName={customerName} />
+          </div>
+        </div>
+      </div>
+
+      {/* ROW 2: Primary Status Actions (One-Tap High Contrast) */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr) 44px', gap: '6px', alignItems: 'stretch' }}>
+        <button 
+          onClick={() => handleStatusUpdate('CALLED')} 
+          disabled={!!loading} 
+          style={{ 
+            fontSize: '9px', 
+            fontWeight: 900, 
+            padding: '12px 2px', 
+            borderRadius: '10px', 
+            color: 'var(--primary-color)', 
+            background: 'rgba(255, 193, 7, 0.1)', 
+            border: '1px solid rgba(255, 193, 7, 0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '5px',
+            cursor: 'pointer',
+            letterSpacing: '0.5px'
+          }}
+        >
+          {loading === 'CALLED' ? <Loader2 size={14} className="animate-spin" /> : <Phone size={14} />}
+          CALLED
+        </button>
+
+        <button 
+          onClick={() => handleStatusUpdate('FOLLOW_UP')} 
+          disabled={!!loading} 
+          style={{ 
+            fontSize: '9px', 
+            fontWeight: 900, 
+            padding: '12px 2px', 
+            borderRadius: '10px', 
+            color: '#F59E0B', 
+            background: 'rgba(245, 158, 11, 0.1)', 
+            border: '1px solid rgba(245, 158, 11, 0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '5px',
+            cursor: 'pointer',
+            letterSpacing: '0.5px'
+          }}
+        >
+          <Clock size={14} />
+          FOLLOW
+        </button>
+
+        <button 
+          onClick={() => handleStatusUpdate('REJECTED')} 
+          disabled={!!loading} 
+          style={{ 
+            fontSize: '9px', 
+            fontWeight: 900, 
+            padding: '12px 2px', 
+            borderRadius: '10px', 
+            color: '#EF4444', 
+            background: 'rgba(239, 68, 68, 0.1)', 
+            border: '1px solid rgba(239, 68, 68, 0.2)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '5px',
+            cursor: 'pointer',
+            letterSpacing: '0.5px'
+          }}
+        >
+          <X size={14} />
+          REJECT
+        </button>
+
+        <div style={{ position: 'relative' }} ref={menuRef}>
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             style={{
-              padding: '12px', 
-              borderRadius: '12px', 
+              width: '44px',
+              height: '100%',
+              borderRadius: '10px', 
               background: 'var(--surface-color)', 
               color: 'var(--text-primary)',
               border: '1px solid var(--border-color)',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center'
+              justifyContent: 'center',
+              boxShadow: 'var(--shadow-sm)'
             }}
           >
-            <MoreVertical size={22} />
+            <MoreVertical size={18} />
           </button>
 
-          {/* Action Dropdown Menu */}
           {isMenuOpen && (
             <div className="fade-in" style={{
               position: 'absolute',
               bottom: '100%',
-              left: '0',
+              right: '0',
               marginBottom: '12px',
-              background: 'var(--surface-color)',
+              background: 'var(--bg-color)',
               border: '1px solid var(--border-color)',
               borderRadius: '16px',
-              boxShadow: '0 20px 40px rgba(0,0,0,0.6)',
-              padding: '12px',
+              boxShadow: '0 25px 60px rgba(0,0,0,0.9)',
+              padding: '16px',
               display: 'flex',
               flexDirection: 'column',
-              gap: '10px',
-              minWidth: '220px',
-              zIndex: 2000
+              gap: '12px',
+              minWidth: '240px',
+              zIndex: 5000,
+              borderBottom: '4px solid var(--primary-color)'
             }}>
+              <p style={{ fontSize: '10px', color: 'var(--text-secondary)', marginBottom: '4px', textAlign: 'center', fontWeight: 900, letterSpacing: '1.5px', textTransform: 'uppercase' }}>Management Deck</p>
               <button 
                 onClick={() => handleStatusUpdate('PROCESSING')}
                 disabled={!!loading}
                 style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
-                  gap: '10px', 
-                  padding: '14px', 
+                  justifyContent: 'center',
+                  gap: '12px', 
+                  padding: '16px', 
                   width: '100%', 
-                  borderRadius: '10px', 
+                  borderRadius: '12px', 
                   color: '#111', 
                   background: 'var(--primary-color)', 
                   border: 'none', 
-                  fontWeight: 800,
-                  fontSize: '14px'
+                  fontWeight: 900,
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  boxShadow: '0 10px 20px rgba(255, 193, 7, 0.25)',
+                  transition: 'transform 0.2s'
                 }}
               >
                 {loading === 'PROCESSING' ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
                 CONVERT TO LOAN
               </button>
-              
-              <div style={{ height: '1px', background: 'var(--border-color)', margin: '4px 0' }} />
-
-              <button onClick={() => handleStatusUpdate('CALLED')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', width: '100%', borderRadius: '10px', color: 'var(--primary-color)', background: 'rgba(255, 193, 7, 0.05)', border: '1px solid rgba(255, 193, 7, 0.1)', fontWeight: 700 }}>
-                {loading === 'CALLED' ? <Loader2 size={16} className="animate-spin" /> : <Phone size={16} />} 
-                Mark as CALLED
-              </button>
-              <button onClick={() => handleStatusUpdate('FOLLOW_UP')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', width: '100%', borderRadius: '10px', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.1)', fontWeight: 700 }}>
-                <Clock size={16} /> Follow Up
-              </button>
-              <button onClick={() => handleStatusUpdate('REJECTED')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '12px', width: '100%', borderRadius: '10px', color: '#EF4444', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', fontWeight: 700 }}>
-                <X size={16} /> Reject Lead
-              </button>
             </div>
           )}
-        </div>
-
-        {/* Right Side: Recording Upload Trigger */}
-        <div style={{ flexShrink: 0 }}>
-          <QuickRecordingUpload customerId={customerId} customerName={customerName} />
         </div>
       </div>
     </div>
