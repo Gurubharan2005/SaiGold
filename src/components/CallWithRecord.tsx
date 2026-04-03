@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { Phone, Mic, Square, Loader2, CheckCircle } from 'lucide-react'
+import { upload } from '@vercel/blob/client'
 
 interface Props {
   phone: string
@@ -80,27 +81,40 @@ export default function CallWithRecord({ phone, customerId, customerName }: Prop
     // Wait for final chunk
     await new Promise(resolve => setTimeout(resolve, 500))
 
-    const blob = new Blob(chunksRef.current, { type: 'audio/webm' })
+    const fileBlob = new Blob(chunksRef.current, { type: 'audio/webm' })
     const now = new Date()
     const label = `Call – ${now.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })} ${now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`
 
-    const form = new FormData()
-    form.append('file', blob, `call-${Date.now()}.webm`)
-    form.append('label', label)
-    form.append('durationSec', String(duration))
-
     try {
-      const res = await fetch(`/api/customers/${customerId}/recordings`, { method: 'POST', body: form })
+      // Step 1: Enterprise Signed Handshake & Stream
+      const blob = await upload(`recordings/call-${Date.now()}.webm`, fileBlob, {
+        access: 'private',
+        contentType: 'audio/webm',
+        handleUploadUrl: '/api/upload-audio'
+      })
+
+      // Step 2: Persistent Metadata Sync (JSON)
+      const res = await fetch(`/api/customers/${customerId}/recordings`, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audioUrl: blob.url,
+          label: label,
+          durationSec: duration
+        })
+      })
+
       if (res.ok) {
         setState('done')
         setTimeout(() => setState('idle'), 3000)
       } else {
         const d = await res.json()
-        setErrorMsg(d.error || 'Upload failed')
+        setErrorMsg(d.error || 'Database Sync Failed')
         setState('error')
       }
-    } catch {
-      setErrorMsg('Upload failed. Please try again.')
+    } catch (err: any) {
+      console.error('[Enterprise-Call-Sync] Failure:', err)
+      setErrorMsg(err.message || 'Upload failed. Please try again.')
       setState('error')
     }
   }

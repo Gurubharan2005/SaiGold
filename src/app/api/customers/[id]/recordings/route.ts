@@ -68,7 +68,7 @@ export async function POST(
 
       // Server-side upload to Vercel Blob (KB files)
       const blob = await put(`recordings/customer_${id}/${Date.now()}_${file.name}`, file, {
-        access: 'public',
+        access: 'private',
         contentType: file.type || 'audio/mpeg'
       })
       audioUrl = blob.url

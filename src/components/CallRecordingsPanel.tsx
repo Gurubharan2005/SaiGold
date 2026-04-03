@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Mic, Upload, Trash2, Play, Pause, Clock, User, Loader2, ChevronDown, ChevronUp } from 'lucide-react'
+import { Mic, Upload, Trash2, Play, Pause, Clock, User, Loader2, ChevronDown, ChevronUp, CheckCircle } from 'lucide-react'
 import { format } from 'date-fns'
+import { upload } from '@vercel/blob/client'
 
 interface Recording {
   id: string
@@ -29,6 +30,7 @@ export default function CallRecordingsPanel({ customerId, isManager }: Props) {
   const [recordings, setRecordings] = useState<Recording[]>([])
   const [loading, setLoading] = useState(true)
   const [uploading, setUploading] = useState(false)
+  const [uploadProgress, setUploadProgress] = useState(0)
   const [label, setLabel] = useState('')
   const [playingId, setPlayingId] = useState<string | null>(null)
   const [collapsed, setCollapsed] = useState(false)
@@ -49,22 +51,48 @@ export default function CallRecordingsPanel({ customerId, isManager }: Props) {
 
   const handleUpload = async (file: File) => {
     setUploading(true)
+    setUploadProgress(0)
     setError('')
-    const form = new FormData()
-    form.append('file', file)
-    if (label.trim()) form.append('label', label.trim())
 
-    const res = await fetch(`/api/customers/${customerId}/recordings`, { method: 'POST', body: form })
-    if (res.ok) {
-      const newRec = await res.json()
-      setRecordings(prev => [newRec, ...prev]) // Add to top
-      setLabel('')
-      if (fileInputRef.current) fileInputRef.current.value = ''
-    } else {
-      const data = await res.json()
-      setError(data.error || 'Upload failed')
+    try {
+      // Step 1: Secure Client-Side Upload via Handshake
+      const suffix = file.name.split('.').pop() || 'mp3'
+      const pathname = `recordings/customer_${customerId}/${Date.now()}.${suffix}`
+      
+      const blob = await upload(pathname, file, {
+        access: 'private',
+        contentType: file.type || 'audio/mpeg',
+        handleUploadUrl: '/api/upload-audio',
+        onUploadProgress: (p) => setUploadProgress(p.percentage)
+      })
+
+      // Step 2: Sync Metadata to Neon Database via PATH A (JSON)
+      const res = await fetch(`/api/customers/${customerId}/recordings`, { 
+        method: 'POST', 
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          audioUrl: blob.url,
+          label: label.trim() || `Call Recording - ${new Date().toLocaleDateString()}`,
+          durationSec: null // Duration detection could be added here later if needed
+        })
+      })
+
+      if (res.ok) {
+        const newRec = await res.json()
+        setRecordings(prev => [newRec, ...prev])
+        setLabel('')
+        if (fileInputRef.current) fileInputRef.current.value = ''
+      } else {
+        const data = await res.json()
+        setError(data.error || 'Database Sync Failed')
+      }
+    } catch (err: any) {
+      console.error('[Upload-Failure]', err)
+      setError(err.message || 'Upload process failed')
+    } finally {
+      setUploading(false)
+      setUploadProgress(0)
     }
-    setUploading(false)
   }
 
   const handleDelete = async (id: string) => {
@@ -142,12 +170,27 @@ export default function CallRecordingsPanel({ customerId, isManager }: Props) {
               onClick={() => fileInputRef.current?.click()}
               disabled={uploading}
               className="btn-primary"
-              style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+              style={{ 
+                width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                background: uploading ? 'var(--surface-hover)' : 'var(--primary-color)',
+                border: uploading ? '1px solid var(--border-color)' : 'none',
+                position: 'relative',
+                overflow: 'hidden'
+              }}
             >
-              {uploading
-                ? <><Loader2 size={16} className="animate-spin" /> Uploading...</>
-                : <><Upload size={16} /> Upload Recording</>
-              }
+              {uploading && (
+                <div style={{
+                  position: 'absolute', left: 0, top: 0, bottom: 0,
+                  width: `${uploadProgress}%`, background: 'rgba(16,185,129,0.15)',
+                  transition: 'width 0.2s'
+                }} />
+              )}
+              <span style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                {uploading
+                  ? <><Loader2 size={16} className="animate-spin" /> {uploadProgress < 100 ? `Syncing... ${uploadProgress}%` : 'Finalizing...'}</>
+                  : <><Upload size={16} /> Upload Recording</>
+                }
+              </span>
             </button>
             {error && (
               <p style={{ color: 'var(--status-rejected)', fontSize: '12px', marginTop: '8px' }}>{error}</p>
@@ -175,7 +218,7 @@ export default function CallRecordingsPanel({ customerId, isManager }: Props) {
                   {/* Hidden audio element */}
                   <audio
                     ref={el => { audioRefs.current[rec.id] = el }}
-                    src={rec.audioUrl}
+                    src={`/api/media?url=${encodeURIComponent(rec.audioUrl)}`}
                     preload="metadata"
                   />
 

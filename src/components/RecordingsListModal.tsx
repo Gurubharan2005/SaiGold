@@ -123,7 +123,11 @@ export default function RecordingsListModal({ customerId, customerName, isOpen, 
                   padding: '16px',
                   transition: 'all 0.2s',
                 }}>
-                  <audio ref={el => { audioRefs.current[rec.id] = el }} src={rec.audioUrl} preload="metadata" />
+                  <audio 
+                    ref={el => { audioRefs.current[rec.id] = el }} 
+                    src={`/api/media?url=${encodeURIComponent(rec.audioUrl)}`} 
+                    preload="metadata" 
+                  />
 
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px' }}>
                     <div style={{ flex: 1, minWidth: 0 }}>

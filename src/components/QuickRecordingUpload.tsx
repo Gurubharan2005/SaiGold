@@ -55,7 +55,8 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
       const simplifiedPath = `recordings/customer_${customerId}/${Date.now()}.${extension}`
 
       const blob = await upload(simplifiedPath, file, {
-        access: 'public',
+        access: 'private',
+        contentType: file.type || 'audio/mpeg',
         handleUploadUrl: '/api/upload-audio', // Pointing to the new 'Enterprise Safe' endpoint
         onUploadProgress: (ev) => {
           setProgress(Math.round(ev.percentage))

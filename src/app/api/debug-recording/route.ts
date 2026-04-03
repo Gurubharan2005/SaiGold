@@ -35,7 +35,7 @@ export async function GET(req: Request) {
     const testBlob = await put(
       `recordings/__test__/${Date.now()}.txt`,
       'hello world',
-      { access: 'public', contentType: 'text/plain' }
+      { access: 'private', contentType: 'text/plain' }
     )
     results.blob_write = `ok: ${testBlob.url}`
     // Cleanup: we don't delete as del() requires a token 
