@@ -18,12 +18,14 @@ export async function POST(request: Request): Promise<NextResponse> {
   }
 
   const body = (await request.json()) as HandleUploadBody
+  console.log(`[Token] Generating for user ${session.id}, file: ${body.type === 'blob.generate-client-token' ? body.payload : 'Unknown'}`)
 
   try {
     const jsonResponse = await handleUpload({
       body,
       request,
       onBeforeGenerateToken: async (pathname) => {
+        console.log(`[Token] Generating for pathname: ${pathname}`)
         // Generate a token that only allows audio uploads up to 50MB
         return {
           allowedContentTypes: [
@@ -39,14 +41,15 @@ export async function POST(request: Request): Promise<NextResponse> {
       },
       onUploadCompleted: async ({ blob, tokenPayload }) => {
         // This is called by Vercel after the upload is done
-        console.log('[Blob] Direct upload completed:', blob.url)
+        console.log('[Blob] Direct upload completed successfully:', blob.url)
       },
     })
 
     return NextResponse.json(jsonResponse)
-  } catch (error) {
+  } catch (error: any) {
+    console.error('[Token] Generation error:', error.message)
     return NextResponse.json(
-      { error: (error as Error).message },
+      { error: error.message },
       { status: 400 }
     )
   }
