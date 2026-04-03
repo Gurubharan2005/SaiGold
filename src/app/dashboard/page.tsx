@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { CheckCircle, AlertCircle, Clock, FileText, UserPlus, ArrowRight, Phone, Target } from 'lucide-react'
+import { CheckCircle, AlertCircle, Clock, FileText, UserPlus, ArrowRight, Phone, Target, ExternalLink } from 'lucide-react'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
@@ -83,7 +83,7 @@ export default async function DashboardPage() {
         { status: 'FOLLOW_UP' }
       ]
     },
-    select: { id: true, name: true, followUpDate: true, followUpNotes: true, phone: true, priority: true }
+    select: { id: true, name: true, followUpDate: true, followUpNotes: true, phone: true, status: true, priority: true }
   })
 
   return (
@@ -134,7 +134,14 @@ export default async function DashboardPage() {
                    </div>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
                      <span className={`badge badge-${lead.status.toLowerCase()}`} style={{ fontSize: '10px' }}>{lead.status}</span>
-                     <QuickStatusActions customerId={lead.id} customerName={lead.name} phone={lead.phone} />
+                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
+                       <QuickStatusActions customerId={lead.id} customerName={lead.name} phone={lead.phone} />
+                       {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED'].includes(lead.status) && (
+                         <Link href={`/dashboard/customers/${lead.id}`} style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 600 }}>
+                           <ExternalLink size={12} /> View Details
+                         </Link>
+                       )}
+                     </div>
                    </div>
                  </div>
               ))
@@ -166,11 +173,13 @@ export default async function DashboardPage() {
                     </div>
                     <div>
                       <QuickStatusActions customerId={f.id} customerName={f.name} phone={f.phone} />
-                      <div style={{ marginTop: '8px', textAlign: 'right' }}>
-                         <Link href={`/dashboard/customers/${f.id}`} style={{ fontSize: '11px', color: 'var(--text-secondary)', textDecoration: 'none' }}>
-                           View Details &rarr;
-                         </Link>
-                      </div>
+                      {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED'].includes(f.status || '') && (
+                        <div style={{ marginTop: '8px', textAlign: 'right' }}>
+                          <Link href={`/dashboard/customers/${f.id}`} style={{ fontSize: '11px', color: 'var(--text-secondary)', textDecoration: 'none' }}>
+                            View Details &rarr;
+                          </Link>
+                        </div>
+                      )}
                     </div>
                   </div>
                   {f.followUpNotes && (

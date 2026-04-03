@@ -1,10 +1,11 @@
 'use client'
 
 import React, { useState } from 'react'
+import Link from 'next/link'
 import { LeadCard } from './LeadCard'
 import { StaffLeadActions } from './StaffLeadActions'
 import QuickRecordingUpload from './QuickRecordingUpload'
-import { CheckCircle, Clock, XCircle, User } from 'lucide-react'
+import { CheckCircle, Clock, XCircle, User, ExternalLink } from 'lucide-react'
 
 interface Lead {
   id: string
@@ -52,6 +53,18 @@ export default function KanbanBoard({ columns, isManager }: Props) {
           <StaffLeadActions leadId={lead.id} />
         )}
         <QuickRecordingUpload customerId={lead.id} customerName={lead.name} />
+        {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED'].includes(lead.status) && (
+          <Link 
+            href={`/dashboard/customers/${lead.id}`}
+            style={{ 
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px',
+              padding: '10px', background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6',
+              borderRadius: '8px', fontSize: '12px', fontWeight: 700, textDecoration: 'none'
+            }}
+          >
+            <ExternalLink size={14} /> Full Customer Profile
+          </Link>
+        )}
       </div>
     </LeadCard>
   )
