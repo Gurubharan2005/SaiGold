@@ -79,7 +79,7 @@ export async function POST(
     // Stream to Vercel Blob — stored in customer-specific folder
     const blob = await put(
       `recordings/customer_${id}/${Date.now()}_${safeFileName}`,
-      file.stream(),
+      file,
       {
         access: 'public',
         contentType: file.type || 'audio/mpeg',
