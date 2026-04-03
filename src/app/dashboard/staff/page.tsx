@@ -3,6 +3,7 @@ import { Briefcase, MapPin, Shield, Activity, User } from 'lucide-react'
 import { format } from 'date-fns'
 import AddStaffModal from '@/components/AddStaffModal'
 import RemoveStaffButton from '@/components/RemoveStaffButton'
+import Link from 'next/link'
 
 export const dynamic = 'force-dynamic'
 
@@ -85,11 +86,19 @@ export default async function StaffManagementPage() {
                     )}
                   </td>
                   <td style={{ padding: '16px 24px', textAlign: 'right' }}>
-                    {user.role === 'STAFF' ? (
-                       <RemoveStaffButton staffId={user.id} staffName={user.name} />
-                    ) : (
-                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '2px 8px', display: 'inline-block' }}>Protected</div>
-                    )}
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', alignItems: 'center' }}>
+                      <Link
+                        href={`/dashboard/staff/${user.id}`}
+                        style={{ fontSize: '12px', color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 600, padding: '6px 12px', border: '1px solid var(--primary-color)', borderRadius: '6px' }}
+                      >
+                        View Leads
+                      </Link>
+                      {user.role === 'STAFF' ? (
+                         <RemoveStaffButton staffId={user.id} staffName={user.name} />
+                      ) : (
+                        <div style={{ fontSize: '11px', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', padding: '2px 8px', display: 'inline-block' }}>Protected</div>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -120,6 +129,12 @@ export default async function StaffManagementPage() {
                 </div>
               </div>
 
+              <Link
+                href={`/dashboard/staff/${user.id}`}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', padding: '10px', background: 'rgba(245,158,11,0.1)', color: 'var(--primary-color)', borderRadius: '8px', fontSize: '13px', fontWeight: 700, textDecoration: 'none', marginTop: '4px' }}
+              >
+                View Leads →
+              </Link>
               {user.lat && user.lng && (
                 <a 
                   href={`https://www.google.com/maps/search/?api=1&query=${user.lat},${user.lng}`} 
