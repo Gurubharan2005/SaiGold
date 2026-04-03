@@ -2,11 +2,15 @@ import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-
 import { put } from '@vercel/blob'
 
-// Allowed size for server-side buffering - 4.5MB is Vercel's limit
+// Use max duration for large recordings
 export const maxDuration = 60
+
+/**
+ * DEEP INVESTIGATION RECORDINGS API
+ * Includes retry logic and robust path/metadata handling.
+ */
 
 // GET — list all recordings for a customer
 export async function GET(
@@ -28,7 +32,7 @@ export async function GET(
   return NextResponse.json(recordings)
 }
 
-// POST — handle metadata (JSON) OR direct file upload (FormData)
+// POST — Handle both JSON and FormData with Persistent Retry
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -38,6 +42,7 @@ export async function POST(
     const cookieStore = await cookies()
     const token = cookieStore.get('auth-token')?.value
     const session = token ? await decrypt(token) : null
+    
     if (!session?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
     const contentType = req.headers.get('content-type') || ''
@@ -45,14 +50,14 @@ export async function POST(
     let label = ''
     let durationSec = null
 
-    // ── Path A: Direct Metadata (JSON) — from new direct-upload component ──
+    // PATH A: JSON (From direct-upload component)
     if (contentType.includes('application/json')) {
       const body = await req.json()
       audioUrl = body.audioUrl
       label = body.label
       durationSec = body.durationSec
     } 
-    // ── Path B: Legacy File Upload (FormData) — for backwards compatibility ──
+    // PATH B: FormData (Legacy components)
     else {
       const formData = await req.formData()
       const file = formData.get('file') as File | null
@@ -61,34 +66,48 @@ export async function POST(
 
       if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
 
-      // Small/Legacy files: upload to Vercel Blob from the server
-      const safeName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
-      const blob = await put(`recordings/customer_${id}/${safeName}`, file, {
+      // Server-side upload to Vercel Blob (KB files)
+      const blob = await put(`recordings/customer_${id}/${Date.now()}_${file.name}`, file, {
         access: 'public',
         contentType: file.type || 'audio/mpeg'
       })
       audioUrl = blob.url
     }
 
-    if (!audioUrl) return NextResponse.json({ error: 'Upload failed' }, { status: 400 })
+    if (!audioUrl) return NextResponse.json({ error: 'Upload process failed' }, { status: 400 })
 
-    console.log(`[Recording] Saving metadata for customer ${id}: ${audioUrl}`)
+    // PERSISTENT RETRY: Try to save to DB (up to 3 attempts)
+    let finalRecording = null
+    let error = null
+    
+    for (let i = 0; i < 3; i++) {
+       try {
+         finalRecording = await prisma.callRecording.create({
+           data: {
+             customerId: id,
+             uploadedById: String(session.id),
+             audioUrl,
+             label: label || null,
+             durationSec,
+           },
+           include: { uploadedBy: { select: { name: true, role: true } } }
+         })
+         if (finalRecording) break
+       } catch (e: any) {
+         console.warn(`[DB-Retry] Attempt ${i+1} failed:`, e.message)
+         error = e
+         await new Promise(resolve => setTimeout(resolve, 500))
+       }
+    }
 
-    const recording = await prisma.callRecording.create({
-      data: {
-        customerId: id,
-        uploadedById: String(session.id),
-        audioUrl,
-        label: label || null,
-        durationSec,
-      },
-      include: { uploadedBy: { select: { name: true, role: true } } }
-    })
+    if (!finalRecording) {
+       throw new Error(`Database Save Failed after 3 attempts: ${error?.message}`)
+    }
 
-    return NextResponse.json(recording, { status: 201 })
+    return NextResponse.json(finalRecording, { status: 201 })
 
   } catch (err: any) {
-    console.error('[Recording] API Error:', err)
-    return NextResponse.json({ error: err.message || 'Failed to save recording' }, { status: 500 })
+    console.error('[Deep-Investigate-API] Error:', err.message)
+    return NextResponse.json({ error: err.message }, { status: 500 })
   }
 }

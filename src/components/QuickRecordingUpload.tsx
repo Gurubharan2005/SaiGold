@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Mic, Upload, X, Loader2, CheckCircle, AlertTriangle } from 'lucide-react'
+import { Mic, Upload, X, Loader2, CheckCircle, AlertTriangle, Bug } from 'lucide-react'
 import { upload } from '@vercel/blob/client'
 
 interface Props {
@@ -15,21 +15,22 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
   const [label, setLabel] = useState('')
   const [uploading, setUploading] = useState(false)
   const [progress, setProgress] = useState(0)
-  const [error, setError] = useState('')
+  const [error, setError] = useState<any>(null)
   const [done, setDone] = useState(false)
+  const [showDebug, setShowDebug] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
   const handleUpload = async (file: File) => {
     setUploading(true)
     setProgress(0)
-    setError('')
+    setError(null)
     setDone(false)
+    setShowDebug(false)
 
     try {
-      console.log(`[Upload] Starting for ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`)
+      console.log(`[Deep-Investigate][Upload] Starting for ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`)
       
-      // Step 1: Direct-to-Blob Upload
-      // Using a simplified filename to avoid any special character issues on mobile
+      // Step 1: Direct-to-Blob Upload (Resilient)
       const extension = file.name.split('.').pop() || 'mp3'
       const simplifiedPath = `recordings/customer_${customerId}/${Date.now()}.${extension}`
 
@@ -38,14 +39,12 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
         handleUploadUrl: '/api/recordings/upload-token',
         onUploadProgress: (ev) => {
           setProgress(Math.round(ev.percentage))
-          console.log(`[Upload] Progress: ${ev.percentage}%`)
         }
       })
 
-      console.log('[Upload] Blob success:', blob.url)
+      console.log('[Deep-Investigate][Upload] Blob Success:', blob.url)
 
-      // Step 2: Save metadata to DB
-      // We use a small JSON POST now - very fast
+      // Step 2: Persistent Metadata Save
       const res = await fetch(`/api/customers/${customerId}/recordings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -56,8 +55,8 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
       })
 
       if (!res.ok) {
-        const errorData = await res.json().catch(() => ({ error: 'DB Save Failed' }))
-        throw new Error(`DB Save Failed: ${errorData.error || res.statusText}`)
+        const errorData = await res.json().catch(() => ({ error: 'Database handshake failed' }))
+        throw new Error(errorData.error || `Server Error ${res.status}`)
       }
 
       setDone(true)
@@ -69,10 +68,14 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
       }, 2000)
 
     } catch (e: any) {
-      console.error('[Upload] Full Error:', e)
-      // Display the most helpful error possible
-      const msg = e.message || 'Upload failed'
-      setError(msg.includes('fetch') ? 'Network error (Check your signal)' : msg)
+      console.error('[Deep-Investigate][Upload] Critical Failure:', e)
+      // Capture the full error for the debug window
+      setError({
+        message: e.message || 'Unknown Upload error',
+        stack: e.stack,
+        type: e.name || 'Error',
+        timestamp: new Date().toISOString()
+      })
     } finally {
       setUploading(false)
     }
@@ -82,7 +85,6 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
     return (
       <button
         onClick={() => setOpen(true)}
-        className="btn-primary"
         style={{
           display: 'inline-flex', alignItems: 'center', gap: '6px',
           padding: '6px 14px', background: 'rgba(245,158,11,0.1)',
@@ -100,25 +102,26 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
     <div className="fade-in" style={{
       background: 'var(--surface-hover)',
       border: '1px solid var(--border-color)',
-      borderRadius: '16px',
-      padding: '16px',
+      borderRadius: '20px',
+      padding: '20px',
       display: 'flex',
       flexDirection: 'column',
       gap: '12px',
       width: '100%',
-      maxWidth: '320px',
-      boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
-      marginTop: '8px'
+      maxWidth: '350px',
+      boxShadow: '0 12px 48px rgba(0,0,0,0.3)',
+      marginTop: '12px',
+      backdropFilter: 'blur(10px)'
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '13px', fontWeight: 700, color: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <Mic size={14} /> Recording for {customerName}
+        <span style={{ fontSize: '14px', fontWeight: 800, color: 'var(--primary-color)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <Mic size={16} /> Recording for {customerName}
         </span>
         <button 
-          onClick={() => { setOpen(false); setError(''); setDone(false); }} 
+          onClick={() => { setOpen(false); setError(null); setDone(false); }} 
           style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)', padding: '4px' }}
         >
-          <X size={18} />
+          <X size={20} />
         </button>
       </div>
 
@@ -129,7 +132,7 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
           value={label}
           onChange={e => setLabel(e.target.value)}
           style={{ 
-            fontSize: '13px', padding: '10px 12px', borderRadius: '10px', 
+            fontSize: '14px', padding: '12px 14px', borderRadius: '12px', 
             border: '1px solid var(--border-color)', background: 'var(--surface-color)', 
             width: '100%', color: 'var(--text-primary)' 
           }}
@@ -145,53 +148,75 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
       />
 
       {done ? (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px', color: '#10B981', fontWeight: 700, fontSize: '14px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '10px' }}>
-          <CheckCircle size={18} /> Recording Saved!
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', padding: '16px', color: '#10B981', fontWeight: 800, fontSize: '15px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '12px' }}>
+          <CheckCircle size={20} /> Successfully Saved!
         </div>
       ) : uploading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', padding: '8px 0' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px', color: 'var(--text-secondary)' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <Loader2 size={14} className="animate-spin" /> {progress < 100 ? `Uploading...` : 'Almost done...'}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', padding: '12px 0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '13px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
+              <Loader2 size={16} className="animate-spin" /> {progress < 100 ? `Syncing File...` : 'Finalizing...'}
             </span>
-            <span style={{ fontWeight: 700, color: 'var(--text-primary)' }}>{progress}%</span>
+            <span style={{ fontWeight: 800, color: 'var(--primary-color)' }}>{progress}%</span>
           </div>
-          <div style={{ background: 'var(--border-color)', borderRadius: '6px', height: '8px', overflow: 'hidden' }}>
-            <div style={{ background: 'linear-gradient(90deg, var(--primary-color), #F59E0B)', height: '100%', width: `${progress}%`, transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)' }} />
+          <div style={{ background: 'var(--border-color)', borderRadius: '8px', height: '10px', overflow: 'hidden' }}>
+            <div style={{ background: 'linear-gradient(90deg, #F59E0B, #FFB800)', height: '100%', width: `${progress}%`, transition: 'width 0.5s' }} />
           </div>
-          <p style={{ fontSize: '10px', color: 'var(--text-secondary)', textAlign: 'center' }}>Please don't close this window</p>
+          <p style={{ fontSize: '11px', color: 'var(--text-secondary)', textAlign: 'center' }}>Keep window open during sync</p>
         </div>
       ) : (
         <button
           onClick={() => fileInputRef.current?.click()}
           style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-            padding: '12px', background: 'var(--primary-color)', border: 'none',
-            borderRadius: '12px', color: '#111', fontWeight: 800, cursor: 'pointer', 
-            fontSize: '13px', width: '100%', boxShadow: '0 4px 12px rgba(245,158,11,0.2)'
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px',
+            padding: '14px', background: 'var(--primary-color)', border: 'none',
+            borderRadius: '14px', color: '#111', fontWeight: 900, cursor: 'pointer', 
+            fontSize: '14px', width: '100%', boxShadow: '0 6px 20px rgba(245,158,11,0.25)',
+            textTransform: 'uppercase', letterSpacing: '0.5px'
           }}
         >
-          <Upload size={16} /> Choose Call Recording
+          <Upload size={18} /> Select Recording
         </button>
       )}
 
       {error && (
         <div style={{ 
-          fontSize: '11px', color: '#EF4444', background: 'rgba(239,68,68,0.1)', 
-          padding: '10px', borderRadius: '10px', border: '1px solid rgba(239,68,68,0.2)',
-          display: 'flex', alignItems: 'flex-start', gap: '8px'
+          fontSize: '12px', color: '#EF4444', background: 'rgba(239,68,68,0.1)', 
+          padding: '12px', borderRadius: '12px', border: '1px solid rgba(239,68,68,0.2)',
+          display: 'flex', flexDirection: 'column', gap: '8px'
         }}>
-          <AlertTriangle size={14} style={{ flexShrink: 0, marginTop: '2px' }} />
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <span style={{ fontWeight: 700 }}>Upload Error</span>
-            <span>{error}</span>
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+            <AlertTriangle size={16} style={{ flexShrink: 0, marginTop: '2px' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              <span style={{ fontWeight: 800 }}>Sync Error</span>
+              <span>{error.message}</span>
+            </div>
+          </div>
+          
+          <div style={{ display: 'flex', gap: '8px', marginTop: '4px' }}>
             <button 
-              onClick={() => { setError(''); fileInputRef.current?.click(); }}
-              style={{ background: 'none', border: 'none', color: '#EF4444', textDecoration: 'underline', padding: 0, fontSize: '10px', cursor: 'pointer', textAlign: 'left', marginTop: '4px' }}
+              onClick={() => { setError(null); fileInputRef.current?.click(); }}
+              style={{ background: '#EF4444', border: 'none', color: '#fff', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}
             >
-              Click here to try again
+              Retry Sync
+            </button>
+            <button 
+              onClick={() => setShowDebug(!showDebug)}
+              style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', color: '#EF4444', padding: '6px 12px', borderRadius: '6px', fontSize: '11px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+            >
+              <Bug size={12} /> {showDebug ? 'Hide Details' : 'View Technical Details'}
             </button>
           </div>
+
+          {showDebug && (
+            <div style={{ 
+              marginTop: '8px', padding: '10px', background: '#000', color: '#0f0', 
+              fontFamily: 'monospace', fontSize: '10px', borderRadius: '6px', 
+              maxHeight: '150px', overflowY: 'auto', whiteSpace: 'pre-wrap', border: '1px solid #333'
+            }}>
+              {JSON.stringify(error, null, 2)}
+            </div>
+          )}
         </div>
       )}
     </div>
