@@ -70,11 +70,11 @@ export default async function LeadsPage() {
         ) : (
           leads.map((lead) => (
              <LeadCard key={lead.id} customer={lead}>
-                <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
+                 <div style={{ marginTop: '12px', paddingTop: '12px', borderTop: '1px solid var(--border-color)' }}>
                    
-                   {/* Distribution Info for Manager */}
-                   {isManager && (
-                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px', padding: '8px', background: 'var(--surface-hover)', borderRadius: '6px' }}>
+                   {/* Assignment Info for Manager — no action buttons */}
+                   {isManager ? (
+                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px', background: 'var(--surface-hover)', borderRadius: '6px' }}>
                         <div style={{ width: '24px', height: '24px', borderRadius: '50%', background: 'var(--primary-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                            <User size={14} color="white" />
                         </div>
@@ -83,12 +83,14 @@ export default async function LeadsPage() {
                            <span style={{ fontWeight: 600 }}>{lead.assignedTo?.name || 'Awaiting Auto-Assign'}</span>
                         </div>
                      </div>
+                   ) : (
+                     <>
+                       <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                         Update Status
+                       </div>
+                       <StaffLeadActions leadId={lead.id} />
+                     </>
                    )}
-
-                   <div style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                      {isManager ? 'Lead Operations' : 'Update Status'}
-                   </div>
-                   <StaffLeadActions leadId={lead.id} />
                 </div>
              </LeadCard>
           ))
