@@ -17,41 +17,51 @@ export default async function DashboardPage() {
   // MANAGER VIEW
   // ----------------------------------------------------
   if (session?.role === 'MANAGER') {
-    const [pendingLeads, dueCustomers] = await Promise.all([
+    const { Prisma } = await import('@prisma/client')
+    const KanbanBoard = (await import('@/components/KanbanBoard')).default
+    const LiveLeadsRefresh = (await import('@/components/LiveLeadsRefresh')).default
+
+    const COLUMN_META = [
+      { key: 'ACCEPTED',  label: 'Accepted',  color: '#10B981', bg: 'rgba(16,185,129,0.08)' },
+      { key: 'FOLLOW_UP', label: 'Follow Up', color: '#F59E0B', bg: 'rgba(245,158,11,0.08)' },
+      { key: 'REJECTED',  label: 'Rejected',  color: '#EF4444', bg: 'rgba(239,68,68,0.08)'  },
+    ]
+
+    const [accepted, followUp, rejected, waiting, dueCustomers] = await Promise.all([
+      prisma.customer.findMany({ where: { status: 'ACCEPTED' }, orderBy: { updatedAt: 'desc' }, include: { assignedTo: { select: { name: true } } } }),
+      prisma.customer.findMany({ where: { status: 'FOLLOW_UP' }, orderBy: { updatedAt: 'desc' }, include: { assignedTo: { select: { name: true } } } }),
+      prisma.customer.findMany({ where: { status: 'REJECTED' }, orderBy: { updatedAt: 'desc' }, include: { assignedTo: { select: { name: true } } } }),
       prisma.customer.count({ where: { status: 'WAITING' } }),
       prisma.customer.count({ where: { status: 'DUE' } }),
     ])
 
+    const columns = [
+      { ...COLUMN_META[0], leads: accepted },
+      { ...COLUMN_META[1], leads: followUp },
+      { ...COLUMN_META[2], leads: rejected },
+    ]
+
     return (
       <div className="fade-in">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-          <h1 style={{ fontSize: '28px', margin: 0 }}>Branch Performance Summary</h1>
-          <span style={{ fontSize: '10px', color: 'var(--text-secondary)', background: 'var(--surface-hover)', padding: '4px 8px', borderRadius: '4px' }}>
-            Latest Sync: 14:35 UTC
-          </span>
-        </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '24px', marginBottom: '32px' }}>
-          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ background: 'rgba(245, 158, 11, 0.1)', padding: '16px', borderRadius: 'var(--border-radius-md)' }}>
-              <Clock size={28} color="var(--status-waiting)" />
-            </div>
-            <div>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>New Leads (Not Yet Called)</p>
-              <h2 style={{ margin: 0, fontSize: '28px' }}>{pendingLeads}</h2>
-            </div>
-          </div>
+        <LiveLeadsRefresh />
 
-          <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ background: 'rgba(244, 63, 94, 0.1)', padding: '16px', borderRadius: 'var(--border-radius-md)' }}>
-              <AlertCircle size={28} color="var(--status-due)" />
-            </div>
-            <div>
-              <p style={{ margin: 0, color: 'var(--text-secondary)', fontSize: '14px' }}>Payments Due Today</p>
-              <h2 style={{ margin: 0, fontSize: '28px' }}>{dueCustomers}</h2>
-            </div>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <h1 style={{ fontSize: '24px', margin: 0 }}>All Leads Overview</h1>
+            <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>Monitor all staff leads across the branch.</p>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <span className="badge badge-waiting">{waiting} Pending</span>
+            <span className="badge badge-accepted">{accepted.length} Accepted</span>
+            <span className="badge badge-waiting" style={{ background: 'rgba(245,158,11,0.1)', color: '#F59E0B' }}>{followUp.length} Follow Up</span>
+            <span className="badge badge-rejected">{rejected.length} Rejected</span>
+            {dueCustomers > 0 && <span className="badge" style={{ background: 'rgba(244,63,94,0.1)', color: '#F43F5E' }}>{dueCustomers} Due</span>}
           </div>
         </div>
+
+        {/* Kanban */}
+        <KanbanBoard columns={columns} isManager={true} />
       </div>
     )
   }
