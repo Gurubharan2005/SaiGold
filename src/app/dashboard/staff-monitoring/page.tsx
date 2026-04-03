@@ -21,16 +21,34 @@ export default async function StaffMonitoringPage() {
     return <div className="p-8 text-center text-zinc-500">Access Denied</div>
   }
 
-  // Fetch all Staff members
-  const staffMembers = await prisma.user.findMany({
+  // Fetch all Staff members with productivity stats
+  const staffData = await prisma.user.findMany({
     where: { role: 'STAFF', isActive: true },
     include: {
       assignedCustomers: {
-        where: { status: { in: ['PROCESSING', 'ACCEPTED', 'DUE', 'FOLLOW_UP'] } },
-        orderBy: { updatedAt: 'desc' }
+        select: {
+          id: true,
+          name: true,
+          status: true,
+          callStatus: true,
+          updatedAt: true
+        }
       }
     },
     orderBy: { name: 'asc' }
+  })
+
+  // Process data for productivity
+  const staffMembers = staffData.map(staff => {
+    return {
+      ...staff,
+      activeLoad: staff.assignedCustomers.filter(c => ['PROCESSING', 'ACCEPTED', 'DUE', 'FOLLOW_UP'].includes(c.status)),
+      stats: {
+        called: staff.assignedCustomers.filter(c => c.callStatus === 'CALLED').length,
+        confirmed: staff.assignedCustomers.filter(c => c.status === 'VERIFIED').length,
+        maintained: staff.assignedCustomers.filter(c => c.status === 'MAINTENANCE').length,
+      }
+    }
   })
 
   // Fetch Recent Activity (Modified customers in last 24h)
@@ -87,13 +105,28 @@ export default async function StaffMonitoringPage() {
                   </div>
                   
                   <div style={{ padding: '16px' }}>
+                    <div style={{ marginBottom: '16px', display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
+                       <div style={{ textAlign: 'center', padding: '8px', background: 'rgba(255,193,7,0.1)', borderRadius: '8px', border: '1px solid rgba(255,193,7,0.2)' }}>
+                          <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>CALLED</div>
+                          <div style={{ fontSize: '16px', fontWeight: 800, color: 'var(--primary-color)' }}>{staff.stats.called}</div>
+                       </div>
+                       <div style={{ textAlign: 'center', padding: '8px', background: 'rgba(16,185,129,0.1)', borderRadius: '8px', border: '1px solid rgba(16,185,129,0.2)' }}>
+                          <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>CONFIRMED</div>
+                          <div style={{ fontSize: '16px', fontWeight: 800, color: '#10B981' }}>{staff.stats.confirmed}</div>
+                       </div>
+                       <div style={{ textAlign: 'center', padding: '8px', background: 'rgba(59,130,246,0.1)', borderRadius: '8px', border: '1px solid rgba(59,130,246,0.2)' }}>
+                          <div style={{ fontSize: '10px', color: 'var(--text-secondary)', fontWeight: 600 }}>MAINTAINED</div>
+                          <div style={{ fontSize: '16px', fontWeight: 800, color: '#3B82F6' }}>{staff.stats.maintained}</div>
+                       </div>
+                    </div>
+
                     <div style={{ marginBottom: '12px', fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', justifyContent: 'space-between' }}>
-                      <span>Current Load:</span>
-                      <span className="badge badge-waiting">{staff.assignedCustomers.length} Customers</span>
+                      <span>Current Active Load:</span>
+                      <span className="badge badge-waiting">{staff.activeLoad.length} Leads</span>
                     </div>
                     
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      {staff.assignedCustomers.slice(0, 3).map(c => (
+                      {staff.activeLoad.slice(0, 3).map(c => (
                         <div key={c.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'var(--surface-color)', padding: '8px 12px', borderRadius: '6px', border: '1px solid var(--border-color)' }}>
                           <div>
                             <div style={{ fontSize: '13px', fontWeight: 600 }}>{c.name}</div>
@@ -104,12 +137,12 @@ export default async function StaffMonitoringPage() {
                           </Link>
                         </div>
                       ))}
-                      {staff.assignedCustomers.length > 3 && (
+                      {staff.activeLoad.length > 3 && (
                         <div style={{ textAlign: 'center', fontSize: '11px', color: 'var(--text-secondary)', paddingTop: '4px' }}>
-                          + {staff.assignedCustomers.length - 3} more active customers
+                          + {staff.activeLoad.length - 3} more active leads
                         </div>
                       )}
-                      {staff.assignedCustomers.length === 0 && (
+                      {staff.activeLoad.length === 0 && (
                         <div style={{ color: 'var(--text-secondary)', fontSize: '13px', fontStyle: 'italic', padding: '8px' }}>
                           No active assignments currently.
                         </div>

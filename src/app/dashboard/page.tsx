@@ -178,92 +178,47 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '32px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px' }}>
         
-        {/* ASSIGNED LEADS */}
-        <div className="card" style={{ padding: 0, overflow: 'visible', borderRadius: '12px' }}>
+        {/* ASSIGNED LEADS - FULL WIDTH FOR FOCUS */}
+        <div className="card" style={{ padding: 0, overflow: 'visible', borderRadius: '12px', minWidth: '100%' }}>
           <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Target size={18} color="var(--primary-color)" /> My Ongoing Leads
+            <h3 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800 }}>
+              <Target size={20} color="var(--primary-color)" /> My Assigned Conversion Leads
             </h3>
-            <span className="badge badge-waiting">{myAssignedLeads.length} Total</span>
+            <span className="badge badge-waiting" style={{ padding: '6px 12px' }}>{myAssignedLeads.length} Total</span>
           </div>
-          <div style={{ maxHeight: '600px', overflowY: 'auto', paddingBottom: '120px' }}>
+          <div style={{ maxHeight: '800px', overflowY: 'auto', paddingBottom: '120px' }}>
             {myAssignedLeads.length === 0 ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>You have no active leads assigned currently.</div>
+              <div style={{ padding: '64px', textAlign: 'center', color: 'var(--text-secondary)' }}>You have no active leads assigned for conversion currently.</div>
             ) : (
-              myAssignedLeads.map((lead) => (
-                 <div key={lead.id} style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '16px 20px', borderBottom: '1px solid var(--border-color)' }}>
-                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                     <div style={{ minWidth: 0, flex: 1 }}>
-                       <h4 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.name}</h4>
-                       <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                         <Phone size={12} color="var(--primary-color)" /> {lead.phone}
-                       </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1px', background: 'var(--border-color)' }}>
+                {myAssignedLeads.map((lead) => (
+                   <div key={lead.id} style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '24px', background: 'var(--bg-color)' }}>
+                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                       <div style={{ minWidth: 0, flex: 1 }}>
+                         <h4 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.5px' }}>{lead.name}</h4>
+                         <p style={{ margin: '6px 0 0 0', color: 'var(--text-secondary)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}>
+                           <Phone size={14} color="var(--primary-color)" /> {lead.phone}
+                         </p>
+                       </div>
+                       <span className={`badge badge-${lead.status.toLowerCase()}`} style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em' }}>{lead.status}</span>
                      </div>
-                     <span className={`badge badge-${lead.status.toLowerCase()}`} style={{ fontSize: '11px', fontWeight: 800 }}>{lead.status}</span>
+                     
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                       <QuickStatusActions customerId={lead.id} customerName={lead.name} phone={lead.phone} />
+                       {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED', 'MAINTENANCE'].includes(lead.status) && (
+                         <Link href={`/dashboard/customers/${lead.id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 700, padding: '8px 12px', background: 'rgba(255,193,7,0.05)', borderRadius: '8px', border: '1px solid rgba(255,193,7,0.1)', justifyContent: 'center' }}>
+                           <ExternalLink size={16} /> Full Customer Profile &rarr;
+                         </Link>
+                       )}
+                     </div>
                    </div>
-                   
-                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                     <QuickStatusActions customerId={lead.id} customerName={lead.name} phone={lead.phone} />
-                     {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED'].includes(lead.status) && (
-                       <Link href={`/dashboard/customers/${lead.id}`} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 700, padding: '4px 0' }}>
-                         <ExternalLink size={14} /> Full Customer Profile &rarr;
-                       </Link>
-                     )}
-                   </div>
-                 </div>
-              ))
+                ))}
+              </div>
             )}
           </div>
         </div>
-
-
-        {/* TODAY'S FOLLOW UPS */}
-        <div className="card" style={{ padding: 0, overflow: 'visible', borderRadius: '12px' }}>
-          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Clock size={18} color="#F59E0B" /> Today's Calling List
-            </h3>
-            <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>{format(todayStart, 'MMM dd')}</span>
-          </div>
-          <div style={{ maxHeight: '600px', overflowY: 'auto', paddingBottom: '120px' }}>
-            {followUpsToday.length === 0 ? (
-              <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>Great job! You have no more calls scheduled for today.</div>
-            ) : (
-              followUpsToday.map((f) => (
-                <div key={f.id} style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(245, 158, 11, 0.05)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <h4 style={{ margin: 0, fontSize: '16px', color: '#F59E0B', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Follow Up: {f.name}</h4>
-                      <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Phone size={13} /> {f.phone}
-                      </div>
-                    </div>
-                    {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED'].includes(f.status || '') && (
-                      <Link href={`/dashboard/customers/${f.id}`} style={{ fontSize: '12px', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600, background: 'var(--surface-color)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
-                        Details &rarr;
-                      </Link>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                    <div style={{ flex: 1 }}>
-                      <QuickStatusActions customerId={f.id} customerName={f.name} phone={f.phone} />
-                    </div>
-                  </div>
-
-                  {f.followUpNotes && (
-                    <div style={{ fontSize: '13px', color: 'var(--text-color)', background: 'var(--surface-color)', padding: '10px', borderRadius: '8px', borderLeft: '3px solid #F59E0B', fontStyle: 'italic' }}>
-                      &ldquo;{f.followUpNotes}&rdquo;
-                    </div>
-                  )}
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-
       </div>
 
     </div>

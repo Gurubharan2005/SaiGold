@@ -28,21 +28,24 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
     return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
-  const handleStatusUpdate = async (status: 'PROCESSING' | 'REJECTED' | 'FOLLOW_UP') => {
+  const handleStatusUpdate = async (status: 'PROCESSING' | 'REJECTED' | 'FOLLOW_UP' | 'CALLED') => {
+    const isCalled = status === 'CALLED'
     setLoading(status)
     setIsMenuOpen(false)
     try {
       type StatusPayload = {
-        status: string
+        status?: string
         callStatus: string
         followUpDate?: string
       }
       const payload: StatusPayload = { 
-        status,
-        callStatus: 'CALLED' // Auto-update call status when making a decision
+        callStatus: 'CALLED' 
       }
 
-      // Automatically set follow-up date for today to appear on the Follow-Ups board
+      if (status !== 'CALLED') {
+        payload.status = status
+      }
+
       if (status === 'FOLLOW_UP') {
         payload.followUpDate = new Date().toISOString()
       }
@@ -55,7 +58,12 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
 
       if (!res.ok) throw new Error('Failed to update status')
       
-      router.refresh()
+      // If converting, push to the profile page for document upload
+      if (status === 'PROCESSING') {
+        router.push(`/dashboard/customers/${customerId}?from=processing`)
+      } else {
+        router.refresh()
+      }
     } catch (error) {
       alert('Error updating customer status')
       setLoading(null)
@@ -64,9 +72,34 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
+      <div style={{ display: 'flex', gap: '8px', width: '100%' }}>
+          {/* PRIMARY CONVERT ACTION */}
+          <button 
+            onClick={() => handleStatusUpdate('PROCESSING')}
+            disabled={!!loading}
+            style={{ 
+              flex: 1, 
+              background: 'var(--primary-color)', 
+              color: '#111', 
+              fontWeight: 800, 
+              padding: '12px', 
+              borderRadius: '10px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center', 
+              gap: '8px', 
+              fontSize: '14px',
+              boxShadow: 'var(--shadow-glow)'
+            }}
+          >
+            {loading === 'PROCESSING' ? <Loader2 size={18} className="animate-spin" /> : <Check size={18} />}
+            CONVERT TO LOAN
+          </button>
+      </div>
+
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', width: '100%' }}>
         
-        {/* Left Side: Quick Stats/Actions */}
+        {/* Left Side: Stats & Communication */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }} ref={menuRef}>
           <RecordingsBadge customerId={customerId} customerName={customerName} />
           
@@ -74,6 +107,7 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
             href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`} 
             target="_blank" 
             rel="noopener noreferrer"
+            title="WhatsApp"
             style={{ 
               padding: '10px', 
               borderRadius: '10px', 
@@ -91,6 +125,7 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
 
           <a 
             href={`tel:${phone}`} 
+            title="Direct Call"
             style={{ 
               padding: '10px', 
               borderRadius: '10px', 
@@ -127,9 +162,9 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
           {isMenuOpen && (
             <div className="fade-in" style={{
               position: 'absolute',
-              top: '100%',
+              bottom: '100%',
               left: '0',
-              marginTop: '8px',
+              marginBottom: '8px',
               background: 'var(--surface-color)',
               border: '1px solid var(--border-color)',
               borderRadius: '12px',
@@ -138,16 +173,17 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
               display: 'flex',
               flexDirection: 'column',
               gap: '8px',
-              minWidth: '160px',
+              minWidth: '180px',
               zIndex: 2000
             }}>
-              <button onClick={() => handleStatusUpdate('FOLLOW_UP')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', borderRadius: '8px', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', fontWeight: 700 }}>
+              <button onClick={() => handleStatusUpdate('CALLED')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', width: '100%', borderRadius: '8px', color: 'var(--primary-color)', background: 'rgba(255, 193, 7, 0.05)', border: '1px solid rgba(255, 193, 7, 0.1)', fontWeight: 700 }}>
+                {loading === 'CALLED' ? <Loader2 size={16} className="animate-spin" /> : <Phone size={16} />} 
+                Mark as CALLED
+              </button>
+              <button onClick={() => handleStatusUpdate('FOLLOW_UP')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', width: '100%', borderRadius: '8px', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.1)', fontWeight: 700 }}>
                 <Clock size={16} /> Follow Up
               </button>
-              <button onClick={() => handleStatusUpdate('PROCESSING')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', borderRadius: '8px', color: '#3B82F6', background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.2)', fontWeight: 700 }}>
-                <Check size={16} /> Accept Lead
-              </button>
-              <button onClick={() => handleStatusUpdate('REJECTED')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', borderRadius: '8px', color: '#EF4444', background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', fontWeight: 700 }}>
+              <button onClick={() => handleStatusUpdate('REJECTED')} disabled={!!loading} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px', width: '100%', borderRadius: '8px', color: '#EF4444', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', fontWeight: 700 }}>
                 <X size={16} /> Reject Lead
               </button>
             </div>
@@ -158,7 +194,6 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
         <div style={{ flexShrink: 0 }}>
           <QuickRecordingUpload customerId={customerId} customerName={customerName} />
         </div>
-
       </div>
     </div>
   )
