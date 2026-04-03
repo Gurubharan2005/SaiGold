@@ -71,6 +71,12 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
             </Link>
           )}
 
+          {(session?.role === 'MANAGER' || session?.role === 'MAINTENANCE') && (
+            <Link href="/dashboard/maintenance" onClick={onClose} style={navItemStyle('/dashboard/maintenance')}>
+              <ShieldCheck size={20} color="#10B981" /> Maintenance Desk
+            </Link>
+          )}
+
           {session?.role === 'MANAGER' && (
             <Link href="/dashboard/leads" onClick={onClose} style={navItemStyle('/dashboard/leads')}>
               <Target size={20} color="var(--status-waiting)" /> Facebook Ad Leads

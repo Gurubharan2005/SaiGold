@@ -97,6 +97,7 @@ enum Role {
   MANAGER
   STAFF
   SALESMAN
+  MAINTENANCE
 }
 
 enum Status {
@@ -110,6 +111,7 @@ enum Status {
   NO_RESPONSE
   VERIFIED
   CLOSE_REQUESTED
+  MAINTENANCE
 }
 
 enum Priority {

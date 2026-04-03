@@ -14,6 +14,14 @@ export default async function DashboardPage() {
   const session = token ? await decrypt(token) : null
 
   // ----------------------------------------------------
+  // ROLE REDIRECTS
+  // ----------------------------------------------------
+  const { redirect } = await import('next/navigation')
+  if (session?.role === 'MAINTENANCE') {
+    redirect('/dashboard/maintenance')
+  }
+
+  // ----------------------------------------------------
   // MANAGER VIEW
   // ----------------------------------------------------
   if (session?.role === 'MANAGER') {
@@ -54,7 +62,7 @@ export default async function DashboardPage() {
           <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
             <span className="badge badge-waiting">{waiting} Pending</span>
             <span className="badge badge-accepted">{accepted.length} Accepted</span>
-            <span className="badge badge-waiting" style={{ background: 'rgba(245,158,11,0.1)', color: '#F59E0B' }}>{followUp.length} Follow Up</span>
+            <span className="badge badge-waiting" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>{followUp.length} Follow Up</span>
             <span className="badge badge-rejected">{rejected.length} Rejected</span>
             {dueCustomers > 0 && <span className="badge" style={{ background: 'rgba(244,63,94,0.1)', color: '#F43F5E' }}>{dueCustomers} Due</span>}
           </div>
@@ -62,6 +70,52 @@ export default async function DashboardPage() {
 
         {/* Kanban */}
         <KanbanBoard columns={columns} isManager={true} />
+      </div>
+    )
+  }
+
+  // ----------------------------------------------------
+  // SALESMAN VIEW (Verification Desk)
+  // ----------------------------------------------------
+  if (session?.role === 'SALESMAN') {
+    const pendingVerification = await prisma.customer.findMany({
+      where: { status: 'VERIFIED' },
+      orderBy: { updatedAt: 'desc' },
+      include: { assignedTo: { select: { name: true } } }
+    })
+
+    return (
+      <div className="fade-in">
+        <div style={{ marginBottom: '32px' }}>
+          <h1 style={{ fontSize: '28px', margin: 0 }}>Verification Desk</h1>
+          <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>Review and confirm leads sent by branch staff for final loan conversion.</p>
+        </div>
+
+        <div className="card" style={{ padding: 0 }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <FileText size={18} color="var(--primary-color)" /> Pending Confirmations
+            </h3>
+            <span className="badge badge-waiting">{pendingVerification.length} Leads</span>
+          </div>
+          <div>
+            {pendingVerification.length === 0 ? (
+              <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text-secondary)' }}>No leads are currently waiting for verification.</div>
+            ) : (
+              pendingVerification.map((lead) => (
+                <div key={lead.id} style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <h4 style={{ margin: 0, fontSize: '16px' }}>{lead.name}</h4>
+                    <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>Assigned to: {lead.assignedTo?.name || 'Unknown'}</p>
+                  </div>
+                  <Link href={`/dashboard/customers/${lead.id}`} className="btn-primary" style={{ textDecoration: 'none', fontSize: '13px', padding: '8px 16px' }}>
+                    Review Documents &rarr;
+                  </Link>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       </div>
     )
   }
@@ -108,19 +162,21 @@ export default async function DashboardPage() {
       </div>
 
       {/* QUICK ACTIONS */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
-         <Link href="/dashboard/customers/new" style={{ textDecoration: 'none' }}>
-         <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer' }}>
-             <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '50%' }}>
-               <UserPlus size={24} color="#10B981" />
+      {session?.role === 'MANAGER' && (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
+           <Link href="/dashboard/customers/new" style={{ textDecoration: 'none' }}>
+           <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer' }}>
+               <div style={{ background: 'rgba(16, 185, 129, 0.1)', padding: '16px', borderRadius: '50%' }}>
+                 <UserPlus size={24} color="#10B981" />
+               </div>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--text-color)' }}>New Walk-in Entry</h3>
+                  <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>Instantly register a customer who visited the branch.</p>
+                </div>
              </div>
-              <div>
-                <h3 style={{ margin: 0, fontSize: '16px', color: 'var(--text-color)' }}>New Walk-in Entry</h3>
-                <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>Instantly register a customer who visited the branch.</p>
-              </div>
-           </div>
-         </Link>
-      </div>
+           </Link>
+        </div>
+      )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '32px' }}>
         

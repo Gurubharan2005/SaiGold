@@ -67,13 +67,15 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         
         <div style={{ display: 'flex', gap: '12px', zIndex: 10 }}>
           {session?.role === 'MANAGER' && (
-            <a href="/api/export" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', textDecoration: 'none', color: 'var(--text-color)' }}>
-              <FileSpreadsheet size={18} /> Export
-            </a>
+            <>
+              <a href="/api/export" className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', textDecoration: 'none', color: 'var(--text-color)' }}>
+                <FileSpreadsheet size={18} /> Export
+              </a>
+              <Link href="/dashboard/customers/new" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', textDecoration: 'none' }}>
+                <Plus size={18} /> New 
+              </Link>
+            </>
           )}
-          <Link href="/dashboard/customers/new" className="btn-primary" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 16px', textDecoration: 'none' }}>
-            <Plus size={18} /> New 
-          </Link>
         </div>
       </div>
 

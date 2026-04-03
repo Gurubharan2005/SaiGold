@@ -19,7 +19,7 @@ export default function SalesVerifyActions({ customerId, salesmanId }: { custome
       }
       const payload: VerifyPayload = { status: '' }
       if (action === 'VERIFY') {
-        payload.status = 'ACCEPTED' // Approving moves it to 'Ongoing' queue
+        payload.status = 'MAINTENANCE' // Approving moves it to Maintenance Desk
         payload.isVerified = true
         payload.verifiedById = salesmanId
         payload.verifiedAt = new Date().toISOString()
