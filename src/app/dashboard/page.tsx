@@ -122,21 +122,21 @@ export default async function DashboardPage() {
             </h3>
             <span className="badge badge-waiting">{myAssignedLeads.length} Total</span>
           </div>
-          <div style={{ maxHeight: '400px', overflowY: 'auto', paddingBottom: '80px' }}>
+          <div style={{ maxHeight: '600px', overflowY: 'auto', paddingBottom: '120px' }}>
             {myAssignedLeads.length === 0 ? (
               <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>You have no active leads assigned currently.</div>
             ) : (
               myAssignedLeads.map((lead) => (
-                <div key={lead.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--border-color)' }}>
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: '15px' }}>{lead.name}</h4>
-                    <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><Phone size={12}/> {lead.phone}</p>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <span className={`badge badge-${lead.status.toLowerCase()}`}>{lead.status}</span>
-                    <QuickStatusActions customerId={lead.id} phone={lead.phone} />
-                  </div>
-                </div>
+                 <div key={lead.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 24px', borderBottom: '1px solid var(--border-color)' }}>
+                   <div style={{ flex: 1, minWidth: 0 }}>
+                     <h4 style={{ margin: 0, fontSize: '15px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.name}</h4>
+                     <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '4px' }}><Phone size={12}/> {lead.phone}</p>
+                   </div>
+                   <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                     <span className={`badge badge-${lead.status.toLowerCase()}`} style={{ fontSize: '10px' }}>{lead.status}</span>
+                     <QuickStatusActions customerId={lead.id} customerName={lead.name} phone={lead.phone} />
+                   </div>
+                 </div>
               ))
             )}
           </div>
@@ -151,7 +151,7 @@ export default async function DashboardPage() {
             </h3>
             <span style={{ fontSize: '13px', fontWeight: 600, color: 'var(--text-secondary)' }}>{format(todayStart, 'MMM dd')}</span>
           </div>
-          <div style={{ maxHeight: '400px', overflowY: 'auto', paddingBottom: '80px' }}>
+          <div style={{ maxHeight: '600px', overflowY: 'auto', paddingBottom: '120px' }}>
             {followUpsToday.length === 0 ? (
               <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>Great job! You have no more calls scheduled for today.</div>
             ) : (
@@ -165,7 +165,7 @@ export default async function DashboardPage() {
                       </div>
                     </div>
                     <div>
-                      <QuickStatusActions customerId={f.id} phone={f.phone} />
+                      <QuickStatusActions customerId={f.id} customerName={f.name} phone={f.phone} />
                       <div style={{ marginTop: '8px', textAlign: 'right' }}>
                          <Link href={`/dashboard/customers/${f.id}`} style={{ fontSize: '11px', color: 'var(--text-secondary)', textDecoration: 'none' }}>
                            View Details &rarr;

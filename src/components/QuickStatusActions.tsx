@@ -1,15 +1,18 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Phone, Check, X, Loader2, Clock, MessageCircle, MoreVertical } from 'lucide-react'
+import { Phone, Check, X, Loader2, Clock, MessageCircle, MoreVertical, Mic } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import QuickRecordingUpload from './QuickRecordingUpload'
+import RecordingsBadge from './RecordingsBadge'
 
 interface QuickStatusActionsProps {
   customerId: string
+  customerName: string
   phone: string
 }
 
-export default function QuickStatusActions({ customerId, phone }: QuickStatusActionsProps) {
+export default function QuickStatusActions({ customerId, customerName, phone }: QuickStatusActionsProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -60,7 +63,10 @@ export default function QuickStatusActions({ customerId, phone }: QuickStatusAct
   }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative' }} ref={menuRef}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', justifyContent: 'flex-end' }} ref={menuRef}>
+        {/* Recording Count Badge */}
+        <RecordingsBadge customerId={customerId} />
       {/* WhatsApp Button */}
       <a 
         href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`} 
@@ -123,52 +129,58 @@ export default function QuickStatusActions({ customerId, phone }: QuickStatusAct
         <MoreVertical size={18} />
       </button>
 
-      {/* Dropdown Menu */}
-      {isMenuOpen && (
-        <div className="fade-in" style={{
-          position: 'absolute',
-          top: '100%',
-          right: '0',
-          marginTop: '8px',
-          background: 'var(--bg-color)',
-          border: '1px solid var(--border-color)',
-          borderRadius: '8px',
-          boxShadow: 'var(--shadow-lg)',
-          padding: '8px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '8px',
-          zIndex: 50,
-          minWidth: '140px'
-        }}>
-           <button 
-             onClick={() => handleStatusUpdate('FOLLOW_UP')} 
-             disabled={!!loading} 
-             style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', width: '100%', borderRadius: '4px', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.1)', cursor: 'pointer' }}
-           >
-              {loading === 'FOLLOW_UP' ? <Loader2 size={16} className="animate-spin" /> : <Clock size={16} />} 
-              <span style={{ fontSize: '13px', fontWeight: 600 }}>Follow Up</span>
-           </button>
-           
-           <button 
-             onClick={() => handleStatusUpdate('PROCESSING')} 
-             disabled={!!loading} 
-             style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', width: '100%', borderRadius: '4px', color: '#3B82F6', background: 'rgba(59, 130, 246, 0.1)', cursor: 'pointer' }}
-           >
-              {loading === 'PROCESSING' ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} 
-              <span style={{ fontSize: '13px', fontWeight: 600 }}>Accept</span>
-           </button>
-           
-           <button 
-             onClick={() => handleStatusUpdate('REJECTED')} 
-             disabled={!!loading} 
-             style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', width: '100%', borderRadius: '4px', color: '#EF4444', background: 'rgba(239, 68, 68, 0.1)', cursor: 'pointer' }}
-           >
-              {loading === 'REJECTED' ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />} 
-              <span style={{ fontSize: '13px', fontWeight: 600 }}>Reject</span>
-           </button>
-        </div>
-      )}
+       {/* Dropdown Menu */}
+       {isMenuOpen && (
+         <div className="fade-in" style={{
+           position: 'absolute',
+           top: '100%',
+           right: '0',
+           marginTop: '8px',
+           background: 'var(--surface-color)',
+           border: '1px solid var(--border-color)',
+           borderRadius: '12px',
+           boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
+           padding: '10px',
+           display: 'flex',
+           flexDirection: 'column',
+           gap: '8px',
+           minWidth: '160px',
+           zIndex: 2000
+         }}>
+            <button 
+              onClick={() => handleStatusUpdate('FOLLOW_UP')} 
+              disabled={!!loading} 
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', borderRadius: '8px', color: '#F59E0B', background: 'rgba(245, 158, 11, 0.1)', cursor: 'pointer', border: '1px solid rgba(245, 158, 11, 0.2)' }}
+            >
+               {loading === 'FOLLOW_UP' ? <Loader2 size={16} className="animate-spin" /> : <Clock size={16} />} 
+               <span style={{ fontSize: '13px', fontWeight: 700 }}>Follow Up</span>
+            </button>
+            
+            <button 
+              onClick={() => handleStatusUpdate('PROCESSING')} 
+              disabled={!!loading} 
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', borderRadius: '8px', color: '#3B82F6', background: 'rgba(59, 130, 246, 0.1)', cursor: 'pointer', border: '1px solid rgba(59, 130, 246, 0.2)' }}
+            >
+               {loading === 'PROCESSING' ? <Loader2 size={16} className="animate-spin" /> : <Check size={16} />} 
+               <span style={{ fontSize: '13px', fontWeight: 700 }}>Accept Lead</span>
+            </button>
+            
+            <button 
+              onClick={() => handleStatusUpdate('REJECTED')} 
+              disabled={!!loading} 
+              style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', width: '100%', borderRadius: '8px', color: '#EF4444', background: 'rgba(239, 68, 68, 0.1)', cursor: 'pointer', border: '1px solid rgba(239, 68, 68, 0.2)' }}
+            >
+               {loading === 'REJECTED' ? <Loader2 size={16} className="animate-spin" /> : <X size={16} />} 
+               <span style={{ fontSize: '13px', fontWeight: 700 }}>Reject Lead</span>
+            </button>
+         </div>
+       )}
+      </div>
+
+      {/* Quick Recording Upload Triggered Component */}
+      <div style={{ alignSelf: 'flex-end' }}>
+        <QuickRecordingUpload customerId={customerId} customerName={customerName} />
+      </div>
     </div>
   )
 }
