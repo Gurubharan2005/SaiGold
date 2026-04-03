@@ -22,8 +22,8 @@ export async function POST(
     const jsonResponse = await handleUpload({
       body,
       request,
-      onBeforeGenerateToken: async (pathname) => {
-        // Allow audio files only
+      onBeforeGenerateToken: async () => {
+        // Generate a token allowing audio uploads up to 50MB
         return {
           allowedContentTypes: [
             'audio/mpeg', 'audio/mp4', 'audio/wav', 'audio/ogg',
@@ -31,32 +31,12 @@ export async function POST(
             'audio/flac', 'audio/3gpp', 'video/mp4', 'application/octet-stream'
           ],
           maximumSizeInBytes: 52_428_800, // 50MB
-          tokenPayload: JSON.stringify({ customerId: id, userId: session.id }),
+          tokenPayload: JSON.stringify({ customerId: id, userId: String(session.id) }),
         }
       },
       onUploadCompleted: async ({ blob, tokenPayload }) => {
-        // This callback is called after successful upload to Vercel Blob
-        // We save the URL to our database here
-        console.log('[Blob] Upload completed:', blob.url)
-        try {
-          const { PrismaClient } = await import('@prisma/client')
-          const prisma = new PrismaClient()
-          const payload = tokenPayload ? JSON.parse(tokenPayload) : {}
-          await prisma.callRecording.create({
-            data: {
-              customerId: payload.customerId || id,
-              uploadedById: String(payload.userId || session.id),
-              audioUrl: blob.url,
-              label: null,
-              durationSec: null,
-            }
-          })
-          console.log('[Blob] DB record saved for', blob.url)
-          await prisma.$disconnect()
-        } catch (err) {
-          console.error('[Blob] DB save error:', err)
-          // Don't throw — the file is already uploaded, we'll handle DB separately
-        }
+        // NOTE: DB save is handled by the client after upload — this is just a log
+        console.log('[Blob] Upload completed to Vercel Blob:', blob.url, 'payload:', tokenPayload)
       },
     })
 
