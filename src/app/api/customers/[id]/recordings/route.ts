@@ -44,6 +44,13 @@ export async function POST(
     const session = token ? await decrypt(token) : null
     
     if (!session?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    
+    // Deep session validation to prevent Foreign Key violations (e.g., if user was deleted but session persists)
+    const userExists = await prisma.user.findUnique({ where: { id: String(session.id) }, select: { id: true } })
+    if (!userExists) {
+      console.warn(`[Recordings-API] Security Abort: User ID '${session.id}' missing from DB. Re-login required.`)
+      return NextResponse.json({ error: 'Session Inconsistency: User account not found. Please logout and login again.' }, { status: 401 })
+    }
 
     const contentType = req.headers.get('content-type') || ''
     let audioUrl = ''

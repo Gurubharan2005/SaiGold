@@ -252,12 +252,26 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
               <span>{error.message}</span>
             </div>
           </div>
-          <button 
-            onClick={() => { setError(null); fileInputRef.current?.click(); }}
-            style={{ background: '#F87171', border: 'none', color: '#fff', padding: '12px', borderRadius: '12px', fontSize: '12px', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '1px' }}
-          >
-            Retry Handshake
-          </button>
+          {error.message?.toLowerCase().includes('logout') ? (
+            <button 
+              onClick={async () => {
+                document.cookie = 'session-active=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT'
+                localStorage.removeItem('isLoggedIn')
+                await fetch('/api/auth/logout', { method: 'POST' })
+                window.location.replace('/')
+              }}
+              style={{ background: '#F87171', border: 'none', color: '#fff', padding: '12px', borderRadius: '12px', fontSize: '12px', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '1px', width: '100%' }}
+            >
+              Log Out & Refresh Session
+            </button>
+          ) : (
+            <button 
+              onClick={() => { setError(null); fileInputRef.current?.click(); }}
+              style={{ background: '#F87171', border: 'none', color: '#fff', padding: '12px', borderRadius: '12px', fontSize: '12px', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '1px' }}
+            >
+              Retry Handshake
+            </button>
+          )}
         </div>
       )}
     </div>
