@@ -58,6 +58,7 @@ export function CustomerEditForm({ customer, isOpen, onClose }: { customer: Cust
 
       if (!res.ok) throw new Error('Failed to update customer data')
       
+      // OPTIMISTIC: Trigger a background refresh but don't wait for it
       router.refresh()
       onClose()
     } catch (error) {

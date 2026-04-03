@@ -4,11 +4,20 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Check, X, Clock, HelpCircle } from 'lucide-react'
 
-export function StaffLeadActions({ leadId }: { leadId: string }) {
+export function StaffLeadActions({ 
+  leadId, 
+  onStatusChange 
+}: { 
+  leadId: string, 
+  onStatusChange?: (status: string) => void 
+}) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
 
   const handleStatusChange = async (status: string) => {
+    // OPTIMISTIC: Update UI immediately
+    if (onStatusChange) onStatusChange(status)
+    
     setLoading(status)
     try {
       const res = await fetch(`/api/customers/${leadId}`, {
@@ -20,13 +29,12 @@ export function StaffLeadActions({ leadId }: { leadId: string }) {
       if (!res.ok) throw new Error('Failed to update')
 
       if (status === 'ACCEPTED') {
-        // Core workflow: Bounce immediately to data entry
+        // Only push to full profile if we are switching to active customer mode
         router.push(`/dashboard/customers/${leadId}`)
-      } else {
-        router.refresh()
       }
+      // router.refresh() is removed to prevent "Runtime Flashing"
     } catch {
-      alert('Network Error')
+      alert('Network Error - Changes might not have saved.')
     } finally {
       setLoading(null)
     }

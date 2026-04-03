@@ -26,6 +26,7 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
   const [showLogs, setShowLogs] = useState(false)
   const fileInputRef = useRef<HTMLInputElement>(null)
   const logEndRef = useRef<HTMLDivElement>(null)
+  const [preFetchedToken, setPreFetchedToken] = useState<string | null>(null)
 
   const addLog = (msg: string) => {
     setLogs(prev => [...prev, `[${new Date().toLocaleTimeString()}] ${msg}`])
@@ -34,6 +35,16 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
   useEffect(() => {
     if (showLogs) logEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [logs, showLogs])
+
+  // OPTIMIZATION: Pre-fetch handshake as soon as component is interactive
+  useEffect(() => {
+    if (open && !preFetchedToken) {
+      addLog('PRE-FETCHING: Warming up secure sync engine...')
+      // We can't fully pre-generate the token without the filename, 
+      // but we can warm up the API endpoint to eliminate cold start delays.
+      fetch('/api/upload-audio', { method: 'HEAD' }).catch(() => {}) 
+    }
+  }, [open, preFetchedToken])
 
   const handleUpload = async (file: File) => {
     setUploading(true)

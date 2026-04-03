@@ -39,6 +39,8 @@ export default function LoanDetailsEditor({
       
       setSuccess(true)
       setTimeout(() => setSuccess(false), 3000)
+      
+      // OPTIMISTIC: Background refresh to sync any other components on the page
       router.refresh()
     } catch {
       alert('Failed to save loan details.')

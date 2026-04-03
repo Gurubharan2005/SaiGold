@@ -23,7 +23,8 @@ export default function CustomerStatusSelect({ customerId, currentStatus }: { cu
 
       if (!res.ok) throw new Error('Update failed')
 
-      router.refresh()
+      // No router.refresh() here to keep the "Runtime" feel snappy.
+      // The local 'selected' state handles the immediate feedback.
     } catch (err) {
       console.error(err)
       alert("Failed to update status")

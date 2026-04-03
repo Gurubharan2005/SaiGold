@@ -11,7 +11,7 @@ import { useRouter } from 'next/navigation'
  * pauses when the tab is not in focus to save resources.
  */
 export default function DashRealtimeSync({ 
-  intervalMs = 10000 // Default to 10 seconds for snappy updates
+  intervalMs = 15000 // default to 15 seconds for a "Low Activity" background refresh
 }: { 
   intervalMs?: number 
 }) {

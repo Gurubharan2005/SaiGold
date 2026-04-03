@@ -39,8 +39,36 @@ const ICONS: Record<string, React.ElementType> = {
   REJECTED: XCircle,
 }
 
-export default function KanbanBoard({ columns, isManager }: Props) {
+export default function KanbanBoard({ columns: initialColumns, isManager }: Props) {
   const [activeTab, setActiveTab] = useState(0)
+  const [columns, setColumns] = useState(initialColumns)
+
+  // OPTIMISTIC UPDATE: Move lead between columns locally
+  const moveLead = (leadId: string, newStatus: string) => {
+    setColumns(prev => {
+      let leadToMove: Lead | null = null
+      
+      // 1. Find and remove from old column
+      const nextCols = prev.map(col => {
+        const found = col.leads.find(l => l.id === leadId)
+        if (found) {
+          leadToMove = { ...found, status: newStatus }
+          return { ...col, leads: col.leads.filter(l => l.id !== leadId) }
+        }
+        return col
+      })
+
+      if (!leadToMove) return prev
+
+      // 2. Add to new column if it exists in current view
+      return nextCols.map(col => {
+        if (col.key === newStatus) {
+          return { ...col, leads: [leadToMove!, ...col.leads] }
+        }
+        return col
+      })
+    })
+  }
 
   const renderCard = (lead: Lead) => (
     <LeadCard key={lead.id} customer={lead}>
@@ -50,7 +78,10 @@ export default function KanbanBoard({ columns, isManager }: Props) {
             <User size={12} /> {lead.assignedTo?.name || 'Unassigned'}
           </div>
         ) : (
-          <StaffLeadActions leadId={lead.id} />
+          <StaffLeadActions 
+            leadId={lead.id} 
+            onStatusChange={(newStatus) => moveLead(lead.id, newStatus)} 
+          />
         )}
         <QuickRecordingUpload customerId={lead.id} customerName={lead.name} />
         {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED'].includes(lead.status) && (
