@@ -54,17 +54,39 @@ export default async function CustomerDetailsPage({
       : '/dashboard/customers'
 
   return (
-    <div className="fade-in max-w-4xl">
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+    <div className="fade-in max-w-4xl" style={{ paddingBottom: '100px' }}>
+      
+      {/* 1. TOP NAVIGATION BAR */}
+      <div style={{ marginBottom: '24px' }}>
+        <Link 
+          href={backHref} 
+          style={{ 
+            display: 'inline-flex', 
+            alignItems: 'center', 
+            gap: '8px', 
+            color: 'var(--text-secondary)', 
+            textDecoration: 'none',
+            fontSize: '14px',
+            fontWeight: 600,
+            padding: '8px 16px',
+            background: 'var(--surface-hover)',
+            borderRadius: '100px',
+            border: '1px solid var(--border-color)',
+            transition: 'all 0.2s'
+          }}
+          className="hover-opacity"
+        >
+          <ArrowLeft size={16} /> Back to Dashboard
+        </Link>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
           <ProfilePhotoUploader customerId={customer.id} initialPhotoUrl={customer.photoUrl} />
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <Link href={backHref} style={{ color: 'var(--text-secondary)', paddingRight: '8px', borderRight: '1px solid var(--border-color)' }} className="hover-opacity">
-                <ArrowLeft size={24} />
-              </Link>
-              <h1 style={{ fontSize: '32px', margin: 0, fontWeight: 700, letterSpacing: '-0.5px' }}>{customer.name}</h1>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <h1 style={{ fontSize: '28px', margin: 0, fontWeight: 800, letterSpacing: '-0.5px' }}>{customer.name}</h1>
               <div className={`badge badge-${customer.status.toLowerCase()}`}>{customer.status}</div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '16px', color: 'var(--text-secondary)', fontSize: '13px' }}>
@@ -140,20 +162,14 @@ export default async function CustomerDetailsPage({
             </div>
           </div>
 
-          <div className="card">
-            <h2 style={{ fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '16px' }}>Loan & Gold Details</h2>
-            <LoanDetailsEditor 
-              customerId={customer.id} 
-              initialAmount={customer.loanAmount} 
-              initialWeight={customer.goldWeight} 
-              disabled={customer.status !== 'PROCESSING' && !isManager} 
-            />
-            {customer.status === 'PROCESSING' && (
-              <div style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px dashed var(--border-color)' }}>
-                <FinishUploadButton customerId={customer.id} fromTab={from} />
-              </div>
-            )}
-          </div>
+            <div style={{ marginTop: '16px' }}>
+              <LoanDetailsEditor 
+                customerId={customer.id} 
+                initialAmount={customer.loanAmount} 
+                initialWeight={customer.goldWeight} 
+                disabled={customer.status !== 'PROCESSING' && !isManager} 
+              />
+            </div>
 
           <div className="card">
             <h2 style={{ fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '16px' }}>Notes & Activity</h2>
@@ -265,6 +281,24 @@ export default async function CustomerDetailsPage({
       {/* Call Recordings */}
       <CallRecordingsPanel customerId={customer.id} isManager={isManager} />
 
+      {/* FINAL ACTION: SEND TO SALESMAN (Only for Processing Leads) */}
+      {customer.status === 'PROCESSING' && (
+        <div className="card" style={{ 
+          marginTop: '32px', 
+          border: '2px solid var(--primary-color)', 
+          background: 'rgba(255, 193, 7, 0.05)', 
+          textAlign: 'center',
+          padding: '32px'
+        }}>
+          <h3 style={{ margin: '0 0 8px 0', fontSize: '20px' }}>Uploads Complete?</h3>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '24px', fontSize: '14px' }}>
+            Verify all compliance documents (Gold photo, ID proofs) before sending to the salesman for verification.
+          </p>
+          <div style={{ maxWidth: '300px', margin: '0 auto' }}>
+            <FinishUploadButton customerId={customer.id} fromTab={from} />
+          </div>
+        </div>
+      )}
     </div>
   )
 }
