@@ -24,17 +24,22 @@ export default function QuickRecordingUpload({ customerId, customerName }: Props
     const autoLabel = label.trim() || `Call – ${new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })} ${new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' })}`
     form.append('label', autoLabel)
 
-    const res = await fetch(`/api/customers/${customerId}/recordings`, { method: 'POST', body: form })
-    if (res.ok) {
-      setDone(true)
-      setLabel('')
-      if (fileInputRef.current) fileInputRef.current.value = ''
-      setTimeout(() => { setDone(false); setOpen(false) }, 2000)
-    } else {
-      const d = await res.json()
-      setError(d.error || 'Upload failed')
+    try {
+      const res = await fetch(`/api/customers/${customerId}/recordings`, { method: 'POST', body: form })
+      if (res.ok) {
+        setDone(true)
+        setLabel('')
+        if (fileInputRef.current) fileInputRef.current.value = ''
+        setTimeout(() => { setDone(false); setOpen(false) }, 2000)
+      } else {
+        const d = await res.json().catch(() => ({ error: 'Upload failed' }))
+        setError(d.error || 'Upload failed')
+      }
+    } catch (e) {
+      setError('Network error, try again')
+    } finally {
+      setUploading(false)
     }
-    setUploading(false)
   }
 
   if (!open) {

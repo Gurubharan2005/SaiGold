@@ -42,10 +42,9 @@ export async function POST(
 
   if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
 
-  // Validate file type
-  const validTypes = ['audio/mpeg', 'audio/mp4', 'audio/wav', 'audio/ogg', 'audio/webm', 'audio/m4a', 'audio/x-m4a']
-  if (!validTypes.includes(file.type) && !file.name.match(/\.(mp3|mp4|wav|ogg|webm|m4a)$/i)) {
-    return NextResponse.json({ error: 'Invalid file type. Use mp3, mp4, wav, ogg, webm or m4a.' }, { status: 400 })
+  // Validate file extensions
+  if (!file.name.match(/\.(mp3|mp4|wav|ogg|webm|m4a|aac)$/i)) {
+    return NextResponse.json({ error: 'Invalid file type. Please use audio files like mp3, m4a, or wav.' }, { status: 400 })
   }
 
   // Upload to Vercel Blob
