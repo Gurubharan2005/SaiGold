@@ -3,11 +3,10 @@ import { prisma } from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 
-/**
- * CUSTOMER RECORDINGS API
- * Simplified to handle DB metadata saving only. 
- * Real file storage is handled directly from browser to Vercel Blob.
- */
+import { put } from '@vercel/blob'
+
+// Allowed size for server-side buffering - 4.5MB is Vercel's limit
+export const maxDuration = 60
 
 // GET — list all recordings for a customer
 export async function GET(
@@ -29,7 +28,7 @@ export async function GET(
   return NextResponse.json(recordings)
 }
 
-// POST — save a pre-uploaded recording URL to the database
+// POST — handle metadata (JSON) OR direct file upload (FormData)
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
@@ -41,12 +40,37 @@ export async function POST(
     const session = token ? await decrypt(token) : null
     if (!session?.id) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    // We now expect JSON with the audioUrl from the successful direct upload
-    const { audioUrl, label, durationSec } = await req.json()
+    const contentType = req.headers.get('content-type') || ''
+    let audioUrl = ''
+    let label = ''
+    let durationSec = null
 
-    if (!audioUrl) {
-      return NextResponse.json({ error: 'No audio URL provided' }, { status: 400 })
+    // ── Path A: Direct Metadata (JSON) — from new direct-upload component ──
+    if (contentType.includes('application/json')) {
+      const body = await req.json()
+      audioUrl = body.audioUrl
+      label = body.label
+      durationSec = body.durationSec
+    } 
+    // ── Path B: Legacy File Upload (FormData) — for backwards compatibility ──
+    else {
+      const formData = await req.formData()
+      const file = formData.get('file') as File | null
+      label = (formData.get('label') as string) || ''
+      durationSec = formData.get('durationSec') ? Number(formData.get('durationSec')) : null
+
+      if (!file) return NextResponse.json({ error: 'No file provided' }, { status: 400 })
+
+      // Small/Legacy files: upload to Vercel Blob from the server
+      const safeName = `${Date.now()}_${file.name.replace(/[^a-zA-Z0-9._-]/g, '_')}`
+      const blob = await put(`recordings/customer_${id}/${safeName}`, file, {
+        access: 'public',
+        contentType: file.type || 'audio/mpeg'
+      })
+      audioUrl = blob.url
     }
+
+    if (!audioUrl) return NextResponse.json({ error: 'Upload failed' }, { status: 400 })
 
     console.log(`[Recording] Saving metadata for customer ${id}: ${audioUrl}`)
 
@@ -56,7 +80,7 @@ export async function POST(
         uploadedById: String(session.id),
         audioUrl,
         label: label || null,
-        durationSec: durationSec ? Number(durationSec) : null,
+        durationSec,
       },
       include: { uploadedBy: { select: { name: true, role: true } } }
     })
@@ -64,7 +88,7 @@ export async function POST(
     return NextResponse.json(recording, { status: 201 })
 
   } catch (err: any) {
-    console.error('[Recording] Metadata error:', err)
-    return NextResponse.json({ error: 'Failed to save recording metadata' }, { status: 500 })
+    console.error('[Recording] API Error:', err)
+    return NextResponse.json({ error: err.message || 'Failed to save recording' }, { status: 500 })
   }
 }
