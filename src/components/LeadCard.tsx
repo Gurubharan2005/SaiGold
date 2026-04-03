@@ -54,23 +54,24 @@ export function LeadCard({ customer, children, showRecordingBadge = true }: Lead
               <User size={24} color="var(--text-secondary)" />
             )}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-              <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>{customer.name}</h3>
+          <div className="min-w-0" style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+              <h3 className="truncate" style={{ margin: 0, fontSize: '17px', fontWeight: 600 }}>{customer.name}</h3>
               {/* 🎙️ Recordings badge */}
-              {showRecordingBadge && <RecordingsBadge customerId={customer.id} customerName={customer.name} />}
+              {showRecordingBadge && <div style={{ flexShrink: 0 }}><RecordingsBadge customerId={customer.id} customerName={customer.name} /></div>}
             </div>
-            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Phone size={12} /> {customer.phone}
+            <span className="truncate" style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
+              <Phone size={10} /> {customer.phone}
             </span>
           </div>
         </div>
-        <StatusBadge status={customer.status} />
+        <div style={{ flexShrink: 0 }}>
+          <StatusBadge status={customer.status} />
+        </div>
       </div>
 
       {/* Details */}
-      <div style={{ 
-        display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', 
+      <div className="grid-2-responsive" style={{ 
         padding: '12px', background: 'rgba(0,0,0,0.02)', borderRadius: '12px' 
       }}>
         {customer.loanAmount && (

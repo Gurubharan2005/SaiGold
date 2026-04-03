@@ -21,7 +21,7 @@ export default function SearchInput({ placeholder = "Search..." }: { placeholder
       
       // Update the URL without reloading the page, which triggers the Server Component to re-fetch Prisma
       router.replace(`?${params.toString()}`, { scroll: false })
-    }, 400) // 400ms delay
+    }, 300) // Reduced to 300ms for snappier feel
 
     return () => clearTimeout(delayDebounceFn)
   }, [query, router, searchParams])

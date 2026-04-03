@@ -107,8 +107,8 @@ export default function KanbanBoard({ columns, isManager }: Props) {
                   transition: 'all 0.2s'
                 }}
               >
-                <Icon size={13} />
-                {col.label}
+                <Icon size={12} style={{ flexShrink: 0 }} />
+                <span className="truncate" style={{ flex: 1, textAlign: 'left' }}>{col.label}</span>
                 <span style={{
                   background: active ? col.color : 'var(--border-color)',
                   color: active ? '#111' : 'var(--text-secondary)',

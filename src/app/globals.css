@@ -128,6 +128,29 @@ input:focus, textarea:focus, select:focus {
   to { background-position: -200% 0; }
 }
 
+/* Utilities for Mobile Fixes */
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+.grid-2-responsive {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+@media (max-width: 480px) {
+  .grid-2-responsive {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* Responsive Table Container */
 .table-container {
   width: 100%;
