@@ -11,6 +11,7 @@ import { EditProfileModalTrigger } from '@/components/EditProfileModalTrigger'
 import LoanDetailsEditor from '@/components/LoanDetailsEditor'
 import FinishUploadButton from '@/components/FinishUploadButton'
 import CustomerTimeline from '@/components/CustomerTimeline'
+import CallRecordingsPanel from '@/components/CallRecordingsPanel'
 import { cookies } from 'next/headers'
 
 import { decrypt } from '@/lib/auth'
@@ -260,6 +261,9 @@ export default async function CustomerDetailsPage({
 
       {/* Audit Timeline Injection */}
       <CustomerTimeline customer={customer} />
+
+      {/* Call Recordings */}
+      <CallRecordingsPanel customerId={customer.id} isManager={isManager} />
 
     </div>
   )

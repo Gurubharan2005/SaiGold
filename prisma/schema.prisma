@@ -23,6 +23,7 @@ model User {
   createdCustomers   Customer[]         @relation("CreatedBy")
   verifiedCustomers  Customer[]         @relation("VerifiedBy")
   uploadedDocs       CustomerDocument[] @relation("UploadedBy")
+  uploadedRecordings CallRecording[]    @relation("RecordingUploadedBy")
 
   @@map("user")
 }
@@ -58,9 +59,24 @@ model Customer {
   createdBy      User?              @relation("CreatedBy", fields: [createdById], references: [id])
   verifiedBy     User?              @relation("VerifiedBy", fields: [verifiedById], references: [id])
   documents      CustomerDocument[]
+  recordings     CallRecording[]
   lastCalledAt   DateTime?
 
   @@map("customer")
+}
+
+model CallRecording {
+  id          String   @id @default(uuid())
+  customerId  String
+  uploadedById String
+  audioUrl    String
+  label       String?
+  durationSec Int?
+  createdAt   DateTime @default(now())
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  uploadedBy  User     @relation("RecordingUploadedBy", fields: [uploadedById], references: [id])
+
+  @@map("call_recordings")
 }
 
 model CustomerDocument {
