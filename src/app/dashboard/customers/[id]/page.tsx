@@ -10,6 +10,7 @@ import ProfilePhotoUploader from '@/components/ProfilePhotoUploader'
 import { EditProfileModalTrigger } from '@/components/EditProfileModalTrigger'
 import LoanDetailsEditor from '@/components/LoanDetailsEditor'
 import FinishUploadButton from '@/components/FinishUploadButton'
+import SalesVerifyActions from '@/components/SalesVerifyActions'
 import CustomerTimeline from '@/components/CustomerTimeline'
 import CallRecordingsPanel from '@/components/CallRecordingsPanel'
 import { cookies } from 'next/headers'
@@ -298,6 +299,11 @@ export default async function CustomerDetailsPage({
             <FinishUploadButton customerId={customer.id} fromTab={from} />
           </div>
         </div>
+      )}
+
+      {/* SALESMAN ACTION: VERIFY & SEND TO MAINTENANCE (Only for Verified Leads) */}
+      {isSalesman && (customer.status === 'VERIFIED' || customer.status === 'PROCESSING') && (
+        <SalesVerifyActions customerId={customer.id} fromTab={from} />
       )}
     </div>
   )
