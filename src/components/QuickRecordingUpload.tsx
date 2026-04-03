@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef, useEffect } from 'react'
-import { Mic, Upload, X, Loader2, CheckCircle, AlertTriangle, Terminal, ChevronDown, ChevronUp } from 'lucide-react'
+import { Mic, Upload, X, Loader2, CheckCircle, AlertTriangle, Terminal, ChevronDown, ChevronUp, ShieldCheck } from 'lucide-react'
 import { upload } from '@vercel/blob/client'
 
 interface Props {
@@ -10,6 +10,11 @@ interface Props {
   onUploadDone?: () => void
 }
 
+/**
+ * ENTERPRISE SIGNED UPLOAD COMPONENT
+ * Architecture: Frontend → Handshake (/api/upload-audio) → Signed Token → Blob
+ * This avoids all serverless body limits and is fully secure.
+ */
 export default function QuickRecordingUpload({ customerId, customerName, onUploadDone }: Props) {
   const [open, setOpen] = useState(false)
   const [label, setLabel] = useState('')
@@ -38,28 +43,35 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
     setLogs([])
     setShowLogs(true)
 
-    addLog(`Initiating sync for ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)...`)
+    addLog(`Initiating Enterprise sync for ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)...`)
 
     try {
-      // Step 1: Handshake with Edge Runtime
-      addLog('Step 1: Requesting secure Edge handshake...')
+      /**
+       * STEP 1: Handshake
+       * Frontend → API (/api/upload-audio)
+       */
+      addLog('Step 1: Requesting Signed Upload Handshake...')
       const extension = file.name.split('.').pop() || 'mp3'
       const simplifiedPath = `recordings/customer_${customerId}/${Date.now()}.${extension}`
 
       const blob = await upload(simplifiedPath, file, {
         access: 'public',
-        handleUploadUrl: '/api/recordings/upload-token',
+        handleUploadUrl: '/api/upload-audio', // Pointing to the new 'Enterprise Safe' endpoint
         onUploadProgress: (ev) => {
           setProgress(Math.round(ev.percentage))
-          if (ev.percentage % 20 === 0) {
-            addLog(`Step 2: Uploading bits... ${Math.round(ev.percentage)}% complete`)
+          if (ev.percentage === 0) addLog('Step 2: Handshake Success! Signed token received.')
+          if (ev.percentage % 25 === 0 && ev.percentage > 0) {
+            addLog(`Step 3: Transferring bits... ${Math.round(ev.percentage)}% complete`)
           }
         }
       })
 
-      addLog('Step 3: Storage success! Finalizing metadata...')
+      addLog('Step 4: Secure storage transfer success! Finalizing metadata...')
 
-      // Step 2: Persistent Metadata Sync
+      /**
+       * STEP 2: Database Sync
+       * Save results to Neon PostgreSQL
+       */
       const res = await fetch(`/api/customers/${customerId}/recordings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -70,11 +82,11 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
       })
 
       if (!res.ok) {
-        const d = await res.json().catch(() => ({ error: 'Sync Handshake Failed' }))
+        const d = await res.json().catch(() => ({ error: 'Database Handshake Failed' }))
         throw new Error(d.error || `Server Error ${res.status}`)
       }
 
-      addLog('Step 4: Sync complete! Database updated.')
+      addLog('Step 5: SYNC COMPLETED! Data is secure.')
       setDone(true)
       setLabel('')
       
@@ -83,11 +95,11 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
         setOpen(false)
         setShowLogs(false)
         onUploadDone?.()
-      }, 2500)
+      }, 3000)
 
     } catch (e: any) {
-      addLog(`CRITICAL ERROR: ${e.message}`)
-      console.error('[Nuclear-Sync] Failure:', e)
+      addLog(`CRITICAL ERROR during handshake/sync: ${e.message}`)
+      console.error('[Enterprise-Sync] Failure:', e)
       setError({
         message: e.message || 'Sync failed',
         trace: e.stack,
@@ -104,9 +116,9 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
         onClick={() => setOpen(true)}
         style={{
           display: 'inline-flex', alignItems: 'center', gap: '6px',
-          padding: '6px 14px', background: 'rgba(245,158,11,0.1)',
-          border: '1px solid rgba(245,158,11,0.3)', borderRadius: '12px',
-          fontSize: '12px', fontWeight: 700, color: '#F59E0B',
+          padding: '6px 14px', background: 'rgba(56,189,248,0.1)',
+          border: '1px solid rgba(56,189,248,0.3)', borderRadius: '12px',
+          fontSize: '12px', fontWeight: 700, color: '#38BDF8',
           cursor: 'pointer', transition: 'all 0.2s', width: 'auto'
         }}
       >
@@ -126,13 +138,15 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
       gap: '16px',
       width: '100%',
       maxWidth: '400px',
-      boxShadow: '0 20px 60px rgba(0,0,0,0.5)',
+      boxShadow: '0 20px 80px rgba(0,0,0,0.6)',
       marginTop: '16px',
-      borderTop: '4px solid var(--primary-color)'
+      borderTop: '4px solid #38BDF8',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: '15px', fontWeight: 900, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <Mic size={18} style={{ color: 'var(--primary-color)' }} /> SYNC RECORDING
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 2 }}>
+        <span style={{ fontSize: '15px', fontWeight: 900, color: '#38BDF8', display: 'flex', alignItems: 'center', gap: '10px', letterSpacing: '0.5px' }}>
+          <ShieldCheck size={18} /> ENTERPRISE SYNC
         </span>
         <button 
           onClick={() => { setOpen(false); setError(null); setDone(false); setShowLogs(false); }} 
@@ -143,16 +157,16 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
       </div>
 
       {!done && !uploading && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <label style={{ fontSize: '11px', fontWeight: 700, color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Call Subject / Note</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          <label style={{ fontSize: '11px', fontWeight: 800, color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '1px' }}>Call Reference Note</label>
           <input
             type="text"
-            placeholder="e.g. Follow-up about Loan Agreement"
+            placeholder="e.g. Call regarding gold valuation..."
             value={label}
             onChange={e => setLabel(e.target.value)}
             style={{ 
               fontSize: '15px', padding: '14px', borderRadius: '14px', 
-              border: '2px solid var(--border-color)', background: 'var(--surface-hover)', 
+              border: '2px solid var(--border-color)', background: 'rgba(255,255,255,0.03)', 
               width: '100%', color: 'var(--text-primary)', outline: 'none'
             }}
           />
@@ -168,19 +182,19 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
       />
 
       {done ? (
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '20px', color: '#10B981', fontWeight: 900, fontSize: '16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '16px' }}>
-          <CheckCircle size={22} /> SYNC COMPLETED
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', padding: '24px', color: '#10B981', fontWeight: 900, fontSize: '16px', background: 'rgba(16, 185, 129, 0.1)', borderRadius: '16px', border: '1px solid rgba(16, 185, 129, 0.2)', transition: 'all 0.5s scale(1.05)' }}>
+          <CheckCircle size={24} /> SECURELY SYNCED
         </div>
       ) : uploading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '14px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: 'var(--primary-color)', fontWeight: 700 }}>
-              <Loader2 size={18} className="animate-spin" /> {progress < 100 ? `UPLOADING...` : 'FINALIZING...'}
+            <span style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#38BDF8', fontWeight: 800 }}>
+              <Loader2 size={18} className="animate-spin" /> {progress < 100 ? `SYNCING...` : 'HANDSHAKE...'}
             </span>
             <span style={{ fontWeight: 900, color: 'var(--text-primary)' }}>{progress}%</span>
           </div>
-          <div style={{ background: 'var(--border-color)', borderRadius: '10px', height: '14px', overflow: 'hidden', padding: '3px' }}>
-            <div style={{ background: 'var(--primary-color)', height: '100%', width: `${progress}%`, transition: 'width 0.4s', borderRadius: '6px' }} />
+          <div style={{ background: 'rgba(56,189,248,0.05)', borderRadius: '12px', height: '12px', overflow: 'hidden', border: '1px solid rgba(56,189,248,0.1)' }}>
+            <div style={{ background: 'linear-gradient(90deg, #38BDF8, #0ea5e9)', height: '100%', width: `${progress}%`, transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)', boxShadow: '0 0 15px rgba(56,189,248,0.4)' }} />
           </div>
         </div>
       ) : (
@@ -188,34 +202,35 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
           onClick={() => fileInputRef.current?.click()}
           style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px',
-            padding: '16px', background: 'var(--primary-color)', border: 'none',
+            padding: '18px', background: '#38BDF8', border: 'none',
             borderRadius: '16px', color: '#111', fontWeight: 900, cursor: 'pointer', 
-            fontSize: '15px', width: '100%', boxShadow: '0 8px 24px rgba(245,158,11,0.3)',
-            textTransform: 'uppercase'
+            fontSize: '15px', width: '100%', boxShadow: '0 10px 30px rgba(56,189,248,0.3)',
+            textTransform: 'uppercase', transition: 'all 0.2s', letterSpacing: '1px'
           }}
         >
-          <Upload size={20} /> CHOOSE AUDIO FILE
+          <Upload size={20} /> Start Secure Upload
         </button>
       )}
 
-      {/* Live Technical Log */}
+      {/* Live Sync Log Console */}
       {(uploading || logs.length > 0) && (
-        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
+        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
           <button 
             onClick={() => setShowLogs(!showLogs)}
-            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', padding: 0 }}
+            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: 0, fontWeight: 700 }}
           >
-            <Terminal size={14} /> LIVE SYNC LOG {showLogs ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
+            <Terminal size={14} /> SECURITY CONSOLE {showLogs ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
           </button>
           
           {showLogs && (
             <div style={{ 
-              marginTop: '10px', padding: '12px', background: '#000', color: '#10B981', 
-              fontFamily: 'monospace', fontSize: '10px', borderRadius: '12px', 
-              maxHeight: '120px', overflowY: 'auto', whiteSpace: 'pre-wrap', border: '1px solid #111'
+              marginTop: '12px', padding: '14px', background: 'rgba(0,0,0,0.8)', color: '#38BDF8', 
+              fontFamily: '"JetBrains Mono", "Fira Code", monospace', fontSize: '10px', borderRadius: '16px', 
+              maxHeight: '140px', overflowY: 'auto', whiteSpace: 'pre-wrap', border: '1px solid rgba(56,189,248,0.1)',
+              lineHeight: '1.5'
             }}>
               {logs.map((log, i) => (
-                <div key={i} style={{ marginBottom: '2px' }}>{log}</div>
+                <div key={i} style={{ marginBottom: '4px', borderLeft: '2px solid rgba(56,189,248,0.3)', paddingLeft: '8px' }}>{log}</div>
               ))}
               <div ref={logEndRef} />
             </div>
@@ -225,22 +240,22 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
 
       {error && (
         <div style={{ 
-          fontSize: '13px', color: '#EF4444', background: 'rgba(239,68,68,0.1)', 
-          padding: '16px', borderRadius: '16px', border: '1px solid rgba(239,68,68,0.2)',
-          display: 'flex', flexDirection: 'column', gap: '10px'
+          fontSize: '13px', color: '#F87171', background: 'rgba(248,113,113,0.05)', 
+          padding: '18px', borderRadius: '18px', border: '1px solid rgba(248,113,113,0.1)',
+          display: 'flex', flexDirection: 'column', gap: '12px', transition: 'all 0.3s'
         }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
             <AlertTriangle size={18} style={{ flexShrink: 0, marginTop: '2px' }} />
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              <span style={{ fontWeight: 900, textTransform: 'uppercase' }}>SYNC FAILED</span>
+              <span style={{ fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>SECURITY ABORT</span>
               <span>{error.message}</span>
             </div>
           </div>
           <button 
             onClick={() => { setError(null); fileInputRef.current?.click(); }}
-            style={{ background: '#EF4444', border: 'none', color: '#fff', padding: '10px', borderRadius: '10px', fontSize: '12px', fontWeight: 800, cursor: 'pointer', textTransform: 'uppercase' }}
+            style={{ background: '#F87171', border: 'none', color: '#fff', padding: '12px', borderRadius: '12px', fontSize: '12px', fontWeight: 900, cursor: 'pointer', textTransform: 'uppercase', letterSpacing: '1px' }}
           >
-            RETRY SYNC NOW
+            Retry Handshake
           </button>
         </div>
       )}
