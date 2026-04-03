@@ -3,10 +3,13 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 
+// USE THE EDGE RUNTIME FOR MAXIMUM SPEED AND 60S TIMEOUTS
+export const runtime = 'edge'
+
 /**
- * DEEP INVESTIGATION UPLOAD HANDLER
- * Configured specifically for multipart large files (5MB+)
- * includes trace logging and extended timeouts.
+ * NUCLEAR TOKEN GENERATOR (EDGE)
+ * This is the final stable version of the handshake logic.
+ * It uses Vercel Edge for zero cold-starts and 60s processing limits.
  */
 export async function POST(request: Request): Promise<NextResponse> {
   const cookieStore = await cookies()
@@ -14,19 +17,19 @@ export async function POST(request: Request): Promise<NextResponse> {
   const session = token ? await decrypt(token) : null
 
   if (!session?.id) {
-    console.error('[Token-Gen] Unauthorized access attempt')
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    console.warn('[Edge-Handshake] Unauthorized attempt or stale session')
+    return NextResponse.json({ error: 'Session Expired. Please Logout/Login.' }, { status: 401 })
   }
 
   const body = (await request.json()) as HandleUploadBody
-  const traceId = Math.random().toString(36).substring(7)
+  const traceId = `edge_${Math.random().toString(36).substring(7)}`
 
   try {
     const jsonResponse = await handleUpload({
       body,
       request,
       onBeforeGenerateToken: async (pathname) => {
-        console.log(`[Token-Gen][${traceId}] Generating for ${pathname} (User: ${session.id})`)
+        console.log(`[Edge-Handshake][${traceId}] Handshake for ${pathname}`)
         
         return {
           allowedContentTypes: [
@@ -44,13 +47,13 @@ export async function POST(request: Request): Promise<NextResponse> {
       },
       onUploadCompleted: async ({ blob, tokenPayload }) => {
         const payload = JSON.parse(tokenPayload || '{}')
-        console.log(`[Token-Gen][${payload.traceId}] Upload to Blob completed: ${blob.url}`)
+        console.log(`[Edge-Handshake][${payload.traceId}] Final Storage Success: ${blob.url}`)
       },
     })
 
     return NextResponse.json(jsonResponse)
   } catch (error: any) {
-    console.error(`[Token-Gen][${traceId}] Critical handler error:`, error.message)
+    console.error(`[Edge-Handshake][${traceId}] Error:`, error.message)
     return NextResponse.json(
       { error: `Handshake Failed: ${error.message}`, traceId },
       { status: 400 }
