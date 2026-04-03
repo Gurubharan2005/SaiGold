@@ -58,7 +58,7 @@ export function LeadCard({ customer, children, showRecordingBadge = true }: Lead
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
               <h3 style={{ margin: 0, fontSize: '18px', fontWeight: 600 }}>{customer.name}</h3>
               {/* 🎙️ Recordings badge */}
-              {showRecordingBadge && <RecordingsBadge customerId={customer.id} />}
+              {showRecordingBadge && <RecordingsBadge customerId={customer.id} customerName={customer.name} />}
             </div>
             <span style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <Phone size={12} /> {customer.phone}

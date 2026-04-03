@@ -66,7 +66,7 @@ export default function QuickStatusActions({ customerId, customerName, phone }: 
     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', position: 'relative', justifyContent: 'flex-end' }} ref={menuRef}>
         {/* Recording Count Badge */}
-        <RecordingsBadge customerId={customerId} />
+        <RecordingsBadge customerId={customerId} customerName={customerName} />
       {/* WhatsApp Button */}
       <a 
         href={`https://wa.me/${phone.replace(/[^0-9]/g, '')}`} 
