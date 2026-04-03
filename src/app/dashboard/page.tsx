@@ -173,28 +173,30 @@ export default async function DashboardPage() {
               <div style={{ padding: '32px', textAlign: 'center', color: 'var(--text-secondary)' }}>Great job! You have no more calls scheduled for today.</div>
             ) : (
               followUpsToday.map((f) => (
-                <div key={f.id} style={{ padding: '16px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(245, 158, 11, 0.05)' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px', flexWrap: 'wrap', gap: '12px' }}>
-                    <div>
-                      <h4 style={{ margin: 0, fontSize: '15px', color: '#F59E0B' }}>Follow Up: {f.name}</h4>
-                      <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <Phone size={12}/> {f.phone}
+                <div key={f.id} style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'rgba(245, 158, 11, 0.05)', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <h4 style={{ margin: 0, fontSize: '16px', color: '#F59E0B', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>Follow Up: {f.name}</h4>
+                      <div style={{ fontSize: '14px', color: 'var(--text-secondary)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <Phone size={13} /> {f.phone}
                       </div>
                     </div>
-                    <div>
+                    {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED'].includes(f.status || '') && (
+                      <Link href={`/dashboard/customers/${f.id}`} style={{ fontSize: '12px', color: 'var(--text-secondary)', textDecoration: 'none', fontWeight: 600, background: 'var(--surface-color)', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border-color)' }}>
+                        Details &rarr;
+                      </Link>
+                    )}
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1 }}>
                       <QuickStatusActions customerId={f.id} customerName={f.name} phone={f.phone} />
-                      {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED'].includes(f.status || '') && (
-                        <div style={{ marginTop: '8px', textAlign: 'right' }}>
-                          <Link href={`/dashboard/customers/${f.id}`} style={{ fontSize: '11px', color: 'var(--text-secondary)', textDecoration: 'none' }}>
-                            View Details &rarr;
-                          </Link>
-                        </div>
-                      )}
                     </div>
                   </div>
+
                   {f.followUpNotes && (
-                    <div style={{ fontSize: '13px', color: 'var(--text-color)', background: 'var(--surface-color)', padding: '8px', borderRadius: '4px', borderLeft: '2px solid #F59E0B' }}>
-                      {f.followUpNotes}
+                    <div style={{ fontSize: '13px', color: 'var(--text-color)', background: 'var(--surface-color)', padding: '10px', borderRadius: '8px', borderLeft: '3px solid #F59E0B', fontStyle: 'italic' }}>
+                      &ldquo;{f.followUpNotes}&rdquo;
                     </div>
                   )}
                 </div>
