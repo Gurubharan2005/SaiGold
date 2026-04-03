@@ -57,8 +57,18 @@ export default async function CustomerDetailsPage({
   return (
     <div className="fade-in max-w-4xl" style={{ paddingBottom: '100px' }}>
       
-      {/* 1. TOP NAVIGATION BAR */}
-      <div style={{ marginBottom: '24px' }}>
+      {/* 1. TOP STICKY NAVIGATION BAR */}
+      <div style={{ 
+        marginBottom: '24px', 
+        position: 'sticky', 
+        top: '0', 
+        zIndex: 100, 
+        padding: '16px 0',
+        background: 'var(--background-color)', // match page background
+        borderBottom: '1px solid var(--border-color)',
+        display: 'flex',
+        alignItems: 'center'
+      }}>
         <Link 
           href={backHref} 
           style={{ 
@@ -69,10 +79,11 @@ export default async function CustomerDetailsPage({
             textDecoration: 'none',
             fontSize: '14px',
             fontWeight: 600,
-            padding: '8px 16px',
-            background: 'var(--surface-hover)',
+            padding: '10px 20px',
+            background: 'var(--surface-color)',
             borderRadius: '100px',
             border: '1px solid var(--border-color)',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
             transition: 'all 0.2s'
           }}
           className="hover-opacity"
