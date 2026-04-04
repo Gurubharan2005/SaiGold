@@ -49,8 +49,8 @@ export default function LoanDetailsEditor({
 
   return (
     <div className="card" style={{ padding: '24px' }}>
-      <h2 style={{ fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-        <Hash size={18} color="var(--primary-color)" /> Loan & Gold Parameters
+      <h2 style={{ fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800 }}>
+        <Hash size={18} color="var(--primary-color)" /> 2. Gold & Loan Details
       </h2>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '20px' }}>

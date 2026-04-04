@@ -138,6 +138,27 @@ export default async function CustomerDetailsPage({
         </Link>
       </div>
 
+      {/* LEAD MASTER FORM BANNER */}
+      {customer.status === 'PROCESSING' && (
+        <div style={{ 
+          marginBottom: '32px', 
+          padding: '24px', 
+          background: 'linear-gradient(135deg, rgba(255, 193, 7, 0.15) 0%, rgba(255, 193, 7, 0.05) 100%)', 
+          borderLeft: '4px solid var(--primary-color)',
+          borderRadius: '12px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '8px'
+        }}>
+          <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 900, color: 'var(--primary-color)', letterSpacing: '0.05em' }}>
+            LEAD MASTER FORM
+          </h2>
+          <p style={{ margin: 0, fontSize: '14px', color: 'var(--text-secondary)', fontWeight: 500 }}>
+            Please finalize the Customer, Gold, and Loan details below to complete the conversion.
+          </p>
+        </div>
+      )}
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
           <Suspense fallback={<div className="w-20 h-20 rounded-2xl bg-zinc-800 animate-pulse" />}>
@@ -198,7 +219,7 @@ export default async function CustomerDetailsPage({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
           
           <div className="card">
-            <h2 style={{ fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '16px' }}>General Information</h2>
+            <h2 style={{ fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '16px', fontWeight: 800 }}>1. Customer Details</h2>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', color: 'var(--text-secondary)' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
