@@ -29,9 +29,11 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
         status?: string
         callStatus: string
         followUpDate?: string
+        markCalled?: boolean
       }
       const payload: StatusPayload = { 
-        callStatus: 'CALLED' 
+        callStatus: 'CALLED',
+        markCalled: true
       }
 
       payload.status = status
@@ -52,6 +54,8 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
         router.push(`/dashboard/customers/${lead.id}?from=processing`)
       } else {
         router.refresh()
+        // Reset loading state safely after soft navigation triggers
+        setTimeout(() => setLoading(null), 400)
       }
     } catch (error) {
       alert('Error updating status')
