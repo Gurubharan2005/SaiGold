@@ -131,23 +131,11 @@ export default async function DashboardPage() {
   const todayEnd = new Date()
   todayEnd.setHours(23, 59, 59, 999)
 
-  const [waitingLeads, followUpLeads, rejectedLeads] = await Promise.all([
-    prisma.customer.findMany({
-      where: { assignedToId: String(session?.id), status: 'WAITING' },
-      orderBy: { assignedAt: 'desc' },
-      select: { id: true, name: true, phone: true, status: true }
-    }),
-    prisma.customer.findMany({
-      where: { assignedToId: String(session?.id), status: 'FOLLOW_UP' },
-      orderBy: { updatedAt: 'desc' },
-      select: { id: true, name: true, phone: true, status: true }
-    }),
-    prisma.customer.findMany({
-      where: { assignedToId: String(session?.id), status: 'REJECTED' },
-      orderBy: { updatedAt: 'desc' },
-      select: { id: true, name: true, phone: true, status: true }
-    })
-  ])
+  const waitingLeads = await prisma.customer.findMany({
+    where: { assignedToId: String(session?.id), status: 'WAITING' },
+    orderBy: { assignedAt: 'desc' },
+    select: { id: true, name: true, phone: true, status: true }
+  })
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -177,59 +165,38 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* ACTIVE LEADS PIPELINE (3-COLUMN SECTION) */}
+      {/* FRESH LEADS INBOX (DASHBOARD FOCUS) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-           <Target size={22} color="var(--primary-color)" /> Active Leads Pipeline
-        </h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+             <Target size={22} color="var(--primary-color)" /> Fresh Leads from Meta
+          </h2>
+          <span className="badge badge-waiting">{waitingLeads.length} Urgent</span>
+        </div>
 
-        <div className="pipeline-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', alignItems: 'flex-start' }}>
-          
-          {/* COLUMN 1: NOT ATTENDED */}
-          <div className="pipeline-column">
-            <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderBottom: '2px solid var(--primary-color)', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '0.05em' }}>NOT ATTENDED</span>
-              <span className="badge badge-waiting">{waitingLeads.length}</span>
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+          gap: '20px',
+          paddingBottom: '40px' 
+        }}>
+          {waitingLeads.length === 0 ? (
+            <div style={{ 
+              gridColumn: '1 / -1',
+              padding: '64px', 
+              textAlign: 'center', 
+              color: 'var(--text-secondary)', 
+              background: 'var(--surface-color)',
+              border: '1px dashed var(--border-color)', 
+              borderRadius: '16px',
+            }}>
+              <CheckCircle size={40} color="var(--primary-color)" style={{ margin: '0 auto 16px auto', opacity: 0.5 }} />
+              <h3 style={{ margin: 0, color: 'var(--text-color)' }}>All Leads Attended!</h3>
+              <p style={{ margin: '8px 0 0 0', fontSize: '14px' }}>New leads from Meta Ads will appear here instantly.</p>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '1000px', overflowY: 'auto', paddingRight: '4px' }}>
-              {waitingLeads.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', fontSize: '13px' }}>No new leads waiting.</div>
-              ) : (
-                waitingLeads.map(lead => <PipelineCard key={lead.id} lead={lead} column="WAITS" />)
-              )}
-            </div>
-          </div>
-
-          {/* COLUMN 2: FOLLOW-UP */}
-          <div className="pipeline-column">
-            <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderBottom: '2px solid #F59E0B', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '0.05em' }}>FOLLOW-UP</span>
-              <span className="badge badge-waiting" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>{followUpLeads.length}</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '1000px', overflowY: 'auto', paddingRight: '4px' }}>
-              {followUpLeads.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', fontSize: '13px' }}>No leads in follow-up.</div>
-              ) : (
-                followUpLeads.map(lead => <PipelineCard key={lead.id} lead={lead} column="FOLLOW" />)
-              )}
-            </div>
-          </div>
-
-          {/* COLUMN 3: REJECTED */}
-          <div className="pipeline-column">
-            <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderBottom: '2px solid #EF4444', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '0.05em' }}>REJECTED</span>
-              <span className="badge badge-rejected">{rejectedLeads.length}</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '1000px', overflowY: 'auto', paddingRight: '4px' }}>
-              {rejectedLeads.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', fontSize: '13px' }}>No rejected leads.</div>
-              ) : (
-                rejectedLeads.map(lead => <PipelineCard key={lead.id} lead={lead} column="REJECT" />)
-              )}
-            </div>
-          </div>
-
+          ) : (
+            waitingLeads.map(lead => <PipelineCard key={lead.id} lead={lead} column="WAITS" />)
+          )}
         </div>
       </div>
 
