@@ -9,7 +9,7 @@ import CompactSalesToolbar from '@/components/CompactSalesToolbar'
 import PipelineCard from '@/components/PipelineCard'
 import { User as UserIcon } from 'lucide-react'
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 15;
 
 export default async function DashboardPage() {
   const cookieStore = await cookies()
@@ -39,9 +39,9 @@ export default async function DashboardPage() {
     ]
 
     const [accepted, followUp, rejected, waiting, dueCustomers] = await Promise.all([
-      prisma.customer.findMany({ where: { status: 'ACCEPTED' }, orderBy: { updatedAt: 'desc' }, include: { assignedTo: { select: { name: true } } } }),
-      prisma.customer.findMany({ where: { status: 'FOLLOW_UP' }, orderBy: { updatedAt: 'desc' }, include: { assignedTo: { select: { name: true } } } }),
-      prisma.customer.findMany({ where: { status: 'REJECTED' }, orderBy: { updatedAt: 'desc' }, include: { assignedTo: { select: { name: true } } } }),
+      prisma.customer.findMany({ where: { status: 'ACCEPTED' }, take: 40, orderBy: { updatedAt: 'desc' }, include: { assignedTo: { select: { name: true } } } }),
+      prisma.customer.findMany({ where: { status: 'FOLLOW_UP' }, take: 40, orderBy: { updatedAt: 'desc' }, include: { assignedTo: { select: { name: true } } } }),
+      prisma.customer.findMany({ where: { status: 'REJECTED' }, take: 40, orderBy: { updatedAt: 'desc' }, include: { assignedTo: { select: { name: true } } } }),
       prisma.customer.count({ where: { status: 'WAITING' } }),
       prisma.customer.count({ where: { status: 'DUE' } }),
     ])
@@ -137,6 +137,7 @@ export default async function DashboardPage() {
       status: 'WAITING',
       lastCalledAt: null // Only untouched leads appear on the Dashboard Inbox
     },
+    take: 40,
     orderBy: { assignedAt: 'desc' },
     select: { id: true, name: true, phone: true, status: true, lastCalledAt: true }
   })

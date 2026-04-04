@@ -91,6 +91,9 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       data: updateData,
     })
 
+    const { revalidatePath } = await import('next/cache')
+    revalidatePath('/dashboard', 'layout')
+
     return NextResponse.json({ success: true, customer: updatedCustomer }, { status: 200 })
   } catch (error) {
     console.error('Update Customer Error:', error)

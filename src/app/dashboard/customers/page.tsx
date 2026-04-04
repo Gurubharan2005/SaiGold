@@ -13,7 +13,7 @@ import PipelineCard from '@/components/PipelineCard'
 import PipelineMobileSwitcher from '@/components/PipelineMobileSwitcher'
 import { Target } from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
+export const revalidate = 15
 
 export default async function CustomersPage({ searchParams }: { searchParams: Promise<{ tab?: string, q?: string, search?: string, page?: string }> }) {
   const cookieStore = await cookies()
@@ -51,6 +51,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
           ]
         } : {})
       },
+      take: 40,
       orderBy: { createdAt: 'desc' },
       select: { id: true, name: true, phone: true, status: true, lastCalledAt: true }
     }),
@@ -65,6 +66,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
           ]
         } : {})
       },
+      take: 40,
       orderBy: { updatedAt: 'desc' },
       select: { id: true, name: true, phone: true, status: true, lastCalledAt: true }
     }),
@@ -79,6 +81,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
           ]
         } : {})
       },
+      take: 40,
       orderBy: { updatedAt: 'desc' },
       select: { id: true, name: true, phone: true, status: true, lastCalledAt: true }
     }),
@@ -93,6 +96,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
           ]
         } : {})
       },
+      take: 40,
       orderBy: { updatedAt: 'desc' },
       select: { id: true, name: true, phone: true, status: true, loanAmount: true, goldWeight: true }
     })

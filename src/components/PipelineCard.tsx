@@ -4,8 +4,10 @@ import { useState } from 'react'
 import { Phone, Check, X, Loader2, Clock, MessageCircle, Mic, ExternalLink, RefreshCw, ArrowRight, LayoutDashboard } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import QuickRecordingUpload from './QuickRecordingUpload'
-import RecordingsBadge from './RecordingsBadge'
+import dynamic from 'next/dynamic'
+
+const QuickRecordingUpload = dynamic(() => import('./QuickRecordingUpload'), { ssr: false })
+const RecordingsBadge = dynamic(() => import('./RecordingsBadge'), { ssr: false })
 
 interface PipelineCardProps {
   lead: {
