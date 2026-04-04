@@ -17,7 +17,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
   const { tab, q, search, page } = await searchParams
-  const currentTab = tab || 'called'
+  const currentTab = tab || 'waiting'
   
   // Backwards compatibility for the quick-search input component
   const activeQuery = search || q || ''
@@ -110,7 +110,6 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '24px', gap: '8px', overflowX: 'auto', paddingBottom: '2px' }} className="no-scrollbar">
         {[
           { id: 'waiting', label: 'Not Attended', count: 0 },
-          { id: 'called', label: 'Called Leads', count: 0 },
           { id: 'followup', label: 'Follow-Ups', count: 0 },
           { id: 'rejected', label: 'Rejected', count: 0 }
         ].map(t => (
