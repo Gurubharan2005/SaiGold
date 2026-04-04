@@ -5,6 +5,8 @@ import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import QuickStatusActions from '@/components/QuickStatusActions'
+import CompactSalesToolbar from '@/components/CompactSalesToolbar'
+import { User as UserIcon } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
 
@@ -188,33 +190,69 @@ export default async function DashboardPage() {
             </h3>
             <span className="badge badge-waiting" style={{ padding: '6px 12px' }}>{myAssignedLeads.length} Total</span>
           </div>
-          <div style={{ maxHeight: '800px', overflowY: 'auto', paddingBottom: '120px' }}>
+          <div style={{ maxHeight: '800px', overflowY: 'auto' }}>
             {myAssignedLeads.length === 0 ? (
               <div style={{ padding: '64px', textAlign: 'center', color: 'var(--text-secondary)' }}>You have no active leads assigned for conversion currently.</div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '1px', background: 'var(--border-color)' }}>
-                {myAssignedLeads.map((lead) => (
-                   <div key={lead.id} style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '24px', background: 'var(--bg-color)' }}>
-                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                       <div style={{ minWidth: 0, flex: 1 }}>
-                         <h4 style={{ margin: 0, fontSize: '18px', fontWeight: 800, color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', letterSpacing: '-0.5px' }}>{lead.name}</h4>
-                         <p style={{ margin: '6px 0 0 0', color: 'var(--text-secondary)', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '6px', fontWeight: 500 }}>
-                           <Phone size={14} color="var(--primary-color)" /> {lead.phone}
-                         </p>
-                       </div>
-                       <span className={`badge badge-${lead.status.toLowerCase()}`} style={{ fontSize: '11px', fontWeight: 800, letterSpacing: '0.05em' }}>{lead.status}</span>
-                     </div>
-                     
-                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                       <QuickStatusActions customerId={lead.id} customerName={lead.name} phone={lead.phone} />
-                       {['ACCEPTED', 'PROCESSING', 'VERIFIED', 'CLOSED', 'MAINTENANCE'].includes(lead.status) && (
-                         <Link href={`/dashboard/customers/${lead.id}`} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 700, padding: '8px 12px', background: 'rgba(255,193,7,0.05)', borderRadius: '8px', border: '1px solid rgba(255,193,7,0.1)', justifyContent: 'center' }}>
-                           <ExternalLink size={16} /> Full Customer Profile &rarr;
-                         </Link>
-                       )}
-                     </div>
-                   </div>
-                ))}
+              <div className="table-container">
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
+                      <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', width: '250px' }}>Lead Information</th>
+                      <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', width: '100px' }}>Status</th>
+                      <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Sales Workbench</th>
+                      <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {myAssignedLeads.map((lead) => (
+                      <tr key={lead.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }} className="hover-opacity">
+                        <td style={{ padding: '16px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--surface-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)', flexShrink: 0 }}>
+                              <UserIcon size={20} color="var(--text-secondary)" />
+                            </div>
+                            <div style={{ minWidth: 0 }}>
+                              <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.name}</div>
+                              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
+                                <Phone size={12} color="var(--primary-color)" /> {lead.phone}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td style={{ padding: '16px' }}>
+                          <span className={`badge badge-${lead.status.toLowerCase()}`} style={{ fontSize: '10px', fontWeight: 800 }}>{lead.status}</span>
+                        </td>
+                        <td style={{ padding: '16px' }}>
+                           <CompactSalesToolbar 
+                             customerId={lead.id} 
+                             customerName={lead.name} 
+                             phone={lead.phone} 
+                             currentStatus={lead.status}
+                             showConvert={true} 
+                           />
+                        </td>
+                        <td style={{ padding: '16px', textAlign: 'right' }}>
+                          <Link href={`/dashboard/customers/${lead.id}`} style={{ 
+                            display: 'inline-flex', 
+                            alignItems: 'center', 
+                            gap: '6px', 
+                            fontSize: '12px', 
+                            color: 'var(--primary-color)', 
+                            textDecoration: 'none', 
+                            fontWeight: 700,
+                            padding: '8px 12px',
+                            borderRadius: '8px',
+                            background: 'rgba(255,193,7,0.05)',
+                            border: '1px solid rgba(255,193,7,0.1)'
+                          }}>
+                            View Profile <ArrowRight size={14} />
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             )}
           </div>

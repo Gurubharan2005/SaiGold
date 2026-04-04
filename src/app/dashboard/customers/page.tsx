@@ -8,6 +8,7 @@ import OngoingQuickUpdate from '@/components/OngoingQuickUpdate'
 import SearchInput from '@/components/SearchInput'
 import RequestClosureButton from '@/components/RequestClosureButton'
 import DashRealtimeSync from '@/components/DashRealtimeSync'
+import CompactSalesToolbar from '@/components/CompactSalesToolbar'
 
 export const dynamic = 'force-dynamic'
 
@@ -38,10 +39,13 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   // TAB FILTERING LOGIC
   if (currentTab === 'called') {
     baseWhere.callStatus = 'CALLED'
-    // Include Waiting, Processing, Accepted, and Rejected in the main Called view
+    // Include Processing, Accepted, and Rejected in the main Called view
     baseWhere.status = { 
-      in: ['WAITING', 'PROCESSING', 'ACCEPTED', 'REJECTED'] 
+      in: ['PROCESSING', 'ACCEPTED', 'REJECTED'] 
     }
+  } else if (currentTab === 'waiting') {
+    baseWhere.status = 'WAITING'
+    baseWhere.callStatus = { not: 'CALLED' }
   } else if (currentTab === 'followup') {
     baseWhere.status = 'FOLLOW_UP'
   } else if (currentTab === 'rejected') {
@@ -105,6 +109,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
 
       <div style={{ display: 'flex', borderBottom: '1px solid var(--border-color)', marginBottom: '24px', gap: '8px', overflowX: 'auto', paddingBottom: '2px' }} className="no-scrollbar">
         {[
+          { id: 'waiting', label: 'Not Attended', count: 0 },
           { id: 'called', label: 'Called Leads', count: 0 },
           { id: 'followup', label: 'Follow-Ups', count: 0 },
           { id: 'rejected', label: 'Rejected', count: 0 }
@@ -148,10 +153,10 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
           <thead>
             <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Customer Data</th>
-              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Loan Info</th>
-              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Creation Date</th>
-              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Response Time</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Lead Information</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', width: '100px' }}>Status</th>
+              <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Sales Workbench</th>
+              <th className="hide-mobile" style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Created At</th>
               <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
             </tr>
           </thead>
@@ -164,66 +169,55 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
               </tr>
             ) : (
               customers.map((c: any) => (
-                <tr key={c.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }}>
-                  <td style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: '16px' }}>
-                    <div style={{ width: '40px', height: '40px', borderRadius: '50%', background: 'var(--surface-color)', overflow: 'hidden', border: '1px solid var(--border-color)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {c.photoUrl ? (
-                         <img 
-                           src={`/api/avatar?url=${encodeURIComponent(c.photoUrl)}`} 
-                           alt="Profile" 
-                           style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-                         />
-                      ) : (
-                         <User size={20} color="var(--text-secondary)" />
-                      )}
-                    </div>
-                    <div>
-                      <div style={{ fontWeight: 600, marginBottom: '4px' }}>{c.name}</div>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)' }}>
-                        <Phone size={12} /> {c.phone}
+                <tr key={c.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }} className="hover-opacity">
+                  <td style={{ padding: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                      <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--surface-color)', overflow: 'hidden', border: '1px solid var(--border-color)', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {c.photoUrl ? (
+                           <img 
+                             src={`/api/avatar?url=${encodeURIComponent(c.photoUrl)}`} 
+                             alt="Profile" 
+                             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+                           />
+                        ) : (
+                           <User size={20} color="var(--text-secondary)" />
+                        )}
+                      </div>
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: '15px' }}>{c.name}</div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                          <Phone size={12} /> {c.phone}
+                        </div>
                       </div>
                     </div>
                   </td>
-                  <td style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
-                    <span className={`badge badge-${c.status.toLowerCase()}`}>{c.status}</span>
+                  <td style={{ padding: '16px' }}>
+                    <span className={`badge badge-${c.status.toLowerCase()}`} style={{ fontSize: '10px' }}>{c.status}</span>
                   </td>
                   <td style={{ padding: '16px' }}>
-                    {currentTab === 'ongoing' ? (
-                       <div style={{ fontWeight: 600, color: 'var(--status-rejected)' }}>
-                         {c.dueDate ? format(new Date(c.dueDate), 'MMM dd, yyyy') : 'No Date Set'}
-                       </div>
-                    ) : (
-                      <>
-                        <div style={{ fontWeight: 600, color: 'var(--primary-color)' }}>
-                          {c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-'}
-                        </div>
-                        <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
-                          {c.goldWeight ? `${c.goldWeight}g` : 'No weight listed'}
-                        </div>
-                      </>
-                    )}
+                    <CompactSalesToolbar 
+                      customerId={c.id} 
+                      customerName={c.name} 
+                      phone={c.phone} 
+                      currentStatus={c.status}
+                      showConvert={true}
+                    />
                   </td>
                   <td className="hide-mobile" style={{ padding: '16px', fontSize: '14px' }}>
-                    {currentTab === 'ongoing' ? (
-                       <div style={{ fontWeight: 700, color: 'var(--primary-color)' }}>
-                         {c.loanAmount ? `₹${c.loanAmount.toLocaleString()}` : '-'}
-                       </div>
-                       ) : (
-                       <span style={{ color: 'var(--text-secondary)' }}>{format(new Date(c.createdAt), 'MMM dd, yyyy')}</span>
-                    )}
-                  </td>
-                  <td className="hide-mobile" style={{ padding: '16px', fontSize: '13px', minWidth: '150px' }}>
-                     {currentTab === 'ongoing' ? (
-                       <div style={{ color: 'var(--text-primary)', fontStyle: 'italic', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                         {c.notes || 'No remainder notes'}
-                       </div>
-                     ) : (
-                        <span style={{ color: 'var(--text-secondary)' }}>N/A</span>
-                     )}
+                    <div style={{ color: 'var(--text-secondary)' }}>{format(new Date(c.createdAt), 'MMM dd, yyyy')}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-secondary)', opacity: 0.7 }}>{format(new Date(c.createdAt), 'hh:mm a')}</div>
                   </td>
                   <td style={{ padding: '16px', textAlign: 'right' }}>
-                    <Link href={`/dashboard/customers/${c.id}?from=${currentTab}`} style={{ color: 'var(--primary-color)', textDecoration: 'none', fontSize: '13px', fontWeight: 700 }}>
-                      Details &rarr;
+                    <Link href={`/dashboard/customers/${c.id}?from=${currentTab}`} style={{ 
+                      color: 'var(--primary-color)', 
+                      textDecoration: 'none', 
+                      fontSize: '13px', 
+                      fontWeight: 700,
+                      padding: '8px 12px',
+                      background: 'rgba(255,193,7,0.05)',
+                      borderRadius: '8px'
+                    }}>
+                      Profile &rarr;
                     </Link>
                   </td>
                 </tr>
@@ -292,12 +286,19 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                    )}
                 </div>
 
+                <div style={{ overflowX: 'auto', paddingBottom: '4px' }} className="no-scrollbar">
+                   <CompactSalesToolbar 
+                     customerId={c.id} 
+                     customerName={c.name} 
+                     phone={c.phone} 
+                     currentStatus={c.status}
+                     showConvert={true}
+                   />
+                </div>
+
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  <a href={`tel:${c.phone}`} className="btn-secondary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', background: 'var(--surface-color)', border: '1px solid var(--border-color)', color: 'var(--text-color)', fontSize: '14px', borderRadius: '8px' }}>
-                    <Phone size={16} /> Call
-                  </a>
-                  <Link href={`/dashboard/customers/${c.id}?from=${currentTab}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '10px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px' }}>
-                    View Details →
+                  <Link href={`/dashboard/customers/${c.id}?from=${currentTab}`} className="btn-primary" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '12px 0', textDecoration: 'none', fontSize: '14px', borderRadius: '8px', fontWeight: 700 }}>
+                    Full Profile →
                   </Link>
                 </div>
               </div>
