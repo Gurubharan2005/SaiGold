@@ -91,7 +91,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
            <Target size={22} color="var(--primary-color)" /> Active Leads Pipeline
         </h2>
 
-        <div className="pipeline-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', alignItems: 'flex-start' }}>
+        <div className="pipeline-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '16px', alignItems: 'flex-start' }}>
           
           {/* COLUMN 1: NOT ATTENDED */}
           <div className="pipeline-column">
@@ -153,7 +153,8 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
             </span>
           </div>
           
-          <div className="table-container">
+          {/* DESKTOP TABLE VIEW */}
+          <div className="table-container desktop-only">
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>
                 <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--surface-color)' }}>
@@ -192,6 +193,38 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                 )}
               </tbody>
             </table>
+          </div>
+
+          {/* MOBILE CARD VIEW */}
+          <div className="mobile-only" style={{ display: 'none' }}>
+            {convertedLeads.length === 0 ? (
+              <div style={{ padding: '48px 24px', textAlign: 'center', color: 'var(--text-secondary)' }}>No active loans.</div>
+            ) : (
+              convertedLeads.map((c: any) => (
+                <div key={c.id} style={{ padding: '20px', borderBottom: '1px solid var(--border-color)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '16px' }}>{c.name}</div>
+                      <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{c.phone}</div>
+                    </div>
+                    <span className={`badge badge-${c.status.toLowerCase()}`}>{c.status}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', background: 'var(--surface-hover)', padding: '12px', borderRadius: '8px' }}>
+                    <div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Loan Amount</div>
+                      <div style={{ fontWeight: 800, color: 'var(--primary-color)' }}>₹{c.loanAmount?.toLocaleString()}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '11px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Gold Weight</div>
+                      <div style={{ fontWeight: 800 }}>{c.goldWeight}g</div>
+                    </div>
+                  </div>
+                  <Link href={`/dashboard/customers/${c.id}`} style={{ display: 'block', textAlign: 'center', marginTop: '16px', color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 800, fontSize: '14px', padding: '12px', background: 'rgba(255,193,7,0.05)', borderRadius: '8px' }}>
+                    View Profile & Master Form
+                  </Link>
+                </div>
+              ))
+            )}
           </div>
         </div>
       </div>

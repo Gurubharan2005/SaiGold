@@ -75,7 +75,7 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
   })
 
   return (
-    <div className="card hover-opacity" style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '12px', border: '1px solid var(--border-color)', borderRadius: '12px', background: 'var(--surface-color)', boxShadow: 'var(--shadow-sm)' }}>
+    <div className="card hover-opacity" style={{ padding: '13px', display: 'flex', flexDirection: 'column', gap: '10px', border: '1px solid var(--border-color)', borderRadius: '12px', background: 'var(--surface-color)', boxShadow: 'var(--shadow-sm)' }}>
       {/* 1. LEAD INFO */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ minWidth: 0, flex: 1 }}>
@@ -113,23 +113,25 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
       {/* 3. COLUMN-SPECIFIC ACTIONS */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
         
-        {/* VIEW CUSTOMER LINK (COMMON TO ALL AS "Lead Customer") */}
-        <Link href={`/dashboard/customers/${lead.id}`} style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          gap: '8px', 
-          fontSize: '12px', 
-          color: 'var(--text-secondary)', 
-          textDecoration: 'none', 
-          fontWeight: 700,
-          padding: '8px',
-          background: 'var(--surface-hover)',
-          borderRadius: '8px',
-          border: '1px solid var(--border-color)'
-        }}>
-          Lead Profile <ArrowRight size={14} />
-        </Link>
+        {/* VIEW CUSTOMER LINK (ONLY ON REJECTED AS PER USER REQUEST) */}
+        {column === 'REJECT' && (
+          <Link href={`/dashboard/customers/${lead.id}`} style={{ 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center',
+            gap: '8px', 
+            fontSize: '12px', 
+            color: 'var(--text-secondary)', 
+            textDecoration: 'none', 
+            fontWeight: 700,
+            padding: '8px',
+            background: 'var(--surface-hover)',
+            borderRadius: '8px',
+            border: '1px solid var(--border-color)'
+          }}>
+            Lead Profile <ArrowRight size={14} />
+          </Link>
+        )}
         <style jsx>{`
           .ArrowRight { display: inline; }
         `}</style>
