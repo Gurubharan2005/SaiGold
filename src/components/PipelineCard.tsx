@@ -88,9 +88,17 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.name}</h4>
+            <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.name}</h4>
+              {lead.lastCalledAt && (
+                <div 
+                  title="Already Called" 
+                  style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#EF4444', border: '1px solid var(--surface-color)', boxShadow: '0 0 0 1px rgba(239, 68, 68, 0.2)' }} 
+                />
+              )}
+            </div>
             {lead.lastCalledAt && (
-              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', background: 'rgba(255,193,7,0.05)', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
                 {new Date(lead.lastCalledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
@@ -169,32 +177,16 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
               {loading === 'PROCESSING' ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={12} />} CONVERT LOAN
             </button>
             <button
-              onClick={() => handleStatusUpdate('WAITING')}
-              disabled={!!loading}
-              style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
-            >
-              <RefreshCw size={12} /> NOT ATTENDED
-            </button>
-            <button
               onClick={() => handleStatusUpdate('REJECTED')}
               disabled={!!loading}
-              style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
+              style={{ gridColumn: 'span 2', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
             >
               <X size={12} /> REJECT
             </button>
           </>
         )}
 
-        {column === 'REJECT' && (
-          <button
-            onClick={() => handleStatusUpdate('WAITING')}
-            disabled={!!loading}
-            className="btn-secondary"
-            style={{ gridColumn: 'span 2', padding: '10px 4px', fontSize: '10px', fontWeight: 900, color: 'var(--primary-color)' }}
-          >
-            {loading === 'WAITING' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />} NOT ATTENDED
-          </button>
-        )}
+        {column === 'REJECT' && null}
       </div>
     </div>
   )
