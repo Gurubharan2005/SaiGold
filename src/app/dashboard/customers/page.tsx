@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/prisma'
-import { Plus, Search, FileSpreadsheet, Phone, MapPin, User, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Search, FileSpreadsheet, Phone, MapPin, User, ChevronLeft, ChevronRight, Activity } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
 import { cookies } from 'next/headers'
@@ -38,7 +38,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
     ]
   }
 
-  const [waitingLeads, followUpLeads, rejectedLeads] = await Promise.all([
+  const [waitingLeads, followUpLeads, rejectedLeads, convertedLeads] = await Promise.all([
     prisma.customer.findMany({
       where: { assignedToId: String(session?.id), status: 'WAITING' },
       orderBy: { createdAt: 'desc' },
@@ -53,6 +53,11 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
       where: { assignedToId: String(session?.id), status: 'REJECTED' },
       orderBy: { updatedAt: 'desc' },
       select: { id: true, name: true, phone: true, status: true }
+    }),
+    prisma.customer.findMany({
+      where: { assignedToId: String(session?.id), status: { in: ['ACCEPTED', 'VERIFIED', 'DUE'] } },
+      orderBy: { updatedAt: 'desc' },
+      select: { id: true, name: true, phone: true, status: true, loanAmount: true, goldWeight: true }
     })
   ])
 
@@ -131,6 +136,62 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
                 rejectedLeads.map(lead => <PipelineCard key={lead.id} lead={lead} column="REJECT" />)
               )}
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* CONVERTED LOANS & ACTIVE ACCOUNTS (FINAL STAGE) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginTop: '64px' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+           <Activity size={22} color="#10B981" /> Converted Loans & Active Accounts
+        </h2>
+
+        <div className="card" style={{ padding: 0, borderRadius: '16px' }}>
+          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', borderTopLeftRadius: '16px', borderTopRightRadius: '16px' }}>
+            <span className="badge badge-accepted" style={{ background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', padding: '6px 12px' }}>
+              {convertedLeads.length} Active Loans
+            </span>
+          </div>
+          
+          <div className="table-container">
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid var(--border-color)', background: 'var(--surface-color)' }}>
+                  <th style={{ padding: '16px', fontWeight: 700, fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Customer</th>
+                  <th style={{ padding: '16px', fontWeight: 700, fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Loan Details</th>
+                  <th style={{ padding: '16px', fontWeight: 700, fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase' }}>Status</th>
+                  <th style={{ padding: '16px', fontWeight: 700, fontSize: '12px', color: 'var(--text-secondary)', textTransform: 'uppercase', textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {convertedLeads.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} style={{ padding: '48px', textAlign: 'center', color: 'var(--text-secondary)' }}>No converted loans yet.</td>
+                  </tr>
+                ) : (
+                  convertedLeads.map((c: any) => (
+                    <tr key={c.id} style={{ borderBottom: '1px solid var(--border-color)' }}>
+                      <td style={{ padding: '16px' }}>
+                        <div style={{ fontWeight: 700, fontSize: '15px' }}>{c.name}</div>
+                        <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>{c.phone}</div>
+                      </td>
+                      <td style={{ padding: '16px' }}>
+                        <div style={{ fontWeight: 800, color: 'var(--primary-color)' }}>₹{c.loanAmount?.toLocaleString()}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{c.goldWeight}g Gold</div>
+                      </td>
+                      <td style={{ padding: '16px' }}>
+                        <span className={`badge badge-${c.status.toLowerCase()}`}>{c.status}</span>
+                      </td>
+                      <td style={{ padding: '16px', textAlign: 'right' }}>
+                        <Link href={`/dashboard/customers/${c.id}`} style={{ color: 'var(--primary-color)', textDecoration: 'none', fontWeight: 800, fontSize: '13px' }}>
+                          View Account &rarr;
+                        </Link>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
