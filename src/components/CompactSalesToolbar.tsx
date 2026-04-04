@@ -110,14 +110,6 @@ export default function CompactSalesToolbar({
 
       {/* 2. SALES FLOW ACTIONS (CALLED, FOLLOW, REJECT) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <button 
-          onClick={() => handleStatusUpdate('CALLED')} 
-          disabled={!!loading} 
-          title="Mark as Called"
-          style={iconBtnStyle('var(--primary-color)', 'rgba(255, 193, 7, 0.08)', 'rgba(255, 193, 7, 0.15)')}
-        >
-          {loading === 'CALLED' ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />}
-        </button>
 
         <button 
           onClick={() => handleStatusUpdate('FOLLOW_UP')} 
