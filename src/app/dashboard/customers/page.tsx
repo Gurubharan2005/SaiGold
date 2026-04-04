@@ -36,11 +36,12 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
   }
 
   // TAB FILTERING LOGIC
-  if (currentTab === 'ongoing') {
-    baseWhere.status = 'ACCEPTED'
-  } else if (currentTab === 'called') {
+  if (currentTab === 'called') {
     baseWhere.callStatus = 'CALLED'
-    baseWhere.status = 'WAITING'
+    // Include Waiting, Processing, Accepted, and Rejected in the main Called view
+    baseWhere.status = { 
+      in: ['WAITING', 'PROCESSING', 'ACCEPTED', 'REJECTED'] 
+    }
   } else if (currentTab === 'followup') {
     baseWhere.status = 'FOLLOW_UP'
   } else if (currentTab === 'rejected') {
