@@ -225,31 +225,7 @@ export default function QuickRecordingUpload({ customerId, customerName, onUploa
         </button>
       )}
 
-      {/* Live Sync Log Console */}
-      {(uploading || logs.length > 0) && (
-        <div style={{ borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
-          <button 
-            onClick={() => setShowLogs(!showLogs)}
-            style={{ background: 'none', border: 'none', color: 'var(--text-secondary)', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', padding: 0, fontWeight: 700 }}
-          >
-            <Terminal size={14} /> SECURITY CONSOLE {showLogs ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
-          </button>
-          
-          {showLogs && (
-            <div style={{ 
-              marginTop: '12px', padding: '14px', background: 'rgba(0,0,0,0.8)', color: '#38BDF8', 
-              fontFamily: '"JetBrains Mono", "Fira Code", monospace', fontSize: '10px', borderRadius: '16px', 
-              maxHeight: '140px', overflowY: 'auto', whiteSpace: 'pre-wrap', border: '1px solid rgba(56,189,248,0.1)',
-              lineHeight: '1.5'
-            }}>
-              {logs.map((log, i) => (
-                <div key={i} style={{ marginBottom: '4px', borderLeft: '2px solid rgba(56,189,248,0.3)', paddingLeft: '8px' }}>{log}</div>
-              ))}
-              <div ref={logEndRef} />
-            </div>
-          )}
-        </div>
-      )}
+      {/* Live Sync Log Console removed as per request */}
 
       {error && (
         <div style={{ 
