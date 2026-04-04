@@ -25,9 +25,9 @@ export default async function DashboardPage() {
   }
 
   // ----------------------------------------------------
-  // MANAGER VIEW
+  // MANAGER & SALESMAN VIEW (Full Access)
   // ----------------------------------------------------
-  if (session?.role === 'MANAGER') {
+  if (session?.role === 'MANAGER' || session?.role === 'SALESMAN') {
     const { Prisma } = await import('@prisma/client')
     const KanbanBoard = (await import('@/components/KanbanBoard')).default
     const LiveLeadsRefresh = (await import('@/components/LiveLeadsRefresh')).default
@@ -77,51 +77,7 @@ export default async function DashboardPage() {
     )
   }
 
-  // ----------------------------------------------------
-  // SALESMAN VIEW (Verification Desk)
-  // ----------------------------------------------------
-  if (session?.role === 'SALESMAN') {
-    const pendingVerification = await prisma.customer.findMany({
-      where: { status: 'VERIFIED' },
-      orderBy: { updatedAt: 'desc' },
-      include: { assignedTo: { select: { name: true } } }
-    })
 
-    return (
-      <div className="fade-in">
-        <div style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '28px', margin: 0 }}>Verification Desk</h1>
-          <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>Review and confirm leads sent by branch staff for final loan conversion.</p>
-        </div>
-
-        <div className="card" style={{ padding: 0 }}>
-          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ margin: 0, fontSize: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <FileText size={18} color="var(--primary-color)" /> Pending Confirmations
-            </h3>
-            <span className="badge badge-waiting">{pendingVerification.length} Leads</span>
-          </div>
-          <div>
-            {pendingVerification.length === 0 ? (
-              <div style={{ padding: '48px', textAlign: 'center', color: 'var(--text-secondary)' }}>No leads are currently waiting for verification.</div>
-            ) : (
-              pendingVerification.map((lead) => (
-                <div key={lead.id} style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <h4 style={{ margin: 0, fontSize: '16px' }}>{lead.name}</h4>
-                    <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>Assigned to: {lead.assignedTo?.name || 'Unknown'}</p>
-                  </div>
-                  <Link href={`/dashboard/customers/${lead.id}`} className="btn-primary" style={{ textDecoration: 'none', fontSize: '13px', padding: '8px 16px' }}>
-                    Review Documents &rarr;
-                  </Link>
-                </div>
-              ))
-            )}
-          </div>
-        </div>
-      </div>
-    )
-  }
 
   // ----------------------------------------------------
   // STAFF VIEW
@@ -154,7 +110,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* QUICK ACTIONS */}
-      {session?.role === 'MANAGER' && (
+      {(session?.role === 'MANAGER' || session?.role === 'SALESMAN') && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '24px' }}>
            <Link href="/dashboard/customers/new" style={{ textDecoration: 'none' }}>
            <div className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px', cursor: 'pointer' }}>

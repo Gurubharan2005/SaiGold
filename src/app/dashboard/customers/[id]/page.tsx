@@ -181,7 +181,7 @@ export default async function CustomerDetailsPage({
         </div>
         
         <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center' }}>
-          {(isManager || customer.status === 'PROCESSING') && (
+          {(isManager || isSalesman || customer.status === 'PROCESSING') && (
             <Suspense fallback={<div className="h-10 w-24 bg-zinc-800 animate-pulse rounded-lg" />}>
               <EditProfileModalTrigger customer={customer as any} />
             </Suspense>
@@ -256,7 +256,7 @@ export default async function CustomerDetailsPage({
                   customerId={customer.id} 
                   initialAmount={customer.loanAmount} 
                   initialWeight={customer.goldWeight} 
-                  disabled={customer.status !== 'PROCESSING' && !isManager} 
+                  disabled={customer.status !== 'PROCESSING' && !isManager && !isSalesman} 
                 />
               </Suspense>
             </div>
@@ -286,7 +286,7 @@ export default async function CustomerDetailsPage({
              hideFollowUp={true}
           />
 
-          {!isManager && customer.status !== 'PROCESSING' && (
+          {!isManager && !isSalesman && customer.status !== 'PROCESSING' && (
             <div className="card" style={{ border: '1px dashed #F59E0B', background: 'rgba(245, 158, 11, 0.05)', textAlign: 'center' }}>
               <Lock size={20} color="#F59E0B" style={{ margin: '0 auto 12px auto' }} />
               <p style={{ fontSize: '13px', color: '#F59E0B', margin: 0, fontWeight: 600 }}>
@@ -340,8 +340,8 @@ export default async function CustomerDetailsPage({
                           <a href={doc.documentUrl} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--text-secondary)' }} title="Download">
                             <Download size={14} />
                           </a>
-                          {/* Disable delete if not in PROCESSING */}
-                          {customer.status === 'PROCESSING' && <DeleteDocumentButton documentId={doc.id} />}
+                          {/* Disable delete if not in PROCESSING - unless Manager/Salesman */}
+                          {(customer.status === 'PROCESSING' || isManager || isSalesman) && <DeleteDocumentButton documentId={doc.id} />}
                        </div>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', overflow: 'hidden', marginTop: '4px' }}>
@@ -355,8 +355,8 @@ export default async function CustomerDetailsPage({
               </ul>
             )}
 
-            {/* The Document Uploader Tool (only when PROCESSING) */}
-            {customer.status === 'PROCESSING' && (
+            {/* The Document Uploader Tool (only when PROCESSING or Manager/Salesman) */}
+            {(customer.status === 'PROCESSING' || isManager || isSalesman) && (
                 <Suspense fallback={<div className="h-12 bg-zinc-800 animate-pulse rounded-lg" />}>
                   <DocumentUploader customerId={customer.id} />
                 </Suspense>
@@ -374,7 +374,7 @@ export default async function CustomerDetailsPage({
 
       {/* Call Recordings */}
       <Suspense fallback={<div className="h-40 bg-zinc-800 animate-pulse rounded-xl" />}>
-        <CallRecordingsPanel customerId={customer.id} isManager={isManager} />
+        <CallRecordingsPanel customerId={customer.id} isManager={isManager || isSalesman} />
       </Suspense>
 
       {/* FINAL ACTION: SEND TO SALESMAN (Only for Processing Leads) */}

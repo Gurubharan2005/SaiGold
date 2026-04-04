@@ -65,7 +65,7 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
             </Link>
           )}
 
-          {(session?.role === 'MANAGER' || session?.role === 'STAFF') && (
+          {(session?.role === 'MANAGER' || session?.role === 'STAFF' || session?.role === 'SALESMAN') && (
             <Link href="/dashboard/customers?tab=called" onClick={onClose} style={navItemStyle('/dashboard/customers?tab=called')}>
               <Users size={20} color="var(--primary-color)" /> Active Customers
             </Link>
@@ -77,19 +77,19 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
             </Link>
           )}
 
-          {session?.role === 'MANAGER' && (
+          {(session?.role === 'MANAGER' || session?.role === 'SALESMAN') && (
             <Link href="/dashboard/leads" onClick={onClose} style={navItemStyle('/dashboard/leads')}>
               <Target size={20} color="var(--status-waiting)" /> Not Attended Leads
             </Link>
           )}
 
-          {(session?.role === 'MANAGER' || session?.role === 'STAFF') && (
+          {(session?.role === 'MANAGER' || session?.role === 'STAFF' || session?.role === 'SALESMAN') && (
             <Link href="/dashboard/detail-filling" onClick={onClose} style={navItemStyle('/dashboard/detail-filling')}>
               <FileText size={20} color="var(--status-processing)" /> Loan Master Form
             </Link>
           )}
 
-          {session?.role === 'MANAGER' && (
+          {(session?.role === 'MANAGER' || session?.role === 'SALESMAN') && (
             <>
               <Link href="/dashboard/analytics" onClick={onClose} style={navItemStyle('/dashboard/analytics')}>
                 <TrendingUp size={20} color="var(--primary-color)" /> Business Performance
