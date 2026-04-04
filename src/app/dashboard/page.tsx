@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { format } from 'date-fns'
 import QuickStatusActions from '@/components/QuickStatusActions'
 import CompactSalesToolbar from '@/components/CompactSalesToolbar'
+import PipelineCard from '@/components/PipelineCard'
 import { User as UserIcon } from 'lucide-react'
 
 export const dynamic = 'force-dynamic';
@@ -130,27 +131,23 @@ export default async function DashboardPage() {
   const todayEnd = new Date()
   todayEnd.setHours(23, 59, 59, 999)
 
-  const myAssignedLeads = await prisma.customer.findMany({
-    where: { 
-      assignedToId: String(session?.id), 
-      status: 'WAITING'
-    },
-    orderBy: { assignedAt: 'desc' },
-    select: { id: true, name: true, phone: true, status: true, priority: true }
-  })
-
-
-  const followUpsToday = await prisma.customer.findMany({
-    where: {
-      assignedToId: String(session?.id),
-      status: { notIn: ['CLOSED', 'REJECTED', 'PROCESSING', 'VERIFIED'] },
-      OR: [
-        { followUpDate: { gte: todayStart, lte: todayEnd } },
-        { status: 'FOLLOW_UP' }
-      ]
-    },
-    select: { id: true, name: true, followUpDate: true, followUpNotes: true, phone: true, status: true, priority: true }
-  })
+  const [waitingLeads, followUpLeads, rejectedLeads] = await Promise.all([
+    prisma.customer.findMany({
+      where: { assignedToId: String(session?.id), status: 'WAITING' },
+      orderBy: { assignedAt: 'desc' },
+      select: { id: true, name: true, phone: true, status: true }
+    }),
+    prisma.customer.findMany({
+      where: { assignedToId: String(session?.id), status: 'FOLLOW_UP' },
+      orderBy: { updatedAt: 'desc' },
+      select: { id: true, name: true, phone: true, status: true }
+    }),
+    prisma.customer.findMany({
+      where: { assignedToId: String(session?.id), status: 'REJECTED' },
+      orderBy: { updatedAt: 'desc' },
+      select: { id: true, name: true, phone: true, status: true }
+    })
+  ])
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
@@ -180,82 +177,59 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '32px' }}>
-        
-        {/* ASSIGNED LEADS - FULL WIDTH FOR FOCUS */}
-        <div className="card" style={{ padding: 0, overflow: 'visible', borderRadius: '12px', minWidth: '100%' }}>
-          <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border-color)', background: 'var(--surface-hover)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTopLeftRadius: '12px', borderTopRightRadius: '12px' }}>
-            <h3 style={{ margin: 0, fontSize: '18px', display: 'flex', alignItems: 'center', gap: '8px', fontWeight: 800 }}>
-              <Target size={20} color="var(--primary-color)" /> My Assigned Conversion Leads
-            </h3>
-            <span className="badge badge-waiting" style={{ padding: '6px 12px' }}>{myAssignedLeads.length} Total</span>
+      {/* ACTIVE LEADS PIPELINE (3-COLUMN SECTION) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '10px' }}>
+           <Target size={22} color="var(--primary-color)" /> Active Leads Pipeline
+        </h2>
+
+        <div className="pipeline-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', alignItems: 'flex-start' }}>
+          
+          {/* COLUMN 1: NOT ATTENDED */}
+          <div className="pipeline-column">
+            <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderBottom: '2px solid var(--primary-color)', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '0.05em' }}>NOT ATTENDED</span>
+              <span className="badge badge-waiting">{waitingLeads.length}</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '1000px', overflowY: 'auto', paddingRight: '4px' }}>
+              {waitingLeads.length === 0 ? (
+                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', fontSize: '13px' }}>No new leads waiting.</div>
+              ) : (
+                waitingLeads.map(lead => <PipelineCard key={lead.id} lead={lead} column="WAITS" />)
+              )}
+            </div>
           </div>
-          <div style={{ maxHeight: '800px', overflowY: 'auto' }}>
-            {myAssignedLeads.length === 0 ? (
-              <div style={{ padding: '64px', textAlign: 'center', color: 'var(--text-secondary)' }}>You have no active leads assigned for conversion currently.</div>
-            ) : (
-              <div className="table-container">
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
-                  <thead>
-                    <tr style={{ background: 'var(--surface-hover)', borderBottom: '1px solid var(--border-color)' }}>
-                      <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', width: '250px' }}>Lead Information</th>
-                      <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', width: '100px' }}>Status</th>
-                      <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)' }}>Sales Workbench</th>
-                      <th style={{ padding: '16px', fontWeight: 600, color: 'var(--text-secondary)', textAlign: 'right' }}>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {myAssignedLeads.map((lead) => (
-                      <tr key={lead.id} style={{ borderBottom: '1px solid var(--border-color)', transition: 'background 0.2s' }} className="hover-opacity">
-                        <td style={{ padding: '16px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <div style={{ width: '40px', height: '40px', borderRadius: '12px', background: 'var(--surface-color)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)', flexShrink: 0 }}>
-                              <UserIcon size={20} color="var(--text-secondary)" />
-                            </div>
-                            <div style={{ minWidth: 0 }}>
-                              <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.name}</div>
-                              <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '2px' }}>
-                                <Phone size={12} color="var(--primary-color)" /> {lead.phone}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td style={{ padding: '16px' }}>
-                          <span className={`badge badge-${lead.status.toLowerCase()}`} style={{ fontSize: '10px', fontWeight: 800 }}>{lead.status}</span>
-                        </td>
-                        <td style={{ padding: '16px' }}>
-                           <CompactSalesToolbar 
-                             customerId={lead.id} 
-                             customerName={lead.name} 
-                             phone={lead.phone} 
-                             currentStatus={lead.status}
-                             showConvert={true} 
-                           />
-                        </td>
-                        <td style={{ padding: '16px', textAlign: 'right' }}>
-                          <Link href={`/dashboard/customers/${lead.id}`} style={{ 
-                            display: 'inline-flex', 
-                            alignItems: 'center', 
-                            gap: '6px', 
-                            fontSize: '12px', 
-                            color: 'var(--primary-color)', 
-                            textDecoration: 'none', 
-                            fontWeight: 700,
-                            padding: '8px 12px',
-                            borderRadius: '8px',
-                            background: 'rgba(255,193,7,0.05)',
-                            border: '1px solid rgba(255,193,7,0.1)'
-                          }}>
-                            View Profile <ArrowRight size={14} />
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+
+          {/* COLUMN 2: FOLLOW-UP */}
+          <div className="pipeline-column">
+            <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderBottom: '2px solid #F59E0B', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '0.05em' }}>FOLLOW-UP</span>
+              <span className="badge badge-waiting" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>{followUpLeads.length}</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '1000px', overflowY: 'auto', paddingRight: '4px' }}>
+              {followUpLeads.length === 0 ? (
+                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', fontSize: '13px' }}>No leads in follow-up.</div>
+              ) : (
+                followUpLeads.map(lead => <PipelineCard key={lead.id} lead={lead} column="FOLLOW" />)
+              )}
+            </div>
           </div>
+
+          {/* COLUMN 3: REJECTED */}
+          <div className="pipeline-column">
+            <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderBottom: '2px solid #EF4444', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '0.05em' }}>REJECTED</span>
+              <span className="badge badge-rejected">{rejectedLeads.length}</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '1000px', overflowY: 'auto', paddingRight: '4px' }}>
+              {rejectedLeads.length === 0 ? (
+                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', fontSize: '13px' }}>No rejected leads.</div>
+              ) : (
+                rejectedLeads.map(lead => <PipelineCard key={lead.id} lead={lead} column="REJECT" />)
+              )}
+            </div>
+          </div>
+
         </div>
       </div>
 
