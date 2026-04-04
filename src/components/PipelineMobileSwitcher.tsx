@@ -46,7 +46,7 @@ export default function PipelineMobileSwitcher({
         boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
       }}>
         <div style={{ display: 'flex' }}>
-          <div onClick={() => setActiveTab('WAITS')} style={tabStyle('WAITS')}>NEW ({waitingLeads.length})</div>
+          <div onClick={() => setActiveTab('WAITS')} style={tabStyle('WAITS')}>NOT ATTENDED ({waitingLeads.length})</div>
           <div onClick={() => setActiveTab('FOLLOW')} style={tabStyle('FOLLOW')}>FOLLOW ({followUpLeads.length})</div>
           <div onClick={() => setActiveTab('REJECT')} style={tabStyle('REJECT')}>REJECT ({rejectedLeads.length})</div>
         </div>

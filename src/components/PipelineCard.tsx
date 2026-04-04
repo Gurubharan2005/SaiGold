@@ -198,7 +198,7 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
                 style={{ flex: 1, padding: '10px 4px', fontSize: '10px', fontWeight: 900, color: 'var(--primary-color)' }}
               >
                 {loading === 'WAITING' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-                RESUME
+                NOT ATTENDED
               </button>
             </>
           )}

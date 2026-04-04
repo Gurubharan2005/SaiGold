@@ -6,7 +6,7 @@ export function StatusBadge({ status }: { status: string }) {
       case 'ACCEPTED':
         return { bg: 'rgba(16, 185, 129, 0.1)', color: '#10B981', text: 'Accepted' }
       case 'WAITING':
-        return { bg: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', text: 'Waiting' }
+        return { bg: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', text: 'Not Attended' }
       case 'FOLLOW_UP':
         return { bg: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B', text: 'Follow Up' }
       case 'NO_RESPONSE':

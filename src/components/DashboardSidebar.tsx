@@ -79,7 +79,7 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
 
           {session?.role === 'MANAGER' && (
             <Link href="/dashboard/leads" onClick={onClose} style={navItemStyle('/dashboard/leads')}>
-              <Target size={20} color="var(--status-waiting)" /> Facebook Ad Leads
+              <Target size={20} color="var(--status-waiting)" /> Not Attended Leads
             </Link>
           )}
 
