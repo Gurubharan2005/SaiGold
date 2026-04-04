@@ -133,13 +133,6 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
         {column === 'WAITS' && (
           <>
             <button
-              onClick={() => handleStatusUpdate('WAITING')}
-              disabled={!!loading}
-              style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
-            >
-              {loading === 'WAITING' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />} NOT ATTENDED
-            </button>
-            <button
               onClick={() => handleStatusUpdate('FOLLOW_UP')}
               disabled={!!loading}
               className="btn-primary"
@@ -158,9 +151,9 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
               href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hi ' + lead.name + ', following up regarding your Sai Gold loan inquiry. When is a good time to talk?')}`}
               target="_blank"
               rel="noopener noreferrer"
-              style={{ textDecoration: 'none', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'var(--surface-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+              style={{ textDecoration: 'none', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'var(--surface-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', gridColumn: 'span 2' }}
             >
-              <MessageCircle size={12} /> REMINDER
+              <MessageCircle size={12} /> SEND REMINDER WHATSAPP
             </a>
           </>
         )}
@@ -193,19 +186,14 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
         )}
 
         {column === 'REJECT' && (
-          <>
-            <button
-              onClick={() => handleStatusUpdate('WAITING')}
-              disabled={!!loading}
-              className="btn-secondary"
-              style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, color: 'var(--primary-color)' }}
-            >
-              {loading === 'WAITING' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />} NOT ATTENDED
-            </button>
-            <Link href="/dashboard" style={{ textDecoration: 'none', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'var(--surface-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-              <LayoutDashboard size={12} /> DASHBOARD
-            </Link>
-          </>
+          <button
+            onClick={() => handleStatusUpdate('WAITING')}
+            disabled={!!loading}
+            className="btn-secondary"
+            style={{ gridColumn: 'span 2', padding: '10px 4px', fontSize: '10px', fontWeight: 900, color: 'var(--primary-color)' }}
+          >
+            {loading === 'WAITING' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />} NOT ATTENDED
+          </button>
         )}
       </div>
     </div>
