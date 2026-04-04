@@ -92,8 +92,19 @@ export async function GET(req: Request) {
           }
         })
 
-        // D. Trigger Automated WhatsApp Welcome
+        // D. Trigger Automated WhatsApp Welcome and Staff Push Alert
+        const { triggerPushNotification } = await import('@/lib/push')
+        
         triggerWelcomeWhatsApp(leadPhone, leadName).catch(e => console.error("[CRON Worker] WhatsApp Failed:", e))
+        
+        if (autoAssigneeId) {
+          triggerPushNotification(
+            autoAssigneeId,
+            'New Lead Assigned! 🚀',
+            `Lead: ${leadName}\nPhone: ${leadPhone}`,
+            `/dashboard/customers/${item.id}` // Link directly to the lead
+          ).catch(e => console.error("[CRON Worker] Push Alert Failed:", e))
+        }
 
         // E. Finish Queue Item
         await prisma.metaLeadQueue.update({

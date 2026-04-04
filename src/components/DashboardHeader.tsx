@@ -3,6 +3,7 @@
 import { useState, ReactNode } from 'react'
 import { Menu, Search } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import NotificationManager from './NotificationManager'
 
 interface HeaderProps {
   session: any
@@ -80,6 +81,7 @@ export default function DashboardHeader({ session, noticeSlot, onMenuClick }: He
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
+        <NotificationManager />
         <div className={`badge badge-${session?.role === 'MANAGER' ? 'accepted' : 'processing'}`}>
           {session?.role || 'STAFF'}
         </div>

@@ -32,6 +32,15 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
     if (assignedToId) {
        updateData.assignedToId = assignedToId
        if (!currentCustomer.assignedAt) updateData.assignedAt = new Date()
+       
+       // Trigger Real-Time Mobile Push Alert for Manual Assignment
+       const { triggerPushNotification } = await import('@/lib/push')
+       triggerPushNotification(
+         assignedToId,
+         'New Lead Assigned! 🎯',
+         `Lead: ${currentCustomer.name}\nAssigned to you for follow-up.`,
+         `/dashboard/customers/${id}`
+       ).catch(e => console.error("[Manual Assign] Push Alert Failed:", e))
     }
     if (notes !== undefined) updateData.notes = notes
     if (loanAmount !== undefined) updateData.loanAmount = loanAmount

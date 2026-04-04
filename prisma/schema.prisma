@@ -24,6 +24,7 @@ model User {
   verifiedCustomers  Customer[]         @relation("VerifiedBy")
   uploadedDocs       CustomerDocument[] @relation("UploadedBy")
   uploadedRecordings CallRecording[]    @relation("RecordingUploadedBy")
+  pushSubscriptions  PushSubscription[]
 
   @@map("user")
 }
@@ -140,4 +141,16 @@ model MetaLeadQueue {
   isProcessed Boolean  @default(false)
 
   @@map("meta_lead_queue")
+}
+
+model PushSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("push_subscriptions")
 }

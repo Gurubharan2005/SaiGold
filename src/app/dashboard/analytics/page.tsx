@@ -11,8 +11,8 @@ export default async function AnalyticsDashboard() {
   const token = cookieStore.get('auth-token')?.value
   const session = token ? await decrypt(token) : null
 
-  // Restrict access
-  if (session?.role !== 'MANAGER') {
+  // Restrict access: Manager & Salesman have full visibility
+  if (session?.role !== 'MANAGER' && session?.role !== 'SALESMAN') {
     redirect('/dashboard')
   }
 
