@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Phone, Check, X, Loader2, Clock, MessageCircle, Mic, ExternalLink, RefreshCw, ArrowRight } from 'lucide-react'
+import { Phone, Check, X, Loader2, Clock, MessageCircle, Mic, ExternalLink, RefreshCw, ArrowRight, LayoutDashboard } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import QuickRecordingUpload from './QuickRecordingUpload'
@@ -168,6 +168,18 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
             </>
           )}
 
+          {/* SEND REMINDER OPTION (Only for Not Attended) */}
+          {column === 'WAITS' && (
+            <a 
+              href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hi ' + lead.name + ', following up regarding your Sai Gold loan inquiry. When is a good time to talk?')}`} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              style={{ flex: 1, textDecoration: 'none', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+            >
+              <MessageCircle size={12} /> SEND REMINDER
+            </a>
+          )}
+
           {column === 'FOLLOW' && (
             <>
               <button 
@@ -200,6 +212,9 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
                 {loading === 'WAITING' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
                 NOT ATTENDED
               </button>
+              <Link href="/dashboard" style={{ flex: 1, textDecoration: 'none', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+                 <LayoutDashboard size={12} /> OPEN DASHBOARD
+              </Link>
             </>
           )}
         </div>
