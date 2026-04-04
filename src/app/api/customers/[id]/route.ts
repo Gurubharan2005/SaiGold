@@ -37,8 +37,8 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
        const { triggerPushNotification } = await import('@/lib/push')
        triggerPushNotification(
          assignedToId,
-         'New Lead Assigned! 🎯',
-         `Lead: ${currentCustomer.name}\nAssigned to you for follow-up.`,
+         `New Lead - ${currentCustomer.name}`,
+         `You have a new lead from Facebook. Tap to follow up with ${currentCustomer.name}.`,
          `/dashboard/customers/${id}`
        ).catch(e => console.error("[Manual Assign] Push Alert Failed:", e))
     }

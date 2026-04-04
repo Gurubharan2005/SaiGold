@@ -100,8 +100,8 @@ export async function GET(req: Request) {
         if (autoAssigneeId) {
           triggerPushNotification(
             autoAssigneeId,
-            'New Lead Assigned! 🚀',
-            `Lead: ${leadName}\nPhone: ${leadPhone}`,
+            `New Lead - ${leadName}`,
+            `You have a new lead from Facebook. Tap to follow up with ${leadName}.`,
             `/dashboard/customers/${item.id}` // Link directly to the lead
           ).catch(e => console.error("[CRON Worker] Push Alert Failed:", e))
         }
