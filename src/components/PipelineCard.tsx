@@ -31,7 +31,7 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
         followUpDate?: string
         markCalled?: boolean
       }
-      const payload: StatusPayload = { 
+      const payload: StatusPayload = {
         callStatus: 'CALLED',
         markCalled: true
       }
@@ -49,7 +49,7 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
       })
 
       if (!res.ok) throw new Error('Failed to update status')
-      
+
       if (status === 'PROCESSING') {
         router.push(`/dashboard/customers/${lead.id}?from=processing`)
       } else {
@@ -65,9 +65,9 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
 
   // Common Action Styles
   const iconBtnStyle = (color: string, bg: string, border: string) => ({
-    padding: '8px', 
-    borderRadius: '8px', 
-    background: bg, 
+    padding: '8px',
+    borderRadius: '8px',
+    background: bg,
     color: color,
     display: 'flex',
     alignItems: 'center',
@@ -104,10 +104,10 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
         <div style={{ flex: 2 }}>
           <QuickRecordingUpload customerId={lead.id} customerName={lead.name} />
         </div>
-        
-        <a 
-          href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}`} 
-          target="_blank" 
+
+        <a
+          href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}`}
+          target="_blank"
           rel="noopener noreferrer"
           title="WhatsApp"
           style={iconBtnStyle('#22c55e', 'rgba(34, 197, 94, 0.1)', 'rgba(34, 197, 94, 0.2)')}
@@ -115,8 +115,8 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
           <MessageCircle size={13} />
         </a>
 
-        <a 
-          href={`tel:${lead.phone}`} 
+        <a
+          href={`tel:${lead.phone}`}
           title="Direct Call"
           style={iconBtnStyle('#10B981', 'rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)')}
         >
@@ -126,34 +126,34 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
 
       {/* 3. COLUMN-SPECIFIC ACTIONS */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '6px' }}>
-        
+
         {column === 'WAITS' && (
           <>
-            <button 
-              onClick={() => handleStatusUpdate('WAITING')} 
-              disabled={!!loading} 
+            <button
+              onClick={() => handleStatusUpdate('WAITING')}
+              disabled={!!loading}
               style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
             >
               {loading === 'WAITING' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />} NOT ATTENDED
             </button>
-            <button 
-              onClick={() => handleStatusUpdate('FOLLOW_UP')} 
-              disabled={!!loading} 
+            <button
+              onClick={() => handleStatusUpdate('FOLLOW_UP')}
+              disabled={!!loading}
               className="btn-primary"
               style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900 }}
             >
               {loading === 'FOLLOW_UP' ? <Loader2 size={12} className="animate-spin" /> : <Clock size={12} />} FOLLOW UP
             </button>
-            <button 
-              onClick={() => handleStatusUpdate('REJECTED')} 
-              disabled={!!loading} 
+            <button
+              onClick={() => handleStatusUpdate('REJECTED')}
+              disabled={!!loading}
               style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
             >
               <X size={12} /> REJECT
             </button>
-            <a 
-              href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hi ' + lead.name + ', following up regarding your Sai Gold loan inquiry. When is a good time to talk?')}`} 
-              target="_blank" 
+            <a
+              href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hi ' + lead.name + ', following up regarding your Sai Gold loan inquiry. When is a good time to talk?')}`}
+              target="_blank"
               rel="noopener noreferrer"
               style={{ textDecoration: 'none', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'var(--surface-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
             >
@@ -164,24 +164,24 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
 
         {column === 'FOLLOW' && (
           <>
-            <button 
-              onClick={() => handleStatusUpdate('PROCESSING')} 
-              disabled={!!loading} 
+            <button
+              onClick={() => handleStatusUpdate('PROCESSING')}
+              disabled={!!loading}
               className="btn-primary"
               style={{ gridColumn: 'span 2', padding: '10px 4px', fontSize: '10px', fontWeight: 900 }}
             >
               {loading === 'PROCESSING' ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={12} />} CONVERT LOAN
             </button>
-            <button 
-              onClick={() => handleStatusUpdate('WAITING')} 
-              disabled={!!loading} 
+            <button
+              onClick={() => handleStatusUpdate('WAITING')}
+              disabled={!!loading}
               style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
             >
               <RefreshCw size={12} /> NOT ATTENDED
             </button>
-            <button 
-              onClick={() => handleStatusUpdate('REJECTED')} 
-              disabled={!!loading} 
+            <button
+              onClick={() => handleStatusUpdate('REJECTED')}
+              disabled={!!loading}
               style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
             >
               <X size={12} /> REJECT
@@ -191,16 +191,16 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
 
         {column === 'REJECT' && (
           <>
-            <button 
-              onClick={() => handleStatusUpdate('WAITING')} 
-              disabled={!!loading} 
+            <button
+              onClick={() => handleStatusUpdate('WAITING')}
+              disabled={!!loading}
               className="btn-secondary"
               style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, color: 'var(--primary-color)' }}
             >
               {loading === 'WAITING' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />} NOT ATTENDED
             </button>
             <Link href="/dashboard" style={{ textDecoration: 'none', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'var(--surface-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-               <LayoutDashboard size={12} /> DASHBOARD
+              <LayoutDashboard size={12} /> DASHBOARD
             </Link>
           </>
         )}

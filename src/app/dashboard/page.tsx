@@ -132,7 +132,11 @@ export default async function DashboardPage() {
   todayEnd.setHours(23, 59, 59, 999)
 
   const waitingLeads = await prisma.customer.findMany({
-    where: { assignedToId: String(session?.id), status: 'WAITING' },
+    where: { 
+      assignedToId: String(session?.id), 
+      status: 'WAITING',
+      lastCalledAt: null // Only untouched leads appear on the Dashboard Inbox
+    },
     orderBy: { assignedAt: 'desc' },
     select: { id: true, name: true, phone: true, status: true, lastCalledAt: true }
   })
@@ -169,7 +173,7 @@ export default async function DashboardPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-             <Target size={22} color="var(--primary-color)" /> Not Attended Leads
+             <Target size={22} color="var(--primary-color)" /> Live Fresh Leads
           </h2>
           <span className="badge badge-waiting">{waitingLeads.length} Urgent</span>
         </div>
