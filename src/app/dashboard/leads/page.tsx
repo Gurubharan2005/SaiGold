@@ -3,10 +3,17 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { LeadCard } from '@/components/LeadCard'
-import { StaffLeadActions } from '@/components/StaffLeadActions'
-import QuickRecordingUpload from '@/components/QuickRecordingUpload'
 import { User, Target } from 'lucide-react'
 import LiveLeadsRefresh from '@/components/LiveLeadsRefresh'
+import nextDynamic from 'next/dynamic'
+
+// Dynamically import heavy client components to reduce initial JS payload
+const StaffLeadActions = nextDynamic(() => import('@/components/StaffLeadActions').then(mod => mod.StaffLeadActions), { 
+  loading: () => <div className="animate-pulse h-10 bg-zinc-800/50 rounded-lg" /> 
+})
+const QuickRecordingUpload = nextDynamic(() => import('@/components/QuickRecordingUpload'), { 
+  loading: () => <div className="animate-pulse h-12 bg-zinc-800/50 rounded-lg" /> 
+})
 
 export const dynamic = 'force-dynamic'
 
@@ -19,11 +26,22 @@ export default async function LeadsPage() {
   const isManager = session.role === 'MANAGER'
   if (!isManager) redirect('/dashboard')
 
-  // Only unassigned / new pending leads from Meta/Facebook
+  // Performance Optimization: Only select necessary fields to reduce JSON payload size
   const newLeads = await prisma.customer.findMany({
     where: { status: { in: ['WAITING', 'NO_RESPONSE'] } },
     orderBy: { createdAt: 'desc' },
-    include: { assignedTo: { select: { name: true } } }
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      status: true,
+      photoUrl: true,
+      loanAmount: true,
+      goldWeight: true,
+      updatedAt: true,
+      followUpDate: true,
+      assignedTo: { select: { name: true } }
+    }
   })
 
   return (
@@ -52,7 +70,7 @@ export default async function LeadsPage() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '16px' }}>
           {newLeads.map(lead => (
-            <LeadCard key={lead.id} customer={lead}>
+            <LeadCard key={lead.id} customer={lead as any}>
               <div style={{ paddingTop: '12px', borderTop: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 <div style={{ fontSize: '12px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <User size={12} /> {lead.assignedTo?.name || 'Unassigned'}

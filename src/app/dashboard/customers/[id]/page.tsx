@@ -1,22 +1,39 @@
-import { ArrowLeft, Phone, MapPin, Calendar, Hash, FileText, Download, Lock, Check } from 'lucide-react'
+import { ArrowLeft, Phone, MapPin, Calendar, Hash, FileText, Download, Lock, Check, Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { format } from 'date-fns'
+import { Suspense } from 'react'
+import nextDynamic from 'next/dynamic'
 import CustomerSalesControl from '@/components/CustomerSalesControl'
-import DocumentUploader from '@/components/DocumentUploader'
 import DeleteDocumentButton from '@/components/DeleteDocumentButton'
 import CloseLoanButton from '@/components/CloseLoanButton'
 import RequestClosureButton from '@/components/RequestClosureButton'
-import ProfilePhotoUploader from '@/components/ProfilePhotoUploader'
-import { EditProfileModalTrigger } from '@/components/EditProfileModalTrigger'
-import LoanDetailsEditor from '@/components/LoanDetailsEditor'
 import FinishUploadButton from '@/components/FinishUploadButton'
-import SalesVerifyActions from '@/components/SalesVerifyActions'
-import CustomerTimeline from '@/components/CustomerTimeline'
-import CallRecordingsPanel from '@/components/CallRecordingsPanel'
 import { cookies } from 'next/headers'
-
 import { decrypt } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+
+// Performance Optimization: Lazy load heavy interactive components
+const ProfilePhotoUploader = nextDynamic(() => import('@/components/ProfilePhotoUploader'), {
+  loading: () => <div className="w-20 h-20 rounded-2xl bg-zinc-800 animate-pulse" />
+})
+const EditProfileModalTrigger = nextDynamic(() => import('@/components/EditProfileModalTrigger').then(mod => mod.EditProfileModalTrigger), {
+  loading: () => <div className="h-10 w-24 bg-zinc-800 animate-pulse rounded-lg" />
+})
+const LoanDetailsEditor = nextDynamic(() => import('@/components/LoanDetailsEditor'), {
+  loading: () => <div className="h-32 bg-zinc-800 animate-pulse rounded-xl" />
+})
+const DocumentUploader = nextDynamic(() => import('@/components/DocumentUploader'), {
+  loading: () => <div className="h-12 bg-zinc-800 animate-pulse rounded-lg" />
+})
+const CustomerTimeline = nextDynamic(() => import('@/components/CustomerTimeline'), {
+  loading: () => <div className="h-40 bg-zinc-800 animate-pulse rounded-xl" />
+})
+const CallRecordingsPanel = nextDynamic(() => import('@/components/CallRecordingsPanel'), {
+  loading: () => <div className="h-40 bg-zinc-800 animate-pulse rounded-xl" />
+})
+const SalesVerifyActions = nextDynamic(() => import('@/components/SalesVerifyActions'), {
+  loading: () => <div className="h-24 bg-zinc-800 animate-pulse rounded-xl" />
+})
 
 export const dynamic = 'force-dynamic'
 
@@ -29,11 +46,40 @@ export default async function CustomerDetailsPage({
 }) {
   const { id } = await params
   const { from } = await searchParams
+  
+  // Performance Optimization: Explicit select to reduce JSON payload size
   const customer = await prisma.customer.findUnique({
     where: { id },
-    include: {
-      documents: true,
-      assignedTo: true,
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      status: true,
+      photoUrl: true,
+      branch: true,
+      loanAmount: true,
+      goldWeight: true,
+      notes: true,
+      createdAt: true,
+      updatedAt: true,
+      priority: true,
+      callStatus: true,
+      followUpDate: true,
+      followUpNotes: true,
+      documents: {
+        select: {
+          id: true,
+          documentName: true,
+          documentUrl: true,
+          documentType: true,
+        }
+      },
+      assignedTo: {
+        select: {
+          id: true,
+          name: true,
+        }
+      }
     }
   })
 
@@ -94,7 +140,9 @@ export default async function CustomerDetailsPage({
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '32px', flexWrap: 'wrap', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px', flexWrap: 'wrap' }}>
-          <ProfilePhotoUploader customerId={customer.id} initialPhotoUrl={customer.photoUrl} />
+          <Suspense fallback={<div className="w-20 h-20 rounded-2xl bg-zinc-800 animate-pulse" />}>
+            <ProfilePhotoUploader customerId={customer.id} initialPhotoUrl={customer.photoUrl} />
+          </Suspense>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
@@ -109,7 +157,11 @@ export default async function CustomerDetailsPage({
         </div>
         
         <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center' }}>
-          {(isManager || customer.status === 'PROCESSING') && <EditProfileModalTrigger customer={customer} />}
+          {(isManager || customer.status === 'PROCESSING') && (
+            <Suspense fallback={<div className="h-10 w-24 bg-zinc-800 animate-pulse rounded-lg" />}>
+              <EditProfileModalTrigger customer={customer as any} />
+            </Suspense>
+          )}
           
           {/* CLOSURE WORKFLOW ENGINE */}
           {isManager ? (
@@ -175,12 +227,14 @@ export default async function CustomerDetailsPage({
           </div>
 
             <div style={{ marginTop: '16px' }}>
-              <LoanDetailsEditor 
-                customerId={customer.id} 
-                initialAmount={customer.loanAmount} 
-                initialWeight={customer.goldWeight} 
-                disabled={customer.status !== 'PROCESSING' && !isManager} 
-              />
+              <Suspense fallback={<div className="h-32 bg-zinc-800 animate-pulse rounded-xl" />}>
+                <LoanDetailsEditor 
+                  customerId={customer.id} 
+                  initialAmount={customer.loanAmount} 
+                  initialWeight={customer.goldWeight} 
+                  disabled={customer.status !== 'PROCESSING' && !isManager} 
+                />
+              </Suspense>
             </div>
 
           <div className="card">
@@ -279,7 +333,9 @@ export default async function CustomerDetailsPage({
 
             {/* The Document Uploader Tool (only when PROCESSING) */}
             {customer.status === 'PROCESSING' && (
-                <DocumentUploader customerId={customer.id} />
+                <Suspense fallback={<div className="h-12 bg-zinc-800 animate-pulse rounded-lg" />}>
+                  <DocumentUploader customerId={customer.id} />
+                </Suspense>
             )}
             
           </div>
@@ -288,10 +344,14 @@ export default async function CustomerDetailsPage({
       </div>
 
       {/* Audit Timeline Injection */}
-      <CustomerTimeline customer={customer} />
+      <Suspense fallback={<div className="h-40 bg-zinc-800 animate-pulse rounded-xl" />}>
+        <CustomerTimeline customer={customer as any} />
+      </Suspense>
 
       {/* Call Recordings */}
-      <CallRecordingsPanel customerId={customer.id} isManager={isManager} />
+      <Suspense fallback={<div className="h-40 bg-zinc-800 animate-pulse rounded-xl" />}>
+        <CallRecordingsPanel customerId={customer.id} isManager={isManager} />
+      </Suspense>
 
       {/* FINAL ACTION: SEND TO SALESMAN (Only for Processing Leads) */}
       {customer.status === 'PROCESSING' && (
@@ -314,7 +374,9 @@ export default async function CustomerDetailsPage({
 
       {/* SALESMAN ACTION: VERIFY & SEND TO MAINTENANCE (Only for Verified Leads) */}
       {isSalesman && (customer.status === 'VERIFIED' || customer.status === 'PROCESSING') && (
-        <SalesVerifyActions customerId={customer.id} fromTab={from} />
+        <Suspense fallback={<div className="h-24 bg-zinc-800 animate-pulse rounded-xl" />}>
+          <SalesVerifyActions customerId={customer.id} fromTab={from} />
+        </Suspense>
       )}
     </div>
   )
