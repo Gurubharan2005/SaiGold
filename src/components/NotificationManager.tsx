@@ -21,6 +21,11 @@ export default function NotificationManager() {
       return
     }
     setPermission(Notification.permission)
+
+    // Pre-register for faster 'ready' state
+    navigator.serviceWorker.register('/sw.js').catch(err => {
+      console.error('[Push] Initial SW registration failed:', err)
+    })
   }, [])
 
   const subscribe = async () => {
@@ -32,8 +37,8 @@ export default function NotificationManager() {
       setPermission(res)
       if (res !== 'granted') throw new Error('Permission denied by user')
 
-      // 2. Register Service Worker
-      const registration = await navigator.serviceWorker.register('/sw.js')
+      // 2. Wait for Service Worker to be Ready & Active
+      const registration = await navigator.serviceWorker.ready
       
       // 3. Negotiate Push Subscription
       const sub = await registration.pushManager.subscribe({
