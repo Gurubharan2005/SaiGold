@@ -18,6 +18,7 @@ interface RecordingsListModalProps {
   customerName: string
   isOpen: boolean
   onClose: () => void
+  refreshKey?: number
 }
 
 function formatDuration(sec: number | null) {
@@ -27,7 +28,7 @@ function formatDuration(sec: number | null) {
   return `${m}:${String(s).padStart(2, '0')}`
 }
 
-export default function RecordingsListModal({ customerId, customerName, isOpen, onClose }: RecordingsListModalProps) {
+export default function RecordingsListModal({ customerId, customerName, isOpen, onClose, refreshKey = 0 }: RecordingsListModalProps) {
   const [recordings, setRecordings] = useState<Recording[]>([])
   const [loading, setLoading] = useState(true)
   const [playingId, setPlayingId] = useState<string | null>(null)
@@ -44,7 +45,7 @@ export default function RecordingsListModal({ customerId, customerName, isOpen, 
         })
         .catch(() => setLoading(false))
     }
-  }, [isOpen, customerId])
+  }, [isOpen, customerId, refreshKey])
 
   const togglePlay = (id: string) => {
     const audio = audioRefs.current[id]

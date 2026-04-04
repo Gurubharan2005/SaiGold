@@ -7,20 +7,26 @@ import RecordingsListModal from './RecordingsListModal'
 interface Props {
   customerId: string
   customerName?: string
+  refreshKey?: number
 }
 
-export default function RecordingsBadge({ customerId, customerName = 'Customer' }: Props) {
+export default function RecordingsBadge({ customerId, customerName = 'Customer', refreshKey = 0 }: Props) {
   const [count, setCount] = useState<number | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  useEffect(() => {
+  const fetchCount = () => {
     fetch(`/api/customers/${customerId}/recordings`)
       .then(r => r.json())
       .then(data => Array.isArray(data) && setCount(data.length))
       .catch(() => {})
-  }, [customerId])
+  }
 
-  // Don't show only if still loading (null)
+  useEffect(() => {
+    fetchCount()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [customerId, refreshKey])
+
+  // Don't show if still loading (null)
   if (count === null) return null
 
   return (
@@ -53,7 +59,8 @@ export default function RecordingsBadge({ customerId, customerName = 'Customer' 
         customerId={customerId} 
         customerName={customerName} 
         isOpen={isModalOpen} 
-        onClose={() => setIsModalOpen(false)} 
+        onClose={() => setIsModalOpen(false)}
+        refreshKey={refreshKey}
       />
     </>
   )

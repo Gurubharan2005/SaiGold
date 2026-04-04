@@ -23,6 +23,7 @@ interface PipelineCardProps {
 export default function PipelineCard({ lead, column }: PipelineCardProps) {
   const router = useRouter()
   const [loading, setLoading] = useState<string | null>(null)
+  const [recordingRefreshKey, setRecordingRefreshKey] = useState(0)
 
   const handleStatusUpdate = async (status: 'PROCESSING' | 'REJECTED' | 'FOLLOW_UP' | 'WAITING') => {
     setLoading(status)
@@ -98,13 +99,13 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
             <Phone size={12} color="var(--primary-color)" /> {lead.phone}
           </div>
         </div>
-        <RecordingsBadge customerId={lead.id} customerName={lead.name} />
+        <RecordingsBadge customerId={lead.id} customerName={lead.name} refreshKey={recordingRefreshKey} />
       </div>
 
       {/* 2. CONSOLIDATED ACTION ROW (AUDIO + COMMS) */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
         <div style={{ flex: 2 }}>
-          <QuickRecordingUpload customerId={lead.id} customerName={lead.name} />
+          <QuickRecordingUpload customerId={lead.id} customerName={lead.name} onUploadDone={() => setRecordingRefreshKey(k => k + 1)} />
         </div>
 
         <a
