@@ -123,25 +123,23 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
       {/* 3. COLUMN-SPECIFIC ACTIONS */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '2px' }}>
         
-        {/* VIEW CUSTOMER LINK (ONLY ON REJECTED AS PER USER REQUEST) */}
-        {column === 'REJECT' && (
-          <Link href={`/dashboard/customers/${lead.id}`} style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            justifyContent: 'center',
-            gap: '8px', 
-            fontSize: '12px', 
-            color: 'var(--text-secondary)', 
-            textDecoration: 'none', 
-            fontWeight: 700,
-            padding: '8px',
-            background: 'var(--surface-hover)',
-            borderRadius: '8px',
-            border: '1px solid var(--border-color)'
-          }}>
-            Lead Profile <ArrowRight size={14} />
-          </Link>
-        )}
+        {/* VIEW CUSTOMER LINK (Lead customer option) */}
+        <Link href={`/dashboard/customers/${lead.id}`} style={{ 
+          display: 'flex', 
+          alignItems: 'center', 
+          justifyContent: 'center',
+          gap: '8px', 
+          fontSize: '12px', 
+          color: 'var(--text-secondary)', 
+          textDecoration: 'none', 
+          fontWeight: 700,
+          padding: '8px',
+          background: 'var(--surface-hover)',
+          borderRadius: '8px',
+          border: '1px solid var(--border-color)'
+        }}>
+          Lead Profile <ArrowRight size={14} />
+        </Link>
         <style jsx>{`
           .ArrowRight { display: inline; }
         `}</style>
