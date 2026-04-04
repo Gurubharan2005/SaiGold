@@ -32,7 +32,7 @@ export async function PATCH(req: Request) {
     
     // Perform individual logs for better granularity in the timeline
     await Promise.all(customerIds.map(cid => 
-      logActivity(cid, 'ASSIGNMENT', `Bulk assigned to ${assignee?.name || 'Staff Member'}`, session.id)
+      logActivity(cid, 'ASSIGNMENT', `Bulk assigned to ${assignee?.name || 'Staff Member'}`, String(session.id))
     ))
 
     return NextResponse.json({ success: true, count: result.count }, { status: 200 })

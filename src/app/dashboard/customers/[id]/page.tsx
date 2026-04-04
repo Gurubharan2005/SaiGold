@@ -66,6 +66,10 @@ export default async function CustomerDetailsPage({
       callStatus: true,
       followUpDate: true,
       followUpNotes: true,
+      isVerified: true,
+      verifiedAt: true,
+      verifiedById: true,
+      lastCalledAt: true,
       documents: {
         select: {
           id: true,
