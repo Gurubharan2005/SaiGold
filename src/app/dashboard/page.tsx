@@ -87,6 +87,8 @@ export default async function DashboardPage() {
   const todayEnd = new Date()
   todayEnd.setHours(23, 59, 59, 999)
 
+  const LiveLeadsRefresh = (await import('@/components/LiveLeadsRefresh')).default
+
   const waitingLeads = await prisma.customer.findMany({
     where: { 
       assignedToId: String(session?.id), 
@@ -100,6 +102,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+      <LiveLeadsRefresh />
       
       {/* HEADER OVERVIEW */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
