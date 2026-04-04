@@ -1,6 +1,6 @@
 'use client'
 
-import { LayoutDashboard, Users, UserPlus, FileText, Settings, LogOut, ShieldCheck, Target, Activity, X, TrendingUp } from 'lucide-react'
+import { LayoutDashboard, Users, UserPlus, FileText, Settings, LogOut, ShieldCheck, Target, Activity, X, TrendingUp, PhoneForwarded } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
@@ -65,9 +65,15 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
             </Link>
           )}
 
-          {(session?.role === 'MANAGER' || session?.role === 'STAFF' || session?.role === 'SALESMAN') && (
+          {(session?.role === 'MANAGER' || session?.role === 'STAFF' || session?.role === 'SALESMAN' || session?.role === 'FOLLOW_UP_STAFF') && (
             <Link href="/dashboard/customers?tab=called" onClick={onClose} style={navItemStyle('/dashboard/customers?tab=called')}>
               <Users size={20} color="var(--primary-color)" /> Active Customers
+            </Link>
+          )}
+
+          {(session?.role === 'MANAGER' || session?.role === 'FOLLOW_UP_STAFF') && (
+            <Link href="/dashboard/followup" onClick={onClose} style={navItemStyle('/dashboard/followup')}>
+              <PhoneForwarded size={20} color="#F59E0B" /> Follow-Up Queue
             </Link>
           )}
 
@@ -83,7 +89,7 @@ export default function DashboardSidebar({ session, isOpen, onClose }: SidebarPr
             </Link>
           )}
 
-          {(session?.role === 'MANAGER' || session?.role === 'STAFF' || session?.role === 'SALESMAN') && (
+          {(session?.role === 'MANAGER' || session?.role === 'FOLLOW_UP_STAFF') && (
             <Link href="/dashboard/detail-filling" onClick={onClose} style={navItemStyle('/dashboard/detail-filling')}>
               <FileText size={20} color="var(--status-processing)" /> Loan Master Form
             </Link>

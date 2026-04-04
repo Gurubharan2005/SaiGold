@@ -19,13 +19,14 @@ model User {
   lng               Float?
   locationUpdatedAt DateTime?
   lastLeadAssignedAt DateTime?
-  assignedCustomers  Customer[]         @relation("AssignedTo")
-  createdCustomers   Customer[]         @relation("CreatedBy")
-  verifiedCustomers  Customer[]         @relation("VerifiedBy")
-  uploadedDocs       CustomerDocument[] @relation("UploadedBy")
-  uploadedRecordings CallRecording[]    @relation("RecordingUploadedBy")
-  pushSubscriptions  PushSubscription[]
-  activities         CustomerActivity[]
+  assignedCustomers    Customer[]         @relation("AssignedTo")
+  createdCustomers     Customer[]         @relation("CreatedBy")
+  verifiedCustomers    Customer[]         @relation("VerifiedBy")
+  followUpCustomers    Customer[]         @relation("FollowUpStaff")
+  uploadedDocs         CustomerDocument[] @relation("UploadedBy")
+  uploadedRecordings   CallRecording[]    @relation("RecordingUploadedBy")
+  pushSubscriptions    PushSubscription[]
+  activities           CustomerActivity[]
 
   @@map("user")
 }
@@ -43,6 +44,7 @@ model Customer {
   createdAt      DateTime           @default(now())
   updatedAt      DateTime           @updatedAt
   assignedToId   String?
+  followUpStaffId String?
   createdById    String?
   photoUrl       String?
   assignedAt     DateTime?
@@ -57,12 +59,13 @@ model Customer {
   startDate      DateTime?
   verifiedAt     DateTime?
   verifiedById   String?
-  assignedTo     User?              @relation("AssignedTo", fields: [assignedToId], references: [id])
-  createdBy      User?              @relation("CreatedBy", fields: [createdById], references: [id])
-  verifiedBy     User?              @relation("VerifiedBy", fields: [verifiedById], references: [id])
-  documents      CustomerDocument[]
-  recordings     CallRecording[]
-  activities     CustomerActivity[]
+  assignedTo      User?              @relation("AssignedTo", fields: [assignedToId], references: [id])
+  createdBy       User?              @relation("CreatedBy", fields: [createdById], references: [id])
+  verifiedBy      User?              @relation("VerifiedBy", fields: [verifiedById], references: [id])
+  followUpStaff   User?              @relation("FollowUpStaff", fields: [followUpStaffId], references: [id])
+  documents       CustomerDocument[]
+  recordings      CallRecording[]
+  activities      CustomerActivity[]
   lastCalledAt   DateTime?
 
   @@index([status, assignedToId])
@@ -116,6 +119,7 @@ model CustomerDocument {
 enum Role {
   MANAGER
   STAFF
+  FOLLOW_UP_STAFF
   SALESMAN
   MAINTENANCE
 }
@@ -128,6 +132,7 @@ enum Status {
   DUE
   CLOSED
   FOLLOW_UP
+  FOLLOW_UP_ASSIGNED
   NO_RESPONSE
   VERIFIED
   CLOSE_REQUESTED
