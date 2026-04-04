@@ -5,6 +5,7 @@ import { Phone, MessageSquare, User, Calendar } from 'lucide-react'
 import { format } from 'date-fns'
 import { StatusBadge } from './StatusBadge'
 import RecordingsBadge from './RecordingsBadge'
+import QuickRecordingUpload from './QuickRecordingUpload'
 
 interface Customer {
   id: string
@@ -16,6 +17,7 @@ interface Customer {
   goldWeight?: number | null
   updatedAt?: string | Date | null
   followUpDate?: string | Date | null
+  lastCalledAt?: string | Date | null
 }
 
 interface LeadCardProps {
@@ -26,15 +28,15 @@ interface LeadCardProps {
 
 export function LeadCard({ customer, children, showRecordingBadge = true }: LeadCardProps) {
   return (
-    <div className="card fade-in" style={{ 
-      padding: '20px', 
+    <div className="card hover-opacity" style={{ 
+      padding: '13px', 
       display: 'flex', 
       flexDirection: 'column', 
-      gap: '16px', 
+      gap: '12px', 
       border: '1px solid var(--border-color)',
-      borderRadius: '16px',
+      borderRadius: '12px',
       background: 'var(--surface-color)',
-      boxShadow: '0 4px 12px rgba(0,0,0,0.05)',
+      boxShadow: 'var(--shadow-sm)',
       position: 'relative',
       overflow: 'hidden'
     }}>
@@ -49,14 +51,19 @@ export function LeadCard({ customer, children, showRecordingBadge = true }: Lead
             overflow: 'hidden', flexShrink: 0 
           }}>
             {customer.photoUrl ? (
-              <img src={`/api/avatar?url=${encodeURIComponent(customer.photoUrl)}`} alt={customer.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={customer.photoUrl} alt={customer.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
               <User size={24} color="var(--text-secondary)" />
             )}
           </div>
           <div className="min-w-0" style={{ display: 'flex', flexDirection: 'column', gap: '4px', flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0, flexWrap: 'wrap' }}>
               <h3 className="truncate" style={{ margin: 0, fontSize: '17px', fontWeight: 600 }}>{customer.name}</h3>
+              {customer.lastCalledAt && (
+                <span style={{ fontSize: '10px', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                  {new Date(customer.lastCalledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              )}
               {/* 🎙️ Recordings badge */}
               {showRecordingBadge && <div style={{ flexShrink: 0 }}><RecordingsBadge customerId={customer.id} customerName={customer.name} /></div>}
             </div>
@@ -104,15 +111,18 @@ export function LeadCard({ customer, children, showRecordingBadge = true }: Lead
         )}
       </div>
 
-      {/* Action Buttons */}
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '16px' }}>
+      {/* Action Buttons Row */}
+      <div style={{ display: 'flex', gap: '6px', alignItems: 'center', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
+        <div style={{ flex: 1 }}>
+          <QuickRecordingUpload customerId={customer.id} customerName={customer.name} />
+        </div>
         <a href={`https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" 
-           style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '12px', background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', borderRadius: '12px', textDecoration: 'none', fontWeight: 600 }}>
-          <MessageSquare size={18} /> WhatsApp
+           style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '10px', background: 'rgba(34, 197, 94, 0.1)', color: '#22c55e', border: '1px solid rgba(34, 197, 94, 0.2)', borderRadius: '8px', textDecoration: 'none' }}>
+          <MessageSquare size={14} />
         </a>
         <a href={`tel:${customer.phone}`}
-           style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '8px', padding: '12px', background: 'var(--surface-hover)', border: '1px solid var(--border-color)', color: 'var(--text-color)', borderRadius: '12px', textDecoration: 'none', fontWeight: 600 }}>
-          <Phone size={18} color="var(--primary-color)" /> Call
+           style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '10px', background: 'rgba(16, 185, 129, 0.1)', color: '#10B981', border: '1px solid rgba(16, 185, 129, 0.2)', borderRadius: '8px', textDecoration: 'none' }}>
+          <Phone size={14} />
         </a>
       </div>
 

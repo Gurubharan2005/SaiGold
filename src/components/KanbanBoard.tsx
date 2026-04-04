@@ -17,6 +17,7 @@ interface Lead {
   goldWeight?: number | null
   updatedAt?: string | Date | null
   followUpDate?: string | Date | null
+  lastCalledAt?: string | Date | null
   assignedTo?: { name: string } | null
 }
 
@@ -102,17 +103,22 @@ export default function KanbanBoard({ columns: initialColumns, isManager }: Prop
 
   return (
     <>
-      {/* ── MOBILE: Tab switcher ─────────────────────────────── */}
+      {/* ── MOBILE: Tab switcher (STICKY) ─────────────────────────────── */}
       <div className="mobile-kanban">
         {/* Tab bar */}
         <div style={{
           display: 'flex',
           gap: '8px',
-          marginBottom: '16px',
-          background: 'var(--surface-hover)',
-          padding: '6px',
+          marginBottom: '20px',
+          background: 'rgba(17, 24, 39, 0.8)',
+          backdropFilter: 'blur(12px)',
+          padding: '8px',
           borderRadius: '12px',
-          border: '1px solid var(--border-color)'
+          border: '1px solid var(--border-color)',
+          position: 'sticky',
+          top: '12px',
+          zIndex: 100,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
         }}>
           {columns.map((col, i) => {
             const Icon = ICONS[col.key] || CheckCircle

@@ -52,7 +52,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         } : {})
       },
       orderBy: { createdAt: 'desc' },
-      select: { id: true, name: true, phone: true, status: true }
+      select: { id: true, name: true, phone: true, status: true, lastCalledAt: true }
     }),
     prisma.customer.findMany({
       where: { 
@@ -66,7 +66,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         } : {})
       },
       orderBy: { updatedAt: 'desc' },
-      select: { id: true, name: true, phone: true, status: true }
+      select: { id: true, name: true, phone: true, status: true, lastCalledAt: true }
     }),
     prisma.customer.findMany({
       where: { 
@@ -80,7 +80,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         } : {})
       },
       orderBy: { updatedAt: 'desc' },
-      select: { id: true, name: true, phone: true, status: true }
+      select: { id: true, name: true, phone: true, status: true, lastCalledAt: true }
     }),
     prisma.customer.findMany({
       where: { 

@@ -13,6 +13,7 @@ interface PipelineCardProps {
     name: string
     phone: string
     status: string
+    lastCalledAt?: string | Date | null
   }
   column: 'WAITS' | 'FOLLOW' | 'REJECT'
 }
@@ -79,7 +80,14 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
       {/* 1. LEAD INFO */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div style={{ minWidth: 0, flex: 1 }}>
-          <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.name}</h4>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 800, color: 'var(--text-color)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{lead.name}</h4>
+            {lead.lastCalledAt && (
+              <span style={{ fontSize: '10px', color: 'var(--text-secondary)', background: 'rgba(255,255,255,0.05)', padding: '2px 6px', borderRadius: '4px', fontWeight: 600 }}>
+                {new Date(lead.lastCalledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+              </span>
+            )}
+          </div>
           <div style={{ fontSize: '13px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
             <Phone size={12} color="var(--primary-color)" /> {lead.phone}
           </div>

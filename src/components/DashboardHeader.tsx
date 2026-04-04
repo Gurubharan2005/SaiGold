@@ -80,8 +80,6 @@ export default function DashboardHeader({ session, noticeSlot, onMenuClick }: He
       </div>
       
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px', flexShrink: 0 }}>
-        {/* The Notification Bell is now a slot for performance streaming */}
-        {noticeSlot}
         <div className={`badge badge-${session?.role === 'MANAGER' ? 'accepted' : 'processing'}`}>
           {session?.role || 'STAFF'}
         </div>

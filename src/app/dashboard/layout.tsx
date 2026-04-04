@@ -17,14 +17,7 @@ export default async function DashboardLayout({
   return (
     <>
       <LocationBroadcaster isStaff={session?.role === 'STAFF'} />
-      <DashboardLayoutClient 
-        session={session} 
-        noticeSlot={
-          <Suspense fallback={<NotificationSkeleton />}>
-            <NotificationLoader />
-          </Suspense>
-        }
-      >
+      <DashboardLayoutClient session={session}>
         {children}
       </DashboardLayoutClient>
     </>

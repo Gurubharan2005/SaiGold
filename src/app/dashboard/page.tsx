@@ -134,7 +134,7 @@ export default async function DashboardPage() {
   const waitingLeads = await prisma.customer.findMany({
     where: { assignedToId: String(session?.id), status: 'WAITING' },
     orderBy: { assignedAt: 'desc' },
-    select: { id: true, name: true, phone: true, status: true }
+    select: { id: true, name: true, phone: true, status: true, lastCalledAt: true }
   })
 
   return (
@@ -169,7 +169,7 @@ export default async function DashboardPage() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '10px' }}>
-             <Target size={22} color="var(--primary-color)" /> Fresh Leads from Meta
+             <Target size={22} color="var(--primary-color)" /> Not Attended Leads
           </h2>
           <span className="badge badge-waiting">{waitingLeads.length} Urgent</span>
         </div>
