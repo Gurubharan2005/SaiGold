@@ -10,6 +10,7 @@ import RequestClosureButton from '@/components/RequestClosureButton'
 import DashRealtimeSync from '@/components/DashRealtimeSync'
 import CompactSalesToolbar from '@/components/CompactSalesToolbar'
 import PipelineCard from '@/components/PipelineCard'
+import PipelineMobileSwitcher from '@/components/PipelineMobileSwitcher'
 import { Target } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
@@ -121,59 +122,17 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         </div>
       </div>
 
-      {/* ACTIVE LEADS PIPELINE (3-COLUMN SECTION) */}
+      {/* ACTIVE LEADS PIPELINE (HIGH-DENSITY MOBILE-READY SECTION) */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <h2 style={{ fontSize: '20px', fontWeight: 800, margin: 0, color: 'var(--text-color)', display: 'flex', alignItems: 'center', gap: '10px' }}>
            <Target size={22} color="var(--primary-color)" /> Active Leads Pipeline
         </h2>
 
-        <div className="pipeline-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(310px, 1fr))', gap: '16px', alignItems: 'flex-start' }}>
-          
-          {/* COLUMN 1: NOT ATTENDED */}
-          <div className="pipeline-column">
-            <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderBottom: '2px solid var(--primary-color)', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '0.05em' }}>NOT ATTENDED</span>
-              <span className="badge badge-waiting">{waitingLeads.length}</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '1200px', overflowY: 'auto', paddingRight: '4px' }}>
-              {waitingLeads.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', fontSize: '13px' }}>No new leads waiting.</div>
-              ) : (
-                waitingLeads.map(lead => <PipelineCard key={lead.id} lead={lead} column="WAITS" />)
-              )}
-            </div>
-          </div>
-
-          {/* COLUMN 2: FOLLOW-UP */}
-          <div className="pipeline-column">
-            <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderBottom: '2px solid #F59E0B', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '0.05em' }}>FOLLOW-UP</span>
-              <span className="badge badge-waiting" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>{followUpLeads.length}</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '1200px', overflowY: 'auto', paddingRight: '4px' }}>
-              {followUpLeads.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', fontSize: '13px' }}>No leads in follow-up.</div>
-              ) : (
-                followUpLeads.map(lead => <PipelineCard key={lead.id} lead={lead} column="FOLLOW" />)
-              )}
-            </div>
-          </div>
-
-          {/* COLUMN 3: REJECTED */}
-          <div className="pipeline-column">
-            <div style={{ padding: '12px 16px', background: 'rgba(255,255,255,0.03)', borderBottom: '2px solid #EF4444', borderRadius: '8px 8px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <span style={{ fontWeight: 800, fontSize: '13px', letterSpacing: '0.05em' }}>REJECTED</span>
-              <span className="badge badge-rejected">{rejectedLeads.length}</span>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', maxHeight: '1200px', overflowY: 'auto', paddingRight: '4px' }}>
-              {rejectedLeads.length === 0 ? (
-                <div style={{ padding: '24px', textAlign: 'center', color: 'var(--text-secondary)', border: '1px dashed var(--border-color)', borderRadius: '12px', fontSize: '13px' }}>No rejected leads.</div>
-              ) : (
-                rejectedLeads.map(lead => <PipelineCard key={lead.id} lead={lead} column="REJECT" />)
-              )}
-            </div>
-          </div>
-        </div>
+        <PipelineMobileSwitcher 
+          waitingLeads={waitingLeads} 
+          followUpLeads={followUpLeads} 
+          rejectedLeads={rejectedLeads} 
+        />
       </div>
 
       {/* CONVERTED LOANS & ACTIVE ACCOUNTS (FINAL STAGE) */}

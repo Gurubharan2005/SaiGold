@@ -87,9 +87,11 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
         <RecordingsBadge customerId={lead.id} customerName={lead.name} />
       </div>
 
-      {/* 2. AUDIO & COMMUNICATION TOOLS */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', borderTop: '1px solid var(--border-color)', paddingTop: '12px' }}>
-        <QuickRecordingUpload customerId={lead.id} customerName={lead.name} />
+      {/* 2. CONSOLIDATED ACTION ROW (AUDIO + COMMS) */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', borderTop: '1px solid var(--border-color)', paddingTop: '10px' }}>
+        <div style={{ flex: 2 }}>
+          <QuickRecordingUpload customerId={lead.id} customerName={lead.name} />
+        </div>
         
         <a 
           href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}`} 
@@ -98,7 +100,7 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
           title="WhatsApp"
           style={iconBtnStyle('#22c55e', 'rgba(34, 197, 94, 0.1)', 'rgba(34, 197, 94, 0.2)')}
         >
-          <MessageCircle size={14} />
+          <MessageCircle size={13} />
         </a>
 
         <a 
@@ -106,12 +108,12 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
           title="Direct Call"
           style={iconBtnStyle('#10B981', 'rgba(16, 185, 129, 0.1)', 'rgba(16, 185, 129, 0.2)')}
         >
-          <Phone size={14} />
+          <Phone size={13} />
         </a>
       </div>
 
       {/* 3. COLUMN-SPECIFIC ACTIONS */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '4px' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '2px' }}>
         
         {/* VIEW CUSTOMER LINK (ONLY ON REJECTED AS PER USER REQUEST) */}
         {column === 'REJECT' && (
