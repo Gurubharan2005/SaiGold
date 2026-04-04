@@ -40,22 +40,58 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
 
   const [waitingLeads, followUpLeads, rejectedLeads, convertedLeads] = await Promise.all([
     prisma.customer.findMany({
-      where: { assignedToId: String(session?.id), status: 'WAITING' },
+      where: { 
+        assignedToId: String(session?.id), 
+        status: 'WAITING',
+        ...(activeQuery ? {
+          OR: [
+            { name: { contains: activeQuery, mode: 'insensitive' } },
+            { phone: { contains: activeQuery, mode: 'insensitive' } }
+          ]
+        } : {})
+      },
       orderBy: { createdAt: 'desc' },
       select: { id: true, name: true, phone: true, status: true }
     }),
     prisma.customer.findMany({
-      where: { assignedToId: String(session?.id), status: 'FOLLOW_UP' },
+      where: { 
+        assignedToId: String(session?.id), 
+        status: 'FOLLOW_UP',
+        ...(activeQuery ? {
+          OR: [
+            { name: { contains: activeQuery, mode: 'insensitive' } },
+            { phone: { contains: activeQuery, mode: 'insensitive' } }
+          ]
+        } : {})
+      },
       orderBy: { updatedAt: 'desc' },
       select: { id: true, name: true, phone: true, status: true }
     }),
     prisma.customer.findMany({
-      where: { assignedToId: String(session?.id), status: 'REJECTED' },
+      where: { 
+        assignedToId: String(session?.id), 
+        status: 'REJECTED',
+        ...(activeQuery ? {
+          OR: [
+            { name: { contains: activeQuery, mode: 'insensitive' } },
+            { phone: { contains: activeQuery, mode: 'insensitive' } }
+          ]
+        } : {})
+      },
       orderBy: { updatedAt: 'desc' },
       select: { id: true, name: true, phone: true, status: true }
     }),
     prisma.customer.findMany({
-      where: { assignedToId: String(session?.id), status: { in: ['ACCEPTED', 'VERIFIED', 'DUE'] } },
+      where: { 
+        assignedToId: String(session?.id), 
+        status: { in: ['ACCEPTED', 'VERIFIED', 'DUE'] },
+        ...(activeQuery ? {
+          OR: [
+            { name: { contains: activeQuery, mode: 'insensitive' } },
+            { phone: { contains: activeQuery, mode: 'insensitive' } }
+          ]
+        } : {})
+      },
       orderBy: { updatedAt: 'desc' },
       select: { id: true, name: true, phone: true, status: true, loanAmount: true, goldWeight: true }
     })
