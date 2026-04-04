@@ -31,8 +31,20 @@ export default function PipelineMobileSwitcher({
 
   return (
     <div className="pipeline-container">
-      {/* MOBILE TAB CONTROLLER */}
-      <div className="mobile-only" style={{ display: 'none', marginBottom: '20px', background: 'var(--surface-color)', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+      {/* MOBILE TAB CONTROLLER (STICKY) */}
+      <div className="mobile-only" style={{ 
+        display: 'none', 
+        marginBottom: '20px', 
+        background: 'rgba(17, 24, 39, 0.8)', 
+        backdropFilter: 'blur(12px)',
+        borderRadius: '12px', 
+        overflow: 'hidden', 
+        border: '1px solid var(--border-color)',
+        position: 'sticky',
+        top: '12px',
+        zIndex: 100,
+        boxShadow: '0 8px 32px rgba(0,0,0,0.4)'
+      }}>
         <div style={{ display: 'flex' }}>
           <div onClick={() => setActiveTab('WAITS')} style={tabStyle('WAITS')}>NEW ({waitingLeads.length})</div>
           <div onClick={() => setActiveTab('FOLLOW')} style={tabStyle('FOLLOW')}>FOLLOW ({followUpLeads.length})</div>

@@ -57,12 +57,12 @@ export default async function DashboardPage() {
         <LiveLeadsRefresh />
 
         {/* Header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px', flexWrap: 'wrap', gap: '16px' }}>
           <div>
-            <h1 style={{ fontSize: '24px', margin: 0 }}>All Leads Overview</h1>
-            <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>Monitor all staff leads across the branch.</p>
+            <h1 style={{ margin: 0 }}>All Leads Overview</h1>
+            <p style={{ margin: '4px 0 0 0', color: 'var(--text-secondary)', fontSize: '13px' }}>Monitor branch branch performance.</p>
           </div>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', justifyContent: 'flex-end' }}>
             <span className="badge badge-waiting">{waiting} Pending</span>
             <span className="badge badge-accepted">{accepted.length} Accepted</span>
             <span className="badge badge-waiting" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#F59E0B' }}>{followUp.length} Follow Up</span>
@@ -141,10 +141,10 @@ export default async function DashboardPage() {
     <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
       
       {/* HEADER OVERVIEW */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '12px' }}>
         <div>
-          <h1 style={{ fontSize: '28px', margin: 0 }}>Sales Dashboard</h1>
-          <p style={{ color: 'var(--text-secondary)', margin: '4px 0 0 0' }}>Manage your assigned leads and track your daily targets.</p>
+          <h1 style={{ margin: 0 }}>Sales Dashboard</h1>
+          <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: '4px 0 0 0' }}>Manage your fresh leads and daily targets.</p>
         </div>
       </div>
 

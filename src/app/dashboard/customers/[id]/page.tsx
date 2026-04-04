@@ -109,33 +109,36 @@ export default async function CustomerDetailsPage({
         position: 'sticky', 
         top: '0', 
         zIndex: 100, 
-        padding: '16px 0',
-        background: 'var(--background-color)', // match page background
+        padding: '12px 0',
+        background: 'rgba(11, 17, 32, 0.8)', 
+        backdropFilter: 'blur(12px)',
         borderBottom: '1px solid var(--border-color)',
         display: 'flex',
         alignItems: 'center'
       }}>
-        <Link 
-          href={backHref} 
-          style={{ 
-            display: 'inline-flex', 
-            alignItems: 'center', 
-            gap: '8px', 
-            color: 'var(--text-secondary)', 
-            textDecoration: 'none',
-            fontSize: '14px',
-            fontWeight: 600,
-            padding: '10px 20px',
-            background: 'var(--surface-color)',
-            borderRadius: '100px',
-            border: '1px solid var(--border-color)',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            transition: 'all 0.2s'
-          }}
-          className="hover-opacity"
-        >
-          <ArrowLeft size={16} /> Back to Dashboard
-        </Link>
+        <div className="container" style={{ display: 'flex', width: '100%' }}>
+          <Link 
+            href={backHref} 
+            style={{ 
+              display: 'inline-flex', 
+              alignItems: 'center', 
+              gap: '8px', 
+              color: 'var(--text-secondary)', 
+              textDecoration: 'none',
+              fontSize: '13px',
+              fontWeight: 700,
+              padding: '8px 16px',
+              background: 'var(--surface-color)',
+              borderRadius: '100px',
+              border: '1px solid var(--border-color)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+              transition: 'all 0.2s'
+            }}
+            className="hover-opacity"
+          >
+            <ArrowLeft size={16} /> <span className="desktop-only">Back to Dashboard</span><span className="mobile-only">Back</span>
+          </Link>
+        </div>
       </div>
 
       {/* LEAD MASTER FORM BANNER */}
@@ -211,7 +214,7 @@ export default async function CustomerDetailsPage({
 
       <div style={{ 
         display: 'grid', 
-        gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', 
         gap: '24px',
         alignItems: 'start'
       }}>
@@ -220,7 +223,7 @@ export default async function CustomerDetailsPage({
           
           <div className="card">
             <h2 style={{ fontSize: '18px', borderBottom: '1px solid var(--border-color)', paddingBottom: '16px', marginBottom: '16px', fontWeight: 800 }}>1. Customer Details</h2>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px', color: 'var(--text-secondary)' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '20px', color: 'var(--text-secondary)' }}>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                   <Phone size={16} /> Phone Number

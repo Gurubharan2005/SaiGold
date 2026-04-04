@@ -95,6 +95,12 @@ input:focus, textarea:focus, select:focus {
   padding: 0 24px;
 }
 
+@media (max-width: 768px) {
+  .container {
+    padding: 0 16px;
+  }
+}
+
 .card {
   background-color: var(--surface-color);
   border-radius: var(--border-radius-md);
@@ -312,6 +318,13 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 0.5em;
+  line-height: 1.2;
+}
+
+@media (max-width: 768px) {
+  h1 { font-size: 24px !important; }
+  h2 { font-size: 20px !important; }
+  h3 { font-size: 18px !important; }
 }
 
 /* Scrollbar */
