@@ -26,6 +26,15 @@ export async function PATCH(req: Request) {
       data: { assignedToId, status: 'PROCESSING', assignedAt: new Date() }
     })
 
+    // LOG BULK ACTIVITY (AUDIT TRAIL)
+    const { logActivity } = await import('@/lib/activity')
+    const assignee = await prisma.user.findUnique({ where: { id: assignedToId }, select: { name: true } })
+    
+    // Perform individual logs for better granularity in the timeline
+    await Promise.all(customerIds.map(cid => 
+      logActivity(cid, 'ASSIGNMENT', `Bulk assigned to ${assignee?.name || 'Staff Member'}`, session.id)
+    ))
+
     return NextResponse.json({ success: true, count: result.count }, { status: 200 })
   } catch (error) {
     console.error('[BULK_ASSIGN_ERROR]', error)

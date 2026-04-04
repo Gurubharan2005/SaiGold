@@ -25,6 +25,7 @@ model User {
   uploadedDocs       CustomerDocument[] @relation("UploadedBy")
   uploadedRecordings CallRecording[]    @relation("RecordingUploadedBy")
   pushSubscriptions  PushSubscription[]
+  activities         CustomerActivity[]
 
   @@map("user")
 }
@@ -61,12 +62,27 @@ model Customer {
   verifiedBy     User?              @relation("VerifiedBy", fields: [verifiedById], references: [id])
   documents      CustomerDocument[]
   recordings     CallRecording[]
+  activities     CustomerActivity[]
   lastCalledAt   DateTime?
 
   @@index([status, assignedToId])
   @@index([createdAt])
   @@index([lastCalledAt])
   @@map("customer")
+}
+
+model CustomerActivity {
+  id          String   @id @default(uuid())
+  customerId  String
+  userId      String?
+  action      String   // e.g. "STATUS_CHANGE", "CALL_RECORDED", "DOC_UPLOAD", "ASSIGNMENT"
+  details     String?  // e.g. "Moved from WAITING to PROCESSING"
+  createdAt   DateTime @default(now())
+  
+  customer    Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id])
+  
+  @@map("customer_activities")
 }
 
 model CallRecording {

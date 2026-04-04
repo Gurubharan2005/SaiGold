@@ -114,6 +114,15 @@ export async function POST(
        throw new Error(`Database Save Failed after 3 attempts: ${error?.message}`)
     }
 
+    // LOG ACTIVITY
+    const { logActivity, ACTIVITY_ACTIONS } = await import('@/lib/activity')
+    await logActivity(
+      id, 
+      ACTIVITY_ACTIONS.CALL_RECORDED, 
+      `Call recording uploaded${label ? `: ${label}` : ''}.`, 
+      String(session.id)
+    )
+
     return NextResponse.json(finalRecording, { status: 201 })
 
   } catch (err: any) {

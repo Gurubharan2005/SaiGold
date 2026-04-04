@@ -79,6 +79,22 @@ export default async function CustomerDetailsPage({
           id: true,
           name: true,
         }
+      },
+      activities: {
+        select: {
+          id: true,
+          action: true,
+          details: true,
+          createdAt: true,
+          user: {
+            select: {
+              name: true,
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
       }
     }
   })

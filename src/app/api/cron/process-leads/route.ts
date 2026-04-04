@@ -78,7 +78,7 @@ export async function GET(req: Request) {
         const autoAssigneeId = await getRoundRobinStaffId()
 
         // C. Create Official Customer Record
-        await prisma.customer.create({
+        const customer = await prisma.customer.create({
           data: {
             name: leadName,
             phone: leadPhone,
@@ -91,6 +91,14 @@ export async function GET(req: Request) {
             notes: `Source: Meta Ad Queue Retrieval (${item.leadgenId})`,
           }
         })
+
+        // Log Automated Lead Intake
+        const { logActivity } = await import('@/lib/activity')
+        await logActivity(
+          customer.id, 
+          'LEAD_RECEIVED', 
+          `Injected from Meta Ads${autoAssigneeId ? ' and auto-assigned to staff member.' : '.'}`
+        )
 
         // D. Trigger Automated WhatsApp Welcome and Staff Push Alert
         const { triggerPushNotification } = await import('@/lib/push')

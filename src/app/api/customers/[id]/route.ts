@@ -100,6 +100,32 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       data: updateData,
     })
 
+    // ----------------------------------------------------
+    // LOG ACTIVITY (AUDIT TRAIL)
+    // ----------------------------------------------------
+    const { logActivity } = await import('@/lib/activity')
+    
+    // 1. Status Change Log
+    if (status && status !== currentCustomer.status) {
+      await logActivity(id, 'STATUS_CHANGE', `Moved from ${currentCustomer.status} to ${status}`, String(session?.id))
+    }
+
+    // 2. Assignment Log
+    if (assignedToId && assignedToId !== currentCustomer.assignedToId) {
+       const assignee = await prisma.user.findUnique({ where: { id: assignedToId }, select: { name: true } })
+       await logActivity(id, 'ASSIGNMENT', `Lead assigned to ${assignee?.name || 'Staff Member'}`, String(session?.id))
+    }
+
+    // 3. Branch Update
+    if (branch !== undefined && branch !== currentCustomer.branch) {
+       await logActivity(id, 'BRANCH_UPDATE', `Branch changed from ${currentCustomer.branch || 'None'} to ${branch}`, String(session?.id))
+    }
+
+    // 4. Manual Verification
+    if (updateData.isVerified === true && !currentCustomer.isVerified) {
+       await logActivity(id, 'VERIFICATION', 'Lead successfully verified and moved to active status.', String(session?.id))
+    }
+
     const { revalidatePath } = await import('next/cache')
     revalidatePath('/dashboard', 'layout')
 

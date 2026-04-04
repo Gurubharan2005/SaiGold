@@ -57,6 +57,15 @@ export async function POST(request: Request): Promise<NextResponse> {
       }
     })
 
+    // LOG ACTIVITY
+    const { logActivity, ACTIVITY_ACTIONS } = await import('@/lib/activity')
+    await logActivity(
+      customerId, 
+      ACTIVITY_ACTIONS.DOC_UPLOAD, 
+      `Document uploaded: ${documentType} (${filename})`, 
+      String(session.id)
+    )
+
     return NextResponse.json({ blob, document }, { status: 200 })
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : String(error)
