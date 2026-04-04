@@ -121,101 +121,85 @@ export default function PipelineCard({ lead, column }: PipelineCardProps) {
       </div>
 
       {/* 3. COLUMN-SPECIFIC ACTIONS */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '2px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', marginTop: '6px' }}>
         
-        {/* VIEW CUSTOMER LINK (Lead customer option) */}
-        <Link href={`/dashboard/customers/${lead.id}`} style={{ 
-          display: 'flex', 
-          alignItems: 'center', 
-          justifyContent: 'center',
-          gap: '8px', 
-          fontSize: '12px', 
-          color: 'var(--text-secondary)', 
-          textDecoration: 'none', 
-          fontWeight: 700,
-          padding: '8px',
-          background: 'var(--surface-hover)',
-          borderRadius: '8px',
-          border: '1px solid var(--border-color)'
-        }}>
-          Lead Profile <ArrowRight size={14} />
-        </Link>
-        <style jsx>{`
-          .ArrowRight { display: inline; }
-        `}</style>
-
-        <div style={{ display: 'flex', gap: '6px' }}>
-          {column === 'WAITS' && (
-            <>
-              <button 
-                onClick={() => handleStatusUpdate('FOLLOW_UP')} 
-                disabled={!!loading} 
-                className="btn-primary"
-                style={{ flex: 1, padding: '10px 4px', fontSize: '10px', fontWeight: 900 }}
-              >
-                {loading === 'FOLLOW_UP' ? <Loader2 size={12} className="animate-spin" /> : <Clock size={12} />}
-                FOLLOW UP
-              </button>
-              <button 
-                onClick={() => handleStatusUpdate('REJECTED')} 
-                disabled={!!loading} 
-                style={{ flex: 1, padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
-              >
-                <X size={12} /> REJECT
-              </button>
-            </>
-          )}
-
-          {/* SEND REMINDER OPTION (Only for Not Attended) */}
-          {column === 'WAITS' && (
+        {column === 'WAITS' && (
+          <>
+            <button 
+              onClick={() => handleStatusUpdate('WAITING')} 
+              disabled={!!loading} 
+              style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
+            >
+              {loading === 'WAITING' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />} NOT ATTENDED
+            </button>
+            <button 
+              onClick={() => handleStatusUpdate('FOLLOW_UP')} 
+              disabled={!!loading} 
+              className="btn-primary"
+              style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900 }}
+            >
+              {loading === 'FOLLOW_UP' ? <Loader2 size={12} className="animate-spin" /> : <Clock size={12} />} FOLLOW UP
+            </button>
+            <button 
+              onClick={() => handleStatusUpdate('REJECTED')} 
+              disabled={!!loading} 
+              style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
+            >
+              <X size={12} /> REJECT
+            </button>
             <a 
               href={`https://wa.me/${lead.phone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent('Hi ' + lead.name + ', following up regarding your Sai Gold loan inquiry. When is a good time to talk?')}`} 
               target="_blank" 
               rel="noopener noreferrer"
-              style={{ flex: 1, textDecoration: 'none', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
+              style={{ textDecoration: 'none', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'var(--surface-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}
             >
-              <MessageCircle size={12} /> SEND REMINDER
+              <MessageCircle size={12} /> REMINDER
             </a>
-          )}
+          </>
+        )}
 
-          {column === 'FOLLOW' && (
-            <>
-              <button 
-                onClick={() => handleStatusUpdate('PROCESSING')} 
-                disabled={!!loading} 
-                className="btn-primary"
-                style={{ flex: 2, padding: '10px 4px', fontSize: '10px', fontWeight: 900 }}
-              >
-                {loading === 'PROCESSING' ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={12} />}
-                CONVERT LOAN
-              </button>
-              <button 
-                onClick={() => handleStatusUpdate('REJECTED')} 
-                disabled={!!loading} 
-                style={{ flex: 1, padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
-              >
-                <X size={12} /> REJECT
-              </button>
-            </>
-          )}
+        {column === 'FOLLOW' && (
+          <>
+            <button 
+              onClick={() => handleStatusUpdate('PROCESSING')} 
+              disabled={!!loading} 
+              className="btn-primary"
+              style={{ gridColumn: 'span 2', padding: '10px 4px', fontSize: '10px', fontWeight: 900 }}
+            >
+              {loading === 'PROCESSING' ? <Loader2 size={12} className="animate-spin" /> : <ExternalLink size={12} />} CONVERT LOAN
+            </button>
+            <button 
+              onClick={() => handleStatusUpdate('WAITING')} 
+              disabled={!!loading} 
+              style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(59, 130, 246, 0.1)', color: '#3B82F6', border: '1px solid rgba(59, 130, 246, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
+            >
+              <RefreshCw size={12} /> NOT ATTENDED
+            </button>
+            <button 
+              onClick={() => handleStatusUpdate('REJECTED')} 
+              disabled={!!loading} 
+              style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(239, 68, 68, 0.1)', color: '#EF4444', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px', cursor: 'pointer' }}
+            >
+              <X size={12} /> REJECT
+            </button>
+          </>
+        )}
 
-          {column === 'REJECT' && (
-            <>
-              <button 
-                onClick={() => handleStatusUpdate('WAITING')} 
-                disabled={!!loading} 
-                className="btn-secondary"
-                style={{ flex: 1, padding: '10px 4px', fontSize: '10px', fontWeight: 900, color: 'var(--primary-color)' }}
-              >
-                {loading === 'WAITING' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />}
-                NOT ATTENDED
-              </button>
-              <Link href="/dashboard" style={{ flex: 1, textDecoration: 'none', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'rgba(255,255,255,0.05)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
-                 <LayoutDashboard size={12} /> OPEN DASHBOARD
-              </Link>
-            </>
-          )}
-        </div>
+        {column === 'REJECT' && (
+          <>
+            <button 
+              onClick={() => handleStatusUpdate('WAITING')} 
+              disabled={!!loading} 
+              className="btn-secondary"
+              style={{ padding: '10px 4px', fontSize: '10px', fontWeight: 900, color: 'var(--primary-color)' }}
+            >
+              {loading === 'WAITING' ? <Loader2 size={12} className="animate-spin" /> : <RefreshCw size={12} />} NOT ATTENDED
+            </button>
+            <Link href="/dashboard" style={{ textDecoration: 'none', padding: '10px 4px', fontSize: '10px', fontWeight: 900, background: 'var(--surface-hover)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px' }}>
+               <LayoutDashboard size={12} /> DASHBOARD
+            </Link>
+          </>
+        )}
       </div>
     </div>
   )
